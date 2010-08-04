@@ -138,7 +138,7 @@ namespace MudServer
 
         public bool OnChannel(string playerName)
         {
-            return (players.IndexOf(playerName) > -1 ? true : false);
+            return (players.IndexOf(playerName) > -1 || playerName.ToLower() == owner.ToLower());
         }
 
         public string FormatMessage(string message)
