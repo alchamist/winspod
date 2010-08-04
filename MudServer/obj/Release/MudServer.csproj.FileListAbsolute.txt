@@ -1,8 +1,0 @@
-C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\bin\Release\greeting.txt
-C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\bin\Release\cmdList.dat
-C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\bin\Release\MudServer.exe.config
-C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\bin\Release\MudServer.exe
-C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\bin\Release\MudServer.pdb
-C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\obj\Release\ResolveAssemblyReference.cache
-C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\obj\Release\MudServer.exe
-C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\obj\Release\MudServer.pdb
