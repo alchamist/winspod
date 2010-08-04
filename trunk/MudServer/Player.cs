@@ -528,8 +528,8 @@ namespace MudServer
 
         ~Player()
         {
-            if (rank!=Rank.Newbie)
-                SavePlayer();
+            //if (rank!=Rank.Newbie)
+                //SavePlayer();
         }
 
         #endregion
@@ -599,6 +599,25 @@ namespace MudServer
             
             return load;
 
+        }
+
+        public static void RemovePlayerFile(string name)
+        {
+            string path = ("players" + Path.DirectorySeparatorChar + name.Substring(0, 1).ToUpper() + Path.DirectorySeparatorChar + name.ToLower() + ".xml");
+
+            Debug.Print(Path.GetFullPath(path));
+
+            if (File.Exists(path))
+            {
+                try
+                {
+                    File.Delete(path);
+                }
+                catch (Exception e)
+                {
+                    Debug.Print(e.ToString());
+                }
+            }
         }
 
         #endregion
