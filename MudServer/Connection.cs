@@ -2729,6 +2729,52 @@ namespace MudServer
             }
         }
 
+        public void cmdRename(string message)
+        {
+            if (message == "" || message.IndexOf(" ") == -1)
+                sendToUser("Syntax: rename <player> <new name>");
+            else
+            {
+                string[] split = message.Split(new char[] { ' ' }, 2);
+                string[] target = matchPartial(split[0]);
+                string[] check = matchPartial(split[1]);
+                if (target.Length == 0)
+                    sendToUser("Player \"" + split[0] + "\" not found", true, false, false);
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (target[0].ToLower() == myPlayer.UserName.ToLower())
+                    sendToUser("Bored of your own name, eh?", true, false, false);
+                else if (AnsiColour.Colorise(split[1], true) != split[1])
+                    sendToUser("Names cannot contain colour codes or dynamic text", true, false, false);
+                else if (check.Length > 0)
+                    sendToUser("Username \"" + split[1] + "\" already exists", true, false, false);
+                else
+                {
+                    // We should be good to go
+                    Player rename = Player.LoadPlayer(target[0], 0);
+                    Player.RemovePlayerFile(target[0]);
+                    rename.UserName = split[1];
+                    rename.SavePlayer();
+                    if (isOnline(target[0]))
+                    {
+                        foreach (Connection c in connections)
+                        {
+                            if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                            {
+                                // Set rank temporarially to 0 to prevent the Player class destructor saving the old file
+                                int tempRank = c.myPlayer.PlayerRank;
+                                c.myPlayer.PlayerRank = 0;
+                                c.myPlayer = rename;
+                                c.myPlayer.PlayerRank = tempRank;
+                            }
+                        }
+                    }
+                    sendToUser("You rename \"" + target[0] + "\" to \"" + split[1] + "\"", true, false, false);
+                    logToFile(myPlayer.UserName + "renames \"" + target[0] + "\" to \"" + split[1] + "\"", "admin");
+                }
+            }
+        }
+
         #region Room Stuff
 
         public void cmdWhere(string message)
