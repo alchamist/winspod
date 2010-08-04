@@ -1078,6 +1078,8 @@ namespace MudServer
 
         #region Methods
 
+        #region Comms commands
+
         public void cmdSay(string message)
         {
             sendToRoom(myPlayer.ColourUserName + " " + sayWord(message, false) + " \"" + wibbleText(message, false) + "{reset}\"", "You " + sayWord(message, true) + " \"" + wibbleText(message, false) + "{reset}\"", myPlayer.UserRoom, myPlayer.UserName, true, false, true);
@@ -1258,6 +1260,31 @@ namespace MudServer
             myPlayer.SavePlayer();
         }
 
+        public void cmdShout(string message)
+        {
+            if (myPlayer != null)
+            {
+                if (myPlayer.CanShout)
+                {
+                    foreach (Connection c in connections)
+                    {
+                        if (c.myPlayer != null && c.myPlayer.UserName != myPlayer.UserName)
+                        {
+                            if (c.myPlayer.HearShouts)
+                                sendToUser(myPlayer.ColourUserName + " shouts \"" + wibbleText(message, false) + "{reset}\"", c.myPlayer.UserName);
+                        }
+                    }
+                    sendToUser("You shout \"" + wibbleText(message, false) + "{reset}\"");
+                }
+                else
+                {
+                    sendToUser("You find that your throat is sore and you cannot shout");
+                }
+            }
+        }
+
+        #endregion
+
         public void cmdListCommands(string message)
         {
             message = message.ToLower();
@@ -1330,29 +1357,6 @@ namespace MudServer
                 foreach (string name in online)
                     output += name + ", ";
                 sendToUser(output.Remove(output.Length - 2), true, false, false);
-            }
-        }
-
-        public void cmdShout(string message)
-        {
-            if (myPlayer != null)
-            {
-                if (myPlayer.CanShout)
-                {
-                    foreach (Connection c in connections)
-                    {
-                        if (c.myPlayer != null && c.myPlayer.UserName != myPlayer.UserName)
-                        {
-                            if (c.myPlayer.HearShouts)
-                                sendToUser(myPlayer.ColourUserName + " shouts \"" + wibbleText(message, false) + "{reset}\"", c.myPlayer.UserName);
-                        }
-                    }
-                    sendToUser("You shout \"" + wibbleText(message, false) + "{reset}\"");
-                }
-                else
-                {
-                    sendToUser("You find that your throat is sore and you cannot shout");
-                }
             }
         }
 
@@ -2702,177 +2706,6 @@ namespace MudServer
             }
         }
 
-        #region Club Channels Stuff
-
-        public void cmdCClist(string message)
-        {
-            clubChannels = ClubChannel.LoadAllChannels();
-
-            string ret = "{bold}{cyan}---[{red}Channels{cyan}]".PadRight(103, '-') + "{reset}\r\n";
-            if (clubChannels.Count == 0)
-                ret += "No channels exist\r\n";
-            else
-            {
-                foreach (ClubChannel c in clubChannels)
-                {
-                    ret += "{bold}{blue}[" + c.ID + "]{reset} " + c.Name + " - " + c.Description + "\r\n";
-                }
-            }
-
-            ret += "{bold}{cyan}".PadRight(92,'-') + "{reset}\r\n";
-            sendToUser(ret, true, false, false);
-        }
-
-        public void cmdCCadd(string message)
-        {
-            if (message == "" || message.IndexOf(" ") == -1)
-                sendToUser("Syntax: ccadd <channel name> <owner>", true, false, false);
-            else
-            {
-                string[] split = message.Split(new char[] { ' ' }, 2);
-                string[] target = matchPartial(split[1]);
-
-                if (target.Length == 0)
-                    sendToUser("Player \"" + split[1] + "\" not found");
-                else if (target.Length > 1)
-                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
-                else
-                {
-                    clubChannels = ClubChannel.LoadAllChannels();
-
-                    bool found = false;
-                    foreach (ClubChannel c in clubChannels)
-                    {
-                        if (c.Name.ToLower() == split[0].ToLower())
-                        {
-                            found = true;
-                        }
-                    }
-
-                    if (found)
-                        sendToUser("Channel already exists", true, false, false);
-                    else
-                    {
-                        ClubChannel chan = new ClubChannel();
-                        chan.Name = split[0];
-                        chan.Owner = target[0];
-                        clubChannels.Add(chan);
-                        ClubChannel.SaveAllChannels(clubChannels, true);
-                        sendToUser("Channel \"" + chan.Name + "\" created");
-                        logToFile(myPlayer.UserName + " creates a new channel called " + chan.Name + " owned by " + chan.Owner, "channel");
-                        if (target[0].ToLower() != myPlayer.UserName.ToLower() && isOnline(target[0]))
-                        {
-                            Player p = Player.LoadPlayer(target[0], 0);
-                            sendToUser("You have been given a new club channel called \"" + chan.Name + "\"", p.UserName, true, p.DoColour, true, false);
-                        }
-                        clubChannels = ClubChannel.ReindexChannels(clubChannels);
-                        clubChannels = ClubChannel.LoadAllChannels();
-                    }
-                }
-
-            }
-        }
-
-        public void cmdCCdel(string message)
-        {
-            clubChannels = ClubChannel.LoadAllChannels();
-
-            if (message == "")
-                sendToUser("Syntax: ccdel <channel name>", true, false, false);
-            else
-            {
-                bool found = false;
-                List<ClubChannel> temp = clubChannels;
-                for (int i = 0; i < temp.Count; i++)
-                {
-                    if (temp[i].Name.ToLower() == message.ToLower())
-                    {
-                        found = true;
-                        sendToUser("Channel \"" + temp[i].Name + "\" deleted", true, false, false);
-                        logToFile(myPlayer.UserName + " deletes channel \"" + temp[i].Name + "\"", "channel");
-                        clubChannels[i].Delete();
-                        clubChannels.RemoveAt(i);
-                    }
-                }
-                if (!found)
-                {
-                    sendToUser("Channel \"" + message + "\" not found", true, false, false);
-                }
-                ClubChannel.SaveAllChannels(clubChannels, true);
-                clubChannels = ClubChannel.LoadAllChannels();
-            }
-        }
-
-        public void cmdCCrname(string message)
-        {
-            if (message == "" || message.IndexOf(" ") == -1)
-                sendToUser("Syntax: ccrname <channel name> <new name>", true, false, false);
-            else
-            {
-                string[] split = message.Split(new char[] { ' ' });
-                ClubChannel test = ClubChannel.LoadChannel(split[1]);
-                if (test != null)
-                {
-                    sendToUser("Channel \"" + split[1] + "\" already exists", true, false, false);
-                }
-                else
-                {
-                    bool found = false;
-                    foreach (ClubChannel c in clubChannels)
-                    {
-                        if (c.Name.ToLower() == split[0])
-                        {
-                            found = true;
-                            c.Name = split[1];
-                            c.SaveChannel();
-                            sendToUser("Channel \"" + split[0] + "\" renamed to \"" + split[1] + "\"", true, false, false);
-                            logToFile(myPlayer.UserName + " renames channel \"" + split[0] + "\" to \"" + split[1] + "\"", "channel");
-                        }
-                    }
-                    if (!found)
-                    {
-                        sendToUser("Channel \"" + split[0] + "\" not found", true, false, false);
-                    }
-                    else
-                    {
-                        clubChannels = ClubChannel.LoadAllChannels();
-                    }
-                }
-            }
-        }
-
-        public void cmdCCinfo(string message)
-        {
-            if (message == "")
-                sendToUser("Syntax: ccinfo <channel>");
-            else
-            {
-                ClubChannel info = ClubChannel.LoadChannel(message);
-                if (info == null)
-                    sendToUser("Channel \"" + message + "\" not found", true, false, false);
-                else
-                {
-                    string userlist = "";
-
-                    string output = "{bold}{cyan}---[{red}Channel info:{cyan}]".PadRight(103, '-') + "{reset}\r\n";
-                    output += "{bold}{red} Name: {reset}" + info.PreColour + "[" + info.NameColour + info.Name + info.PreColour + "]{reset}\r\n";
-                    output += "{bold}{red}Owner: {reset}" + info.Owner + "\r\n";
-                    output += "{bold}{red} Info: {reset}" + info.MainColour + info.Description + "{reset}\r\n";
-                    output += "{bold}{red}Users: {reset}";
-
-                    foreach (string u in info.Users)
-                    {
-                        userlist += ", " + u;
-                    }
-                    output += (userlist == "" ? "None" : userlist.Substring(2));
-                    output += "\r\n{bold}{cyan}".PadRight(92, '-') + "{reset}\r\n";
-                    sendToUser(output, true, false, false);
-                }
-            }
-        }
-
-        #endregion
-
         #region Room Stuff
 
         public void cmdWhere(string message)
@@ -3374,6 +3207,408 @@ namespace MudServer
 
         #endregion
 
+        #region Club Channels Stuff
+
+        public void cmdCClist(string message)
+        {
+            clubChannels = ClubChannel.LoadAllChannels();
+
+            string ret = "{bold}{cyan}---[{red}Channels{cyan}]".PadRight(103, '-') + "{reset}\r\n";
+            if (clubChannels.Count == 0)
+                ret += "No channels exist\r\n";
+            else
+            {
+                foreach (ClubChannel c in clubChannels)
+                {
+                    ret += "{bold}{blue}[" + c.ID + "]{reset} " + c.Name + " - " + c.Description + "\r\n";
+                }
+            }
+
+            ret += "{bold}{cyan}".PadRight(92, '-') + "{reset}\r\n";
+            sendToUser(ret, true, false, false);
+        }
+
+        public void cmdCCadd(string message)
+        {
+            if (message == "" || message.IndexOf(" ") == -1)
+                sendToUser("Syntax: ccadd <channel name> <owner>", true, false, false);
+            else
+            {
+                string[] split = message.Split(new char[] { ' ' }, 2);
+                string[] target = matchPartial(split[1]);
+
+                if (target.Length == 0)
+                    sendToUser("Player \"" + split[1] + "\" not found");
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else
+                {
+                    clubChannels = ClubChannel.LoadAllChannels();
+
+                    bool found = false;
+                    foreach (ClubChannel c in clubChannels)
+                    {
+                        if (c.Name.ToLower() == split[0].ToLower())
+                        {
+                            found = true;
+                        }
+                    }
+
+                    if (found)
+                        sendToUser("Channel already exists", true, false, false);
+                    else
+                    {
+                        ClubChannel chan = new ClubChannel();
+                        chan.Name = split[0];
+                        chan.Owner = target[0];
+                        clubChannels.Add(chan);
+                        ClubChannel.SaveAllChannels(clubChannels, true);
+                        sendToUser("Channel \"" + chan.Name + "\" created");
+                        logToFile(myPlayer.UserName + " creates a new channel called " + chan.Name + " owned by " + chan.Owner, "channel");
+                        if (target[0].ToLower() != myPlayer.UserName.ToLower() && isOnline(target[0]))
+                        {
+                            Player p = Player.LoadPlayer(target[0], 0);
+                            sendToUser("You have been given a new club channel called \"" + chan.Name + "\"", p.UserName, true, p.DoColour, true, false);
+                        }
+                        clubChannels = ClubChannel.ReindexChannels(clubChannels);
+                        clubChannels = ClubChannel.LoadAllChannels();
+                    }
+                }
+
+            }
+        }
+
+        public void cmdCCdel(string message)
+        {
+            clubChannels = ClubChannel.LoadAllChannels();
+
+            if (message == "")
+                sendToUser("Syntax: ccdel <channel name>", true, false, false);
+            else
+            {
+                bool found = false;
+                List<ClubChannel> temp = clubChannels;
+                for (int i = 0; i < temp.Count; i++)
+                {
+                    if (temp[i].Name.ToLower() == message.ToLower())
+                    {
+                        found = true;
+                        sendToUser("Channel \"" + temp[i].Name + "\" deleted", true, false, false);
+                        logToFile(myPlayer.UserName + " deletes channel \"" + temp[i].Name + "\"", "channel");
+                        clubChannels[i].Delete();
+                        clubChannels.RemoveAt(i);
+                    }
+                }
+                if (!found)
+                {
+                    sendToUser("Channel \"" + message + "\" not found", true, false, false);
+                }
+                ClubChannel.SaveAllChannels(clubChannels, true);
+                clubChannels = ClubChannel.LoadAllChannels();
+            }
+        }
+
+        public void cmdCCrname(string message)
+        {
+            if (message == "" || message.IndexOf(" ") == -1)
+                sendToUser("Syntax: ccrname <channel name> <new name>", true, false, false);
+            else
+            {
+                string[] split = message.Split(new char[] { ' ' });
+                ClubChannel test = ClubChannel.LoadChannel(split[1]);
+                if (test != null)
+                {
+                    sendToUser("Channel \"" + split[1] + "\" already exists", true, false, false);
+                }
+                else
+                {
+                    bool found = false;
+                    foreach (ClubChannel c in clubChannels)
+                    {
+                        if (c.Name.ToLower() == split[0])
+                        {
+                            found = true;
+                            c.Name = split[1];
+                            c.SaveChannel();
+                            sendToUser("Channel \"" + split[0] + "\" renamed to \"" + split[1] + "\"", true, false, false);
+                            logToFile(myPlayer.UserName + " renames channel \"" + split[0] + "\" to \"" + split[1] + "\"", "channel");
+                        }
+                    }
+                    if (!found)
+                    {
+                        sendToUser("Channel \"" + split[0] + "\" not found", true, false, false);
+                    }
+                    else
+                    {
+                        clubChannels = ClubChannel.LoadAllChannels();
+                    }
+                }
+            }
+        }
+
+        public void cmdCCinfo(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: ccinfo <channel>");
+            else
+            {
+                ClubChannel info = ClubChannel.LoadChannel(message);
+                if (info == null)
+                    sendToUser("Channel \"" + message + "\" not found", true, false, false);
+                else
+                {
+                    string userlist = "";
+
+                    string output = "{bold}{cyan}---[{red}Channel info{cyan}]".PadRight(103, '-') + "{reset}\r\n";
+                    output += "{bold}{red} Name: {reset}" + info.PreColour + "[" + info.NameColour + info.Name + info.PreColour + "]{reset}\r\n";
+                    output += "{bold}{red}Owner: {reset}" + info.Owner + "\r\n";
+                    output += "{bold}{red} Info: {reset}" + info.MainColour + info.Description + "{reset}\r\n";
+                    output += "{bold}{red}Users: {reset}";
+
+                    foreach (string u in info.Users)
+                    {
+                        userlist += ", " + u;
+                    }
+                    output += (userlist == "" ? "None" : userlist.Substring(2));
+                    output += "\r\n{bold}{cyan}".PadRight(92, '-') + "{reset}\r\n";
+                    sendToUser(output, true, false, false);
+                }
+            }
+        }
+
+        public void cmdCCjoin(string message)
+        {
+            if (message == "" || message.IndexOf(" ") == -1)
+                sendToUser("Syntax: ccjoin <channel> <player>", true, false, false);
+            else
+            {
+                string[] split = message.Split(new char[] { ' ' }, 2);
+                string[] target = matchPartial(split[1]);
+
+                if (target.Length == 0)
+                    sendToUser("Player \"" + split[1] + "\" not found", true, false, false);
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (ClubChannel.LoadChannel(split[0]) == null)
+                    sendToUser("Channel \"" + split[0] + "\" not found", true, false, false);
+                else
+                {
+                    clubChannels = ClubChannel.LoadAllChannels();
+
+                    bool found = false;
+                    foreach (ClubChannel c in clubChannels)
+                    {
+                        if (c.Name.ToLower() == split[0].ToLower())
+                        {
+                            found = true;
+                            if (c.Owner.ToLower() != myPlayer.UserName.ToLower() && myPlayer.PlayerRank < (int)Player.Rank.Admin)
+                                sendToUser("Sorry, you are not the owner of the channel", true, false, false);
+                            else if (myPlayer.UserName.ToLower() == target[0].ToLower())
+                                sendToUser("You cannot remove yourself from this channel", true, false, false);
+                            else
+                            {
+                                if (c.OnChannel(target[0]))
+                                {
+                                    sendToUser("Player \"" + target[0] + "\" removed from channel \"" + c.Name + "\"", true, false, false);
+                                    if (isOnline(target[0]))
+                                        sendToUser("You have been removed from channel \"" + c.Name + "\"", true, true, false);
+
+                                    c.RemovePlayer(target[0]);
+                                    c.SaveChannel();
+                                }
+                                else
+                                {
+                                    sendToUser("Player \"" + target[0] + "\" added to channel \"" + c.Name + "\"", true, false, false);
+                                    if (isOnline(target[0]))
+                                        sendToUser("You have been added to channel \"" + c.Name + "\"", true, true, false);
+
+                                    c.AddPlayer(target[0]);
+                                    c.SaveChannel();
+                                }
+                            }
+                                    
+                        }
+                    }
+                    if (!found)
+                        sendToUser("Strange - something has gone a bit wrong", true, false, false);
+                    else
+                        clubChannels = ClubChannel.LoadAllChannels();
+                }
+            }
+        }
+
+        public void cmdCCdesc(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: ccdesc <channel> <description>", true, false, false);
+            else
+            {
+                string chanName;
+                string chanDesc = "";
+                if (message.IndexOf(" ") == -1)
+                    chanName = message;
+                else
+                {
+                    string[] split = message.Split(new char[] { ' ' }, 2);
+                    chanName = split[0];
+                    chanDesc = split[1];
+                }
+
+
+                if (ClubChannel.LoadChannel(chanName) == null)
+                    sendToUser("Channel \"" + chanName + "\" not found", true, false, false);
+                else
+                {
+                    clubChannels = ClubChannel.LoadAllChannels();
+
+                    bool found = false;
+                    foreach (ClubChannel c in clubChannels)
+                    {
+                        if (c.Name.ToLower() == chanName.ToLower())
+                        {
+                            found = true;
+                            if (c.Owner.ToLower() != myPlayer.UserName.ToLower() && myPlayer.PlayerRank < (int)Player.Rank.Admin)
+                                sendToUser("Sorry, you are not the owner of the channel", true, false, false);
+                            else
+                            {
+                                c.Description = chanDesc;
+                                sendToUser(chanDesc == "" ? "You remove the description for channel \"" + c.Name + "\"" : "You set the description for channel \"" + c.Name + "\" to \"" + chanDesc + "\"", true, false, false);
+                                c.SaveChannel();
+                            }
+                        }
+                    }
+                    if (!found)
+                        sendToUser("Strange ... you shouldn't be here ...", true, false, false);
+                    else
+                        clubChannels = ClubChannel.LoadAllChannels();
+                }
+            }
+        }
+
+        public void cmdCCpCol(string message)
+        {
+            if (message == "" || message.IndexOf(" ")==-1)
+                sendToUser("Syntax: ccpcol <channel> <colour code>", true, false, false);
+            else
+            {
+                string[] split = message.Split(new char[] { ' ' }, 2);
+
+                if (ClubChannel.LoadChannel(split[0]) == null)
+                    sendToUser("Channel \"" + split[0] + "\" not found", true, false, false);
+                else
+                {
+                    clubChannels = ClubChannel.LoadAllChannels();
+
+                    bool found = false;
+                    foreach (ClubChannel c in clubChannels)
+                    {
+                        if (c.Name.ToLower() == split[0].ToLower())
+                        {
+                            found = true;
+                            if (c.Owner.ToLower() != myPlayer.UserName.ToLower() && myPlayer.PlayerRank < (int)Player.Rank.Admin)
+                                sendToUser("Sorry, you are not the owner of the channel", true, false, false);
+                            else if (AnsiColour.Colorise(split[1], true) != "")
+                                sendToUser("That is not a valid colour code");
+                            else
+                            {
+                                c.PreColour = split[1];
+                                sendToUser("Prefix colour set for channel \"" + c.Name + "\"", true, false, false);
+                                c.SaveChannel();
+                            }
+                        }
+                    }
+                    if (!found)
+                        sendToUser("Strange ... you shouldn't be here ...", true, false, false);
+                    else
+                        clubChannels = ClubChannel.LoadAllChannels();
+                }
+            }
+
+        }
+
+        public void cmdCCmCol(string message)
+        {
+            if (message == "" || message.IndexOf(" ") == -1)
+                sendToUser("Syntax: ccmcol <channel> <colour code>", true, false, false);
+            else
+            {
+                string[] split = message.Split(new char[] { ' ' }, 2);
+
+                if (ClubChannel.LoadChannel(split[0]) == null)
+                    sendToUser("Channel \"" + split[0] + "\" not found", true, false, false);
+                else
+                {
+                    clubChannels = ClubChannel.LoadAllChannels();
+
+                    bool found = false;
+                    foreach (ClubChannel c in clubChannels)
+                    {
+                        if (c.Name.ToLower() == split[0].ToLower())
+                        {
+                            found = true;
+                            if (c.Owner.ToLower() != myPlayer.UserName.ToLower() && myPlayer.PlayerRank < (int)Player.Rank.Admin)
+                                sendToUser("Sorry, you are not the owner of the channel", true, false, false);
+                            else if (AnsiColour.Colorise(split[1], true) != "")
+                                sendToUser("That is not a valid colour code");
+                            else
+                            {
+                                c.MainColour = split[1];
+                                sendToUser("Main colour set for channel \"" + c.Name + "\"", true, false, false);
+                                c.SaveChannel();
+                            }
+                        }
+                    }
+                    if (!found)
+                        sendToUser("Strange ... you shouldn't be here ...", true, false, false);
+                    else
+                        clubChannels = ClubChannel.LoadAllChannels();
+                }
+            }
+
+        }
+
+        public void cmdCCnCol(string message)
+        {
+            if (message == "" || message.IndexOf(" ") == -1)
+                sendToUser("Syntax: ccncol <channel> <colour code>", true, false, false);
+            else
+            {
+                string[] split = message.Split(new char[] { ' ' }, 2);
+
+                if (ClubChannel.LoadChannel(split[0]) == null)
+                    sendToUser("Channel \"" + split[0] + "\" not found", true, false, false);
+                else
+                {
+                    clubChannels = ClubChannel.LoadAllChannels();
+
+                    bool found = false;
+                    foreach (ClubChannel c in clubChannels)
+                    {
+                        if (c.Name.ToLower() == split[0].ToLower())
+                        {
+                            found = true;
+                            if (c.Owner.ToLower() != myPlayer.UserName.ToLower() && myPlayer.PlayerRank < (int)Player.Rank.Admin)
+                                sendToUser("Sorry, you are not the owner of the channel", true, false, false);
+                            else if (AnsiColour.Colorise(split[1], true) != "")
+                                sendToUser("That is not a valid colour code");
+                            else
+                            {
+                                c.NameColour = split[1];
+                                sendToUser("Name colour set for channel \"" + c.Name + "\"", true, false, false);
+                                c.SaveChannel();
+                            }
+                        }
+                    }
+                    if (!found)
+                        sendToUser("Strange ... you shouldn't be here ...", true, false, false);
+                    else
+                        clubChannels = ClubChannel.LoadAllChannels();
+                }
+            }
+
+        }
+
+        #endregion
 
 
         #endregion
