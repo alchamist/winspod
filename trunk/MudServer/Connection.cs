@@ -1694,7 +1694,7 @@ namespace MudServer
         public void cmdAway(string message)
         {
             sendToUser("You mark yourself as away", true, false, false);
-            sendToRoom(myPlayer.ColourUserName + " sets " + (myPlayer.Gender == 0  ? "it's self" : (myPlayer.Gender == 1 ? "himself" : "herself")) + " as away");
+            sendToRoom(myPlayer.ColourUserName + " sets " + (myPlayer.Gender == 0  ? "it's self" : (myPlayer.Gender == 1 ? "himself" : "herself")) + " as away","", false, true);
             myPlayer.Away = true;
         }
 
