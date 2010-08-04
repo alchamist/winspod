@@ -1,0 +1,11 @@
+0
+^YSyntax: ^Nfwho
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Gives a detailed list of all players connected to the system
+
+^RRestrictions:^N
+
+None

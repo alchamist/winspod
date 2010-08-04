@@ -1,0 +1,11 @@
+0
+^YSyntax: ^NExits
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Lists all available exits from the current room
+
+^RRestrictions:^N
+
+None

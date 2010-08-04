@@ -1,0 +1,17 @@
+﻿Welcome to Homelands University, the alternative education centre.
+
+This program is hosted with WinSpod, see "help version" for more information
+
+Homelands is a place where you can come and meet your friends, talk to like minded people and even a place to come to ask for technical help from fellow residents.
+
+After you have completed the short login procedure, you will be taken to the main meeting area of Homelands Uni, where you will find other members and hopefully a Staff member who will be able to guide you through some of the basic commands.
+
+To find out if any staff members are around to help you get permanent residency, or to help you with some commands,
+type "Staff" at the prompt; this will bring up a list of any staff connected.
+
+To talk to a staff member or any other user on the program, you can use the tell command, for example, you would type "tell alchamist help" (without the quotes) if you wanted to speak to alchamist. However, if you wanted to speak to everyone in the room, you would use the command say, for example "Say hello room" will say hello room to anyone in the Quad.
+
+Have fun and enjoy the experience.
+
+
+~The Admin.

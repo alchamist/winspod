@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Nccjoin <channel name/number> <player>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+This command will toggle someone on/off of a channel
+
+^RRestrictions:^N
+
+You must be the owner of the channel

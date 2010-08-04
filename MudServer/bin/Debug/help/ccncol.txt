@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Nccncol <colour code>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+This will set the colour of the channel name
+
+^RRestrictions:^N
+
+None

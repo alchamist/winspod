@@ -1,0 +1,868 @@
+29/04/2009 14:36:47 = Command ==> Error parsing command '
+29/04/2009 14:37:03 = Command ==> Error parsing command '
+29/04/2009 14:39:16 = Command ==> Error parsing command ': System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 238
+30/04/2009 07:09:00 = Socket ==> System.IO.IOException: Unable to write data to the transport connection: A request to send or receive data was disallowed because the socket had already been shut down in that direction with a previous shutdown call. ---> System.Net.Sockets.SocketException: A request to send or receive data was disallowed because the socket had already been shut down in that direction with a previous shutdown call
+   at System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   at System.Net.Sockets.NetworkStream.Write(Byte[] buffer, Int32 offset, Int32 size)
+   --- End of inner exception stack trace ---
+   at System.Net.Sockets.NetworkStream.Write(Byte[] buffer, Int32 offset, Int32 size)
+   at System.IO.StreamWriter.Flush(Boolean flushStream, Boolean flushEncoder)
+   at System.IO.StreamWriter.Flush()
+   at MudServer.Connection.ClientLoop() in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 60
+30/04/2009 08:18:39 = Command ==> Error parsing command tell: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.IO.DirectoryNotFoundException: Could not find a part of the path 'C:\players'.
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.Directory.InternalGetFileDirectoryNames(String path, String userPathOriginal, String searchPattern, Boolean includeFiles, Boolean includeDirs, SearchOption searchOption)
+   at System.IO.Directory.GetDirectories(String path, String searchPattern, SearchOption searchOption)
+   at System.IO.Directory.GetDirectories(String path)
+   at MudServer.Connection.matchPartial(String name) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 561
+   at MudServer.Connection.cmdTell(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 485
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 251
+30/04/2009 08:18:44 = Command ==> Error parsing command tell: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.IO.DirectoryNotFoundException: Could not find a part of the path 'C:\players'.
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.Directory.InternalGetFileDirectoryNames(String path, String userPathOriginal, String searchPattern, Boolean includeFiles, Boolean includeDirs, SearchOption searchOption)
+   at System.IO.Directory.GetDirectories(String path, String searchPattern, SearchOption searchOption)
+   at System.IO.Directory.GetDirectories(String path)
+   at MudServer.Connection.matchPartial(String name) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 561
+   at MudServer.Connection.cmdTell(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 485
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 251
+30/04/2009 08:23:45 = Command ==> Error parsing command .: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.IO.DirectoryNotFoundException: Could not find a part of the path 'C:\players'.
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.Directory.InternalGetFileDirectoryNames(String path, String userPathOriginal, String searchPattern, Boolean includeFiles, Boolean includeDirs, SearchOption searchOption)
+   at System.IO.Directory.GetDirectories(String path, String searchPattern, SearchOption searchOption)
+   at System.IO.Directory.GetDirectories(String path)
+   at MudServer.Connection.matchPartial(String name) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 513
+   at MudServer.Connection.cmdTell(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 437
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 224
+30/04/2009 08:24:12 = Command ==> Error parsing command .: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.IO.DirectoryNotFoundException: Could not find a part of the path 'C:\players'.
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.Directory.InternalGetFileDirectoryNames(String path, String userPathOriginal, String searchPattern, Boolean includeFiles, Boolean includeDirs, SearchOption searchOption)
+   at System.IO.Directory.GetDirectories(String path, String searchPattern, SearchOption searchOption)
+   at System.IO.Directory.GetDirectories(String path)
+   at MudServer.Connection.matchPartial(String name) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 513
+   at MudServer.Connection.cmdTell(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 437
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 224
+30/04/2009 08:32:16 = Socket ==> System.IO.IOException: Unable to write data to the transport connection: A request to send or receive data was disallowed because the socket had already been shut down in that direction with a previous shutdown call. ---> System.Net.Sockets.SocketException: A request to send or receive data was disallowed because the socket had already been shut down in that direction with a previous shutdown call
+   at System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   at System.Net.Sockets.NetworkStream.Write(Byte[] buffer, Int32 offset, Int32 size)
+   --- End of inner exception stack trace ---
+   at System.Net.Sockets.NetworkStream.Write(Byte[] buffer, Int32 offset, Int32 size)
+   at System.IO.StreamWriter.Flush(Boolean flushStream, Boolean flushEncoder)
+   at System.IO.StreamWriter.Flush()
+   at MudServer.Connection.ClientLoop() in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 63
+30/04/2009 08:32:20 = Socket ==> System.IO.IOException: Unable to write data to the transport connection: A request to send or receive data was disallowed because the socket had already been shut down in that direction with a previous shutdown call. ---> System.Net.Sockets.SocketException: A request to send or receive data was disallowed because the socket had already been shut down in that direction with a previous shutdown call
+   at System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   at System.Net.Sockets.NetworkStream.Write(Byte[] buffer, Int32 offset, Int32 size)
+   --- End of inner exception stack trace ---
+   at System.Net.Sockets.NetworkStream.Write(Byte[] buffer, Int32 offset, Int32 size)
+   at System.IO.StreamWriter.Flush(Boolean flushStream, Boolean flushEncoder)
+   at System.IO.StreamWriter.Flush()
+   at MudServer.Connection.ClientLoop() in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 63
+30/04/2009 09:05:44 = Socket ==> System.IO.IOException: Unable to write data to the transport connection: A request to send or receive data was disallowed because the socket had already been shut down in that direction with a previous shutdown call. ---> System.Net.Sockets.SocketException: A request to send or receive data was disallowed because the socket had already been shut down in that direction with a previous shutdown call
+   at System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   at System.Net.Sockets.NetworkStream.Write(Byte[] buffer, Int32 offset, Int32 size)
+   --- End of inner exception stack trace ---
+   at System.Net.Sockets.NetworkStream.Write(Byte[] buffer, Int32 offset, Int32 size)
+   at System.IO.StreamWriter.Flush(Boolean flushStream, Boolean flushEncoder)
+   at System.IO.StreamWriter.Flush()
+   at MudServer.Connection.ClientLoop() in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 63
+30/04/2009 09:40:47 = Socket ==> System.IO.IOException: Unable to write data to the transport connection: A request to send or receive data was disallowed because the socket had already been shut down in that direction with a previous shutdown call. ---> System.Net.Sockets.SocketException: A request to send or receive data was disallowed because the socket had already been shut down in that direction with a previous shutdown call
+   at System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   at System.Net.Sockets.NetworkStream.Write(Byte[] buffer, Int32 offset, Int32 size)
+   --- End of inner exception stack trace ---
+   at System.Net.Sockets.NetworkStream.Write(Byte[] buffer, Int32 offset, Int32 size)
+   at System.IO.StreamWriter.Flush(Boolean flushStream, Boolean flushEncoder)
+   at System.IO.StreamWriter.Flush()
+   at MudServer.Connection.ClientLoop() in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 63
+30/04/2009 10:50:09 = Socket ==> System.IO.IOException: Unable to write data to the transport connection: A request to send or receive data was disallowed because the socket had already been shut down in that direction with a previous shutdown call. ---> System.Net.Sockets.SocketException: A request to send or receive data was disallowed because the socket had already been shut down in that direction with a previous shutdown call
+   at System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   at System.Net.Sockets.NetworkStream.Write(Byte[] buffer, Int32 offset, Int32 size)
+   --- End of inner exception stack trace ---
+   at System.Net.Sockets.NetworkStream.Write(Byte[] buffer, Int32 offset, Int32 size)
+   at System.IO.StreamWriter.Flush(Boolean flushStream, Boolean flushEncoder)
+   at System.IO.StreamWriter.Flush()
+   at MudServer.Connection.ClientLoop() in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 63
+30/04/2009 13:30:37 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.InvalidCastException: Invalid cast from 'Int32' to 'DateTime'.
+   at System.Int32.System.IConvertible.ToDateTime(IFormatProvider provider)
+   at System.Convert.ToDateTime(Int32 value)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 759
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 228
+30/04/2009 13:30:38 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.InvalidCastException: Invalid cast from 'Int32' to 'DateTime'.
+   at System.Int32.System.IConvertible.ToDateTime(IFormatProvider provider)
+   at System.Convert.ToDateTime(Int32 value)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 759
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 228
+30/04/2009 13:32:45 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.InvalidCastException: Invalid cast from 'Int32' to 'DateTime'.
+   at System.Int32.System.IConvertible.ToDateTime(IFormatProvider provider)
+   at System.Convert.ToDateTime(Int32 value)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 759
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 228
+30/04/2009 13:32:47 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.InvalidCastException: Invalid cast from 'Int32' to 'DateTime'.
+   at System.Int32.System.IConvertible.ToDateTime(IFormatProvider provider)
+   at System.Convert.ToDateTime(Int32 value)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 759
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 228
+30/04/2009 13:33:35 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.InvalidCastException: Invalid cast from 'Int32' to 'DateTime'.
+   at System.Int32.System.IConvertible.ToDateTime(IFormatProvider provider)
+   at System.Convert.ToDateTime(Int32 value)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 759
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 228
+30/04/2009 13:33:36 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.InvalidCastException: Invalid cast from 'Int32' to 'DateTime'.
+   at System.Int32.System.IConvertible.ToDateTime(IFormatProvider provider)
+   at System.Convert.ToDateTime(Int32 value)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 759
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 228
+30/04/2009 13:34:11 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.InvalidCastException: Invalid cast from 'Int32' to 'DateTime'.
+   at System.Int32.System.IConvertible.ToDateTime(IFormatProvider provider)
+   at System.Convert.ToDateTime(Int32 value)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 759
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 228
+30/04/2009 13:34:13 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.InvalidCastException: Invalid cast from 'Int32' to 'DateTime'.
+   at System.Int32.System.IConvertible.ToDateTime(IFormatProvider provider)
+   at System.Convert.ToDateTime(Int32 value)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 759
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 228
+30/04/2009 13:34:56 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.InvalidCastException: Invalid cast from 'Int32' to 'DateTime'.
+   at System.Int32.System.IConvertible.ToDateTime(IFormatProvider provider)
+   at System.Convert.ToDateTime(Int32 value)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 759
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 228
+30/04/2009 13:49:34 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.InvalidCastException: Invalid cast from 'Int32' to 'DateTime'.
+   at System.Int32.System.IConvertible.ToDateTime(IFormatProvider provider)
+   at System.Convert.ToDateTime(Int32 value)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 759
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 228
+30/04/2009 13:49:35 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.InvalidCastException: Invalid cast from 'Int32' to 'DateTime'.
+   at System.Int32.System.IConvertible.ToDateTime(IFormatProvider provider)
+   at System.Convert.ToDateTime(Int32 value)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 759
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 228
+30/04/2009 14:26:26 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.DivideByZeroException: Attempted to divide by zero.
+   at MudServer.Player.get_AverageLoginTime() in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Player.cs:line 277
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 767
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 228
+06/05/2009 13:08:46 = Command ==> Error parsing command fwho: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: Length cannot be less than zero.
+Parameter name: length
+   at System.String.InternalSubStringWithChecks(Int32 startIndex, Int32 length, Boolean fAlwaysCopy)
+   at System.String.Substring(Int32 startIndex, Int32 length)
+   at MudServer.Connection.cmdFullWho(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 890
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 245
+04/11/2009 10:39:17 = Command ==> Error parsing command wibble: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+04/11/2009 10:39:19 = Command ==> Error parsing command wibble: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+04/11/2009 10:39:24 = Command ==> Error parsing command wibble: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:23:49 = Command ==> Error parsing command help: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:25:05 = Command ==> Error parsing command ge: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:25:17 = Command ==> Error parsing command ge: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:25:29 = Command ==> Error parsing command slap: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:25:36 = Command ==> Error parsing command hu: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:25:48 = Command ==> Error parsing command set: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:25:57 = Command ==> Error parsing command alias: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:25:58 = Command ==> Error parsing command alog: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:26:00 = Command ==> Error parsing command away: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:26:03 = Command ==> Error parsing command bump: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:26:05 = Command ==> Error parsing command ccadd: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:26:12 = Command ==> Error parsing command ce: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:26:18 = Command ==> Error parsing command cs: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:26:21 = Command ==> Error parsing command dblank: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:26:25 = Command ==> Error parsing command email: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:26:53 = Command ==> Error parsing command motd: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:26:57 = Command ==> Error parsing command msweep: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:27:02 = Command ==> Error parsing command nban: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:27:05 = Command ==> Error parsing command news: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:27:15 = Command ==> Error parsing command rf: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:27:25 = Command ==> Error parsing command ss: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:27:27 = Command ==> Error parsing command stats: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:34:29 = Command ==> Error parsing command hide: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:37:33 = Command ==> Error parsing command hide: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:39:35 = Command ==> Error parsing command i: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:39:38 = Command ==> Error parsing command i: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:39:42 = Command ==> Error parsing command i: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:39:44 = Command ==> Error parsing command i: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 368
+22/07/2010 13:57:35 = Command ==> Error parsing command i: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 370
+22/07/2010 14:16:50 = Command ==> Error parsing command away: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 371
+22/07/2010 14:17:19 = Command ==> Error parsing command away: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 371
+22/07/2010 14:20:21 = Command ==> Error parsing command away: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 371
+22/07/2010 14:20:34 = Command ==> Error parsing command away: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 371
+22/07/2010 14:21:58 = Command ==> Error parsing command away: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 371
+22/07/2010 14:25:37 = Command ==> Error parsing command away: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 371
+22/07/2010 14:26:44 = Command ==> Error parsing command away: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 371
+22/07/2010 14:26:52 = Command ==> Error parsing command away: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 371
+22/07/2010 14:30:15 = Command ==> Error parsing command i: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 371
+22/07/2010 14:48:35 = Command ==> Error parsing command i: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 377
+22/07/2010 14:48:38 = Command ==> Error parsing command i: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 377
+22/07/2010 15:11:47 = Command ==> Error parsing command i: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 381
+23/07/2010 12:46:21 = Command ==> Error parsing command ': System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: StartIndex cannot be less than zero.
+Parameter name: startIndex
+   at System.String.InternalSubStringWithChecks(Int32 startIndex, Int32 length, Boolean fAlwaysCopy)
+   at System.String.Substring(Int32 startIndex, Int32 length)
+   at MudServer.Connection.cmdSay(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 648
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 411
+23/07/2010 12:46:40 = Command ==> Error parsing command ': System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: StartIndex cannot be less than zero.
+Parameter name: startIndex
+   at System.String.InternalSubStringWithChecks(Int32 startIndex, Int32 length, Boolean fAlwaysCopy)
+   at System.String.Substring(Int32 startIndex, Int32 length)
+   at MudServer.Connection.cmdSay(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 648
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 411
+23/07/2010 13:14:34 = Command ==> Error parsing command staff: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 381
+23/07/2010 13:34:26 = Command ==> Error parsing command staff: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.IndexOutOfRangeException: Index was outside the bounds of the array.
+   at MudServer.Connection.cmdStaff(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1180
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 381
+23/07/2010 13:36:56 = Command ==> Error parsing command hide: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 381
+23/07/2010 14:31:40 = File I/O ==> Error getting offline examine details for alchamist
+28/07/2010 09:39:49 = Command ==> Error parsing command exits: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 381
+28/07/2010 09:54:26 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: StartIndex cannot be less than zero.
+Parameter name: startIndex
+   at System.String.Remove(Int32 startIndex)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 989
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 381
+28/07/2010 10:59:13 = Command ==> Error parsing command title: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 381
+28/07/2010 11:11:53 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: StartIndex cannot be less than zero.
+Parameter name: startIndex
+   at System.String.Remove(Int32 startIndex)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 991
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 383
+28/07/2010 13:47:42 = Command ==> Error parsing command stats: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 385
+28/07/2010 14:32:59 = Command ==> Error parsing command list: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.cmdDoList(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1567
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 385
+28/07/2010 14:35:37 = Command ==> Error parsing command list: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.cmdDoList(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1567
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 385
+28/07/2010 14:35:56 = Command ==> Error parsing command list: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.cmdDoList(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1567
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 385
+28/07/2010 14:36:50 = Command ==> Error parsing command list: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.cmdDoList(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1567
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 385
+28/07/2010 14:37:50 = Command ==> Error parsing command list: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.cmdDoList(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1567
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 385
+28/07/2010 14:38:54 = Command ==> Error parsing command list: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: startIndex cannot be larger than length of string.
+Parameter name: startIndex
+   at System.String.InternalSubStringWithChecks(Int32 startIndex, Int32 length, Boolean fAlwaysCopy)
+   at System.String.Substring(Int32 startIndex)
+   at MudServer.Connection.cmdDoList(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1567
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 385
+28/07/2010 14:39:18 = Command ==> Error parsing command list: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: startIndex cannot be larger than length of string.
+Parameter name: startIndex
+   at System.String.InternalSubStringWithChecks(Int32 startIndex, Int32 length, Boolean fAlwaysCopy)
+   at System.String.Substring(Int32 startIndex)
+   at MudServer.Connection.cmdDoList(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1567
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 385
+28/07/2010 14:58:58 = Command ==> Error parsing command list: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: startIndex cannot be larger than length of string.
+Parameter name: startIndex
+   at System.String.InternalSubStringWithChecks(Int32 startIndex, Int32 length, Boolean fAlwaysCopy)
+   at System.String.Substring(Int32 startIndex)
+   at MudServer.Connection.cmdDoList(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1554
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 385
+29/07/2010 08:15:34 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: StartIndex cannot be less than zero.
+Parameter name: startIndex
+   at System.String.Remove(Int32 startIndex)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 990
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 08:15:35 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: StartIndex cannot be less than zero.
+Parameter name: startIndex
+   at System.String.Remove(Int32 startIndex)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 990
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 08:15:36 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: StartIndex cannot be less than zero.
+Parameter name: startIndex
+   at System.String.Remove(Int32 startIndex)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 990
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 08:15:36 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: StartIndex cannot be less than zero.
+Parameter name: startIndex
+   at System.String.Remove(Int32 startIndex)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 990
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 08:15:37 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: StartIndex cannot be less than zero.
+Parameter name: startIndex
+   at System.String.Remove(Int32 startIndex)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 990
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 08:15:38 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: StartIndex cannot be less than zero.
+Parameter name: startIndex
+   at System.String.Remove(Int32 startIndex)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 990
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 08:15:39 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: StartIndex cannot be less than zero.
+Parameter name: startIndex
+   at System.String.Remove(Int32 startIndex)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 990
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 08:15:40 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: StartIndex cannot be less than zero.
+Parameter name: startIndex
+   at System.String.Remove(Int32 startIndex)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 990
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 08:15:42 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: StartIndex cannot be less than zero.
+Parameter name: startIndex
+   at System.String.Remove(Int32 startIndex)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 990
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 08:15:44 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: StartIndex cannot be less than zero.
+Parameter name: startIndex
+   at System.String.Remove(Int32 startIndex)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 990
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 08:15:45 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: StartIndex cannot be less than zero.
+Parameter name: startIndex
+   at System.String.Remove(Int32 startIndex)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 990
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 08:18:24 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: StartIndex cannot be less than zero.
+Parameter name: startIndex
+   at System.String.Remove(Int32 startIndex)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 990
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 08:21:17 = Command ==> Error parsing command i: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 417
+29/07/2010 08:43:01 = Command ==> Error parsing command list: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.getPlayers(String startsWith) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1614
+   at MudServer.Connection.getPlayers() in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1598
+   at MudServer.Connection.cmdDoList(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1579
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 08:44:19 = Command ==> Error parsing command list: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.getPlayers(String startsWith) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1614
+   at MudServer.Connection.getPlayers() in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1598
+   at MudServer.Connection.cmdDoList(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1579
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 08:45:13 = Command ==> Error parsing command list: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.getPlayers(String startsWith) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1614
+   at MudServer.Connection.getPlayers() in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1598
+   at MudServer.Connection.cmdDoList(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1579
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 09:10:28 = Command ==> Error parsing command list: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.cmdDoList(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1586
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 09:18:40 = Command ==> Error parsing command list: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: startIndex cannot be larger than length of string.
+Parameter name: startIndex
+   at System.String.InternalSubStringWithChecks(Int32 startIndex, Int32 length, Boolean fAlwaysCopy)
+   at System.String.Substring(Int32 startIndex)
+   at MudServer.Connection.cmdDoList(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1577
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 09:33:39 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: StartIndex cannot be less than zero.
+Parameter name: startIndex
+   at System.String.Remove(Int32 startIndex)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 995
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 09:33:40 = Command ==> Error parsing command x: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: StartIndex cannot be less than zero.
+Parameter name: startIndex
+   at System.String.Remove(Int32 startIndex)
+   at MudServer.Connection.cmdExamine(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 995
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 10:23:21 = Command ==> Error parsing command edtime: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.OverflowException: Value was either too large or too small for an Int16.
+   at System.Int16.Parse(String s, NumberStyles style, NumberFormatInfo info)
+   at System.Convert.ToInt16(String value)
+   at MudServer.Connection.cmdEdtime(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1280
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 12:43:28 = Command ==> Error parsing command email: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 12:51:45 = Command ==> Error parsing command +: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 13:27:12 = Command ==> Error parsing command noprefix: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 13:27:40 = Command ==> Error parsing command noprefix: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+29/07/2010 13:49:02 = Command ==> Error parsing command wall: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: startIndex cannot be larger than length of string.
+Parameter name: startIndex
+   at System.String.InternalSubStringWithChecks(Int32 startIndex, Int32 length, Boolean fAlwaysCopy)
+   at System.String.Substring(Int32 startIndex)
+   at MudServer.Connection.cmdWall(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1706
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 387
+30/07/2010 08:53:43 = Command ==> Error parsing command i: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 440
+30/07/2010 10:57:28 = Command ==> Error parsing command hide: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 446
+30/07/2010 12:45:41 = Command ==> Error parsing command exits: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.sendToUser(String msg, String user, Boolean newline, Boolean removeColour, Boolean sendPrompt) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 559
+   at MudServer.Connection.sendToUser(String msg) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 529
+   at MudServer.Connection.cmdExits(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1852
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 446
+02/08/2010 10:00:31 = Socket write ==> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.sendToUser(String msg, String user, Boolean newline, Boolean removeColour, Boolean sendPrompt) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 599
+02/08/2010 10:00:33 = Socket write ==> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.sendToUser(String msg, String user, Boolean newline, Boolean removeColour, Boolean sendPrompt) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 599
+02/08/2010 10:00:34 = Socket write ==> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.sendToUser(String msg, String user, Boolean newline, Boolean removeColour, Boolean sendPrompt) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 599
+02/08/2010 10:00:37 = Socket write ==> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.sendToUser(String msg, String user, Boolean newline, Boolean removeColour, Boolean sendPrompt) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 599
+02/08/2010 10:00:38 = Socket write ==> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.sendToUser(String msg, String user, Boolean newline, Boolean removeColour, Boolean sendPrompt) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 599
+02/08/2010 10:00:38 = Socket write ==> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.sendToUser(String msg, String user, Boolean newline, Boolean removeColour, Boolean sendPrompt) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 599
+02/08/2010 10:00:40 = Socket write ==> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.sendToUser(String msg, String user, Boolean newline, Boolean removeColour, Boolean sendPrompt) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 599
+02/08/2010 10:00:40 = Socket write ==> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.sendToUser(String msg, String user, Boolean newline, Boolean removeColour, Boolean sendPrompt) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 599
+02/08/2010 10:00:42 = Socket write ==> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.sendToUser(String msg, String user, Boolean newline, Boolean removeColour, Boolean sendPrompt) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 599
+02/08/2010 10:00:43 = Socket write ==> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.sendToUser(String msg, String user, Boolean newline, Boolean removeColour, Boolean sendPrompt) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 599
+02/08/2010 10:00:46 = Socket write ==> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.sendToUser(String msg, String user, Boolean newline, Boolean removeColour, Boolean sendPrompt) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 599
+02/08/2010 10:00:47 = Socket write ==> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.sendToUser(String msg, String user, Boolean newline, Boolean removeColour, Boolean sendPrompt) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 599
+02/08/2010 10:00:48 = Socket write ==> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.sendToUser(String msg, String user, Boolean newline, Boolean removeColour, Boolean sendPrompt) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 599
+02/08/2010 10:00:48 = Socket write ==> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.sendToUser(String msg, String user, Boolean newline, Boolean removeColour, Boolean sendPrompt) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 599
+02/08/2010 10:01:26 = Socket write ==> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.sendToUser(String msg, String user, Boolean newline, Boolean removeColour, Boolean sendPrompt) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 599
+02/08/2010 10:32:18 = Socket write ==> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.sendToUser(String msg, String user, Boolean newline, Boolean removeColour, Boolean sendPrompt, Boolean doHistory) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 607
+02/08/2010 10:32:20 = Socket write ==> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.sendToUser(String msg, String user, Boolean newline, Boolean removeColour, Boolean sendPrompt, Boolean doHistory) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 607
+02/08/2010 10:32:25 = Socket write ==> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.sendToUser(String msg, String user, Boolean newline, Boolean removeColour, Boolean sendPrompt, Boolean doHistory) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 607
+02/08/2010 10:32:33 = Socket write ==> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.sendToUser(String msg, String user, Boolean newline, Boolean removeColour, Boolean sendPrompt, Boolean doHistory) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 607
+02/08/2010 10:33:40 = Socket write ==> System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.sendToUser(String msg, String user, Boolean newline, Boolean removeColour, Boolean sendPrompt, Boolean doHistory) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 607
+02/08/2010 10:46:46 = Command ==> Error parsing command history: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection.
+Parameter name: index
+   at System.ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument argument, ExceptionResource resource)
+   at System.ThrowHelper.ThrowArgumentOutOfRangeException()
+   at System.Collections.Generic.List`1.get_Item(Int32 index)
+   at MudServer.Connection.cmdHistory(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1983
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 469
+02/08/2010 10:46:49 = Command ==> Error parsing command history: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection.
+Parameter name: index
+   at System.ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument argument, ExceptionResource resource)
+   at System.ThrowHelper.ThrowArgumentOutOfRangeException()
+   at System.Collections.Generic.List`1.get_Item(Int32 index)
+   at MudServer.Connection.cmdHistory(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 1983
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 469
+02/08/2010 12:38:56 = File I/O ==> Unable to load file disclaimer.txt - file does not exist
+02/08/2010 12:39:34 = File I/O ==> Unable to load file disclaimer.txt - file does not exist
+02/08/2010 12:40:24 = File I/O ==> Unable to load file disclaimer.txt - file does not exist
+02/08/2010 12:40:52 = File I/O ==> Unable to load file disclaimer.txt - file does not exist
+02/08/2010 12:41:12 = File I/O ==> Unable to load file disclaimer.txt - file does not exist
+02/08/2010 13:39:15 = Command ==> Error parsing command res: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.ArgumentOutOfRangeException: Length cannot be less than zero.
+Parameter name: length
+   at System.String.InternalSubStringWithChecks(Int32 startIndex, Int32 length, Boolean fAlwaysCopy)
+   at System.String.Substring(Int32 startIndex, Int32 length)
+   at MudServer.Connection.cmdRes(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 2182
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 517
+02/08/2010 14:46:49 = File I/O ==> Unable to load file help\wibble.txt - file does not exist
+02/08/2010 14:46:49 = Command ==> Error parsing command help: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.FormatException: Input string was not in a correct format.
+   at System.Number.StringToNumber(String str, NumberStyles options, NumberBuffer& number, NumberFormatInfo info, Boolean parseDecimal)
+   at System.Number.ParseInt32(String s, NumberStyles style, NumberFormatInfo info)
+   at System.Convert.ToInt32(String value)
+   at MudServer.Connection.cmdHelp(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 2130
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 578
+02/08/2010 14:47:44 = File I/O ==> Unable to load file help\wibble.txt - file does not exist
+02/08/2010 14:47:44 = Command ==> Error parsing command help: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.FormatException: Input string was not in a correct format.
+   at System.Number.StringToNumber(String str, NumberStyles options, NumberBuffer& number, NumberFormatInfo info, Boolean parseDecimal)
+   at System.Number.ParseInt32(String s, NumberStyles style, NumberFormatInfo info)
+   at System.Convert.ToInt32(String value)
+   at MudServer.Connection.cmdHelp(String message) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 2130
+   --- End of inner exception stack trace ---
+   at System.RuntimeMethodHandle._InvokeMethodFast(Object target, Object[] arguments, SignatureStruct& sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.RuntimeMethodHandle.InvokeMethodFast(Object target, Object[] arguments, Signature sig, MethodAttributes methodAttributes, RuntimeTypeHandle typeOwner)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture, Boolean skipVisibilityChecks)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at System.Reflection.MethodBase.Invoke(Object obj, Object[] parameters)
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 578
+02/08/2010 14:47:53 = File I/O ==> Unable to load file help\wibble.txt - file does not exist
+02/08/2010 14:48:34 = File I/O ==> Unable to load file help\test.txt - file does not exist
+02/08/2010 14:50:34 = File I/O ==> Unable to load file help\'.txt - file does not exist
+02/08/2010 14:50:39 = File I/O ==> Unable to load file help\say.txt - file does not exist
+02/08/2010 14:50:44 = File I/O ==> Unable to load file help\tell.txt - file does not exist
+02/08/2010 15:19:05 = filesystem ==> System.IO.IOException: The process cannot access the file 'C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\bin\Debug\players\t\test.xml' because it is being used by another process.
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options)
+   at System.IO.StreamWriter.CreateFile(String path, Boolean append)
+   at System.IO.StreamWriter..ctor(String path, Boolean append, Encoding encoding, Int32 bufferSize)
+   at System.IO.StreamWriter..ctor(String path)
+   at MudServer.Player.SavePlayer() in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Player.cs:line 541
+02/08/2010 15:20:41 = File I/O ==> Unable to load file help\flog.txt - file does not exist
+03/08/2010 07:48:52 = Command ==> Error parsing command ccadd: System.NullReferenceException: Object reference not set to an instance of an object.
+   at MudServer.Connection.ProcessLine(String line) in C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\Connection.cs:line 578
+03/08/2010 07:56:27 = File I/O ==> Unable to load file help\wibble.txt - file does not exist

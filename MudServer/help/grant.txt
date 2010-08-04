@@ -1,0 +1,11 @@
+4
+^YSyntax: ^Ngrant <player> <Admin/Staff/Guide>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Promotes/Demotes a player to specified staff level
+
+^RRestrictions:^N
+
+Player must be on-line
