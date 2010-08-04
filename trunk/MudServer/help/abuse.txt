@@ -1,0 +1,11 @@
+0
+^YSyntax: ^NAbuse
+^YAliases: ^NNone
+
+^PEffect:^N
+
+This command dumps the contents of a players history to file and marks it for the attention of the admin. Use this command to report abuse.
+
+^RRestrictions:^N
+
+None

@@ -1,0 +1,11 @@
+0
+^YSyntax: ^Nemote <1-5> <e-mail address>
+^YAliases: ^N: ;
+
+^PEffect:^N
+
+Send's an action to the current room. If leading character is a ' then no space will be left between the players name and the action.
+
+^RRestrictions:^N
+
+None

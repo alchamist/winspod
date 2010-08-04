@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Player xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <UserName>Alchamist</UserName>
+  <UserRoom>Main</UserRoom>
+  <EnterMsg>walks into the room</EnterMsg>
+  <ExitMsg>wanders off into the distance</ExitMsg>
+  <LogonMsg>arrives, dazed and confused</LogonMsg>
+  <LogoffMsg>leaves for normality</LogoffMsg>
+  <Password>wizzard</Password>
+  <NewPlayer>false</NewPlayer>
+  <PlayerRank>5</PlayerRank>
+  <DoColour>true</DoColour>
+  <Invisible>false</Invisible>
+  <Hidden>false</Hidden>
+  <Prompt>Homelands Uni&gt; </Prompt>
+  <Wibbled>false</Wibbled>
+  <CanShout>true</CanShout>
+  <HearShouts>true</HearShouts>
+  <Prefix>Oh No It's{reset}</Prefix>
+  <SeePrefix>true</SeePrefix>
+  <HourlyChime>false</HourlyChime>
+  <Description>{bold}{red}is everywhere and nowhere baby{reset}</Description>
+  <LastIP>144.100.25.25</LastIP>
+  <CurrentIP>144.100.25.25</CurrentIP>
+  <CurrentLogon>2010-08-03T14:43:53.2642856+01:00</CurrentLogon>
+  <LastLogon>2010-08-03T14:44:21.8271512+01:00</LastLogon>
+  <LongestLogin>205</LongestLogin>
+  <LoginCount>294</LoginCount>
+  <TotalOnlineTime>3600975</TotalOnlineTime>
+  <ResDate>2009-05-08T08:12:17.5735868+01:00</ResDate>
+  <ResBy>System</ResBy>
+  <ResCount>2</ResCount>
+  <EmailAddress>jay@sitback.dyndns.org</EmailAddress>
+  <JabberAddress />
+  <ICQAddress />
+  <MSNAddress />
+  <YahooAddress />
+  <SkypeAddress />
+  <HomeURL>http://sitback.dyndns.org</HomeURL>
+  <WorkURL>http://www.grg.com</WorkURL>
+  <RealName />
+  <Occupation>Mad Professor</Occupation>
+  <Hometown>Somewhere</Hometown>
+  <JetLag>0</JetLag>
+  <Gender>1</Gender>
+  <KickedCount>0</KickedCount>
+  <IdledCount>0</IdledCount>
+  <WarnedCount>0</WarnedCount>
+  <SlappedCount>0</SlappedCount>
+  <SpecialPrivs>
+    <builder>true</builder>
+    <tester>true</tester>
+    <noidle>false</noidle>
+  </SpecialPrivs>
+  <DateOfBirth>0001-01-01T00:00:00</DateOfBirth>
+  <Away>false</Away>
+  <LastActive>2010-08-03T14:43:59.311238+01:00</LastActive>
+  <OnGuide>true</OnGuide>
+  <OnStaff>true</OnStaff>
+  <OnAdmin>true</OnAdmin>
+  <OnHCAdmin>true</OnHCAdmin>
+  <OnDuty>true</OnDuty>
+  <Git>false</Git>
+  <SeeEcho>true</SeeEcho>
+</Player>

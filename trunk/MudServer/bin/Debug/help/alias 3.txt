@@ -1,0 +1,16 @@
+1
+^YSyntax: ^NAlias <command 1>;<command 2>;<comm....
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Aliases can also contain random content, in the form of
+
+{<choice 1>|<choice 2>|<choice 3>}
+
+When the command is executed, one of the choices will be randomly selected and inserted into the output.
+
+
+^RRestrictions:^N
+
+Aliases can only contain system commands, not other aliases.

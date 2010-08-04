@@ -1,0 +1,13 @@
+0
+^G&v for Windows^N
+
+Created by:
+  Julian Eames
+  http://sitback.dyndns.org
+
+Code by:
+  Julian Eames
+
+Copyright (c) 2002 Julian Eames. All rights reserved.
+
+^HMany thanks to the beta testers, especially Boltar - we wish you luck with Nuts 4!^N

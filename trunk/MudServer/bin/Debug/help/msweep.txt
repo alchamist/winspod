@@ -1,0 +1,20 @@
+0
+^YSyntax: ^Nmsweep <new/show/<x y>>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Msweep is a text based version of the classic "Minesweeper" game. The object of Msweep is for you to determine where all the mines are without uncovering any of them.
+
+To start a new game, use "^Gmsweep new^N", to reshow the grid without making a move, use "^Gmsweep show^N"
+
+You can uncover a square by giving the x y co-ordinates (x along, y down). If you uncover a mine, you lose the game.
+
+eg: "^Gmsweep 8 1^N" would uncover the top right square of the grid.
+
+If a number appears on a square, it indicates how many mines are in the eight squares that surround the numbered one.
+
+
+^RRestrictions:^N
+
+None

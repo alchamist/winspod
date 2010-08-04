@@ -1,0 +1,11 @@
+4
+^YSyntax: ^Nccrname <channel> <new name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+This command renames an active channel, leaving all other channel information intact
+
+^RRestrictions:^N
+
+None

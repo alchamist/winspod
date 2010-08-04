@@ -1,0 +1,11 @@
+2
+^YSyntax: ^Ngs <song>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Sends a song to the Guide channel
+
+^RRestrictions:^N
+
+None

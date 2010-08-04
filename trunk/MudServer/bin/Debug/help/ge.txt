@@ -1,0 +1,11 @@
+2
+^YSyntax: ^Nge
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Sends an emote to the Guide channel
+
+^RRestrictions:^N
+
+None
