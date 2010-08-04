@@ -505,7 +505,9 @@ namespace MudServer
                         {
                             Console.WriteLine("[" + DateTime.Now.ToShortTimeString() + "] Login: " + myPlayer.UserName);
                             showMOTD(false);
-                            cmdCheckLogs("");
+                            if (myPlayer.PlayerRank >= (int)Player.Rank.Admin)
+                                cmdCheckLogs("");
+
                             sendToUser("\r\nLast login " + myPlayer.LastLogon.ToShortDateString() + " from " + myPlayer.LastIP + "\r\n", true, false, false);
                             myState = 10;
                             sendToRoom(myPlayer.UserName + " " + myPlayer.EnterMsg, "", myPlayer.UserRoom, myPlayer.UserName);
@@ -818,6 +820,27 @@ namespace MudServer
 
         #endregion
 
+        #region sendToChannel
+
+        private void sendToChannel(string channel, string message, bool nohistory)
+        {
+            ClubChannel chan = ClubChannel.LoadChannel(channel);
+            if (chan == null)
+                sendToUser("Error sending to channel", true, false, false);
+            else
+            {
+                foreach (Connection c in connections)
+                {
+                    if (chan.OnChannel(c.myPlayer.UserName) && !c.myPlayer.ClubChannelMute)
+                    {
+                        sendToUser(chan.FormatMessage(message), true, c.myPlayer.UserName != myPlayer.UserName, nohistory);
+                    }
+                }
+            }
+        }
+
+        #endregion
+
         #endregion
 
         #region fileMethods
@@ -1087,7 +1110,7 @@ namespace MudServer
 
         public void cmdThink(string message)
         {
-            sendToRoom(myPlayer.ColourUserName + " thinks . o O ( " + wibbleText(message, false) + " {reset})", "You think ( " + wibbleText(message, false) + " {reset})", false, true);
+            sendToRoom(myPlayer.ColourUserName + " thinks . o O ( " + wibbleText(message, false) + " {reset})", "You think . o O ( " + wibbleText(message, false) + " {reset})", false, true);
         }
 
         public void cmdSing(string message)
@@ -3606,6 +3629,134 @@ namespace MudServer
                 }
             }
 
+        }
+
+        public void cmdCCmute(string message)
+        {
+            myPlayer.ClubChannelMute = ! myPlayer.ClubChannelMute;
+            sendToUser("You are now " + (myPlayer.ClubChannelMute ? "muting " : "listening to ") + "club channels", true, false, false);
+            myPlayer.SavePlayer();
+        }
+
+        public void cmdCCwho(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: ccwho <channel>", true, false, false);
+            else
+            {
+                ClubChannel c = ClubChannel.LoadChannel(message);
+                if (c == null)
+                    sendToUser("Channel \"" + message + "\" not found", true, false, false);
+                else if (!c.OnChannel(myPlayer.UserName) && myPlayer.PlayerRank < (int)Player.Rank.Admin)
+                    sendToUser("You are not on channel \"" + c.Name + "\"", true, false, false);
+                else
+                {
+                    string output = "{bold}{cyan}---[{red}CCWho{cyan}]".PadRight(103, '-') + "{reset}\r\nListening on channel \"" + c.Name + "\"\r\n";
+                    string users = "";
+                    if (isOnline(c.Owner))
+                    {
+                        foreach (Connection conn in connections)
+                        {
+                            if (conn.myPlayer.UserName.ToLower() == c.Owner.ToLower() && !conn.myPlayer.ClubChannelMute)
+                                users += ", " + conn.myPlayer.ColourUserName;
+                        }
+                    }
+                    foreach (string user in c.Users)
+                    {
+                        foreach (Connection conn in connections)
+                        {
+                            if (conn.myPlayer.UserName.ToLower() == user.ToLower() && !conn.myPlayer.ClubChannelMute)
+                                users += ", " + conn.myPlayer.ColourUserName;
+                        }
+                    }
+
+                    sendToUser(output + (users == "" ? "None" : users.Substring(2)) + "\r\n{bold}{cyan}".PadRight(94, '-') + "{reset}", true, false, false);
+                }
+            }
+        }
+
+        public void cmdCCSay(string message)
+        {
+            if (message == "" || message.IndexOf(" ") == -1)
+                sendToUser("Syntax: cu <channel> <message>");
+            else
+            {
+                string[] split = message.Split(new char[] { ' ' }, 2);
+                ClubChannel targ = ClubChannel.LoadChannel(split[0]);
+                if (myPlayer.ClubChannelMute)
+                    sendToUser("You cannot send to channels if you have them muted", true, false, false);
+                else if (targ == null)
+                    sendToUser("Channel \"" + split[0] + "\" not found", true, false, false);
+                else if (!targ.OnChannel(myPlayer.UserName))
+                    sendToUser("You are not on channel \"" + targ.Name + "\"", true, false, false);
+                else
+                {
+                    sendToChannel(targ.Name, myPlayer.UserName + " " + sayWord(split[1], false) + " \"" + split[1] + "\"", false);
+                }
+            }
+        }
+
+        public void cmdCCThink(string message)
+        {
+            if (message == "" || message.IndexOf(" ") == -1)
+                sendToUser("Syntax: ct <channel> <message>");
+            else
+            {
+                string[] split = message.Split(new char[] { ' ' }, 2);
+                ClubChannel targ = ClubChannel.LoadChannel(split[0]);
+                if (myPlayer.ClubChannelMute)
+                    sendToUser("You cannot send to channels if you have them muted", true, false, false);
+                else if (targ == null)
+                    sendToUser("Channel \"" + split[0] + "\" not found", true, false, false);
+                else if (!targ.OnChannel(myPlayer.UserName))
+                    sendToUser("You are not on channel \"" + targ.Name + "\"", true, false, false);
+                else
+                {
+                    sendToChannel(targ.Name, myPlayer.UserName + " thinks . o O ( " + split[1] + " )", false);
+                }
+            }
+        }
+
+        public void cmdCCSing(string message)
+        {
+            if (message == "" || message.IndexOf(" ") == -1)
+                sendToUser("Syntax: cs <channel> <message>");
+            else
+            {
+                string[] split = message.Split(new char[] { ' ' }, 2);
+                ClubChannel targ = ClubChannel.LoadChannel(split[0]);
+                if (myPlayer.ClubChannelMute)
+                    sendToUser("You cannot send to channels if you have them muted", true, false, false);
+                else if (targ == null)
+                    sendToUser("Channel \"" + split[0] + "\" not found", true, false, false);
+                else if (!targ.OnChannel(myPlayer.UserName))
+                    sendToUser("You are not on channel \"" + targ.Name + "\"", true, false, false);
+                else
+                {
+                    sendToChannel(targ.Name, myPlayer.UserName + " sings ./ " + split[1] + " ./", false);
+                }
+            }
+        }
+
+        public void cmdCCEmote(string message)
+        {
+            if (message == "" || message.IndexOf(" ") == -1)
+                sendToUser("Syntax: ce <channel> <message>");
+            else
+            {
+                string[] split = message.Split(new char[] { ' ' }, 2);
+                ClubChannel targ = ClubChannel.LoadChannel(split[0]);
+                if (myPlayer.ClubChannelMute)
+                    sendToUser("You cannot send to channels if you have them muted", true, false, false);
+                else if (targ == null)
+                    sendToUser("Channel \"" + split[0] + "\" not found", true, false, false);
+                else if (!targ.OnChannel(myPlayer.UserName))
+                    sendToUser("You are not on channel \"" + targ.Name + "\"", true, false, false);
+                else
+                {
+                    sendToChannel(targ.Name, myPlayer.UserName + (split[1].Substring(0,1)=="'" ? "" : " ") + split[1], false);
+                }
+            }
         }
 
         #endregion

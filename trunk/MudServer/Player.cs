@@ -101,6 +101,7 @@ namespace MudServer
         private bool        adminChan = true;                               // On/Off admin channel
         private bool        hcAdminChan = true;                             // On/Off admin channel
         private bool        onDuty = true;                                  // On/Off duty - global mute/unmute for staff chans
+        private bool        clubChanMute = false;                           // Have they muted the club channels?
         private bool        seeEchoFrom = false;                            // Does the user see who the echo is from
         private bool        hidden = false;                                 // Is the user hidden from "where" command
         private bool        hourlyChime = false;                            // Does the user want an hourly chime?
@@ -508,6 +509,12 @@ namespace MudServer
         {
             get { return seeEchoFrom; }
             set { seeEchoFrom = value; }
+        }
+
+        public bool ClubChannelMute
+        {
+            get { return clubChanMute; }
+            set { clubChanMute = value; }
         }
 
         #endregion
