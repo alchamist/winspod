@@ -54,3 +54,6 @@ C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudSer
 C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\bin\Debug\commands\cmdList.dat
 C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\bin\Debug\files\motd.txt
 C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer\MudServer\bin\Debug\files\sumotd.txt
+C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer_SVN\MudServer\bin\Debug\MudServer.exe.config
+C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer_SVN\MudServer\obj\Debug\MudServer.exe
+C:\Documents and Settings\eamesj\My Documents\Visual Studio 2008\Projects\MudServer_SVN\MudServer\obj\Debug\MudServer.pdb
