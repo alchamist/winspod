@@ -4004,7 +4004,15 @@ namespace MudServer
 
         private string getChannels(string username)
         {
-            return "none";
+            clubChannels = ClubChannel.LoadAllChannels();
+
+            string ret = "";
+            foreach (ClubChannel c in clubChannels)
+            {
+                if (c.OnChannel(username))
+                    ret += ", " + c.Name;
+            }
+            return (ret == "" ? "None" : ret.Substring(2));
         }
 
         private string formatTime(TimeSpan time)
