@@ -7,11 +7,12 @@ using System.Threading;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Xml.Serialization;
 using System.Collections.Generic;
 
 namespace MudServer
 {
-    class Connection
+    public class Connection
     {
         public struct commands
         {
@@ -26,6 +27,18 @@ namespace MudServer
             public int createStatus;
             public string username;
             public string tPassword;
+        }
+
+        public struct message
+        {
+            public DateTime Date;
+            public string From;
+            public string To;
+            public string Subject;
+            public string Body;
+            public bool Read;    // Has the message been read?
+            public bool Warning; // Is this a warning?
+            public bool Deleted; // Is this message deleted
         }
 
         private enum gender
@@ -60,6 +73,13 @@ namespace MudServer
         public List<string>         history = new List<string>();
 
         public List<ClubChannel>    clubChannels = new List<ClubChannel>();
+
+        public List<message>        messages = new List<message>();
+
+        public List<message>        mail = new List<message>();
+
+        public message              editMail = new message();
+
         
         public Connection(Socket socket, int conNum)
         {
@@ -73,6 +93,8 @@ namespace MudServer
             heartbeat.Elapsed += new System.Timers.ElapsedEventHandler(heartbeat_Elapsed);
             heartbeat.Start();
 
+            messages = loadMessages();
+
             roomList = loadRooms();
 
             new Thread(ClientLoop).Start();
@@ -82,7 +104,7 @@ namespace MudServer
         {
             if (myPlayer != null)
             {
-                if (myPlayer.HourlyChime && DateTime.Now.Minute == 0 && DateTime.Now.Hour != lastHChimeHour)
+                if (myPlayer.HourlyChime && DateTime.Now.Minute == 0 && DateTime.Now.Hour != lastHChimeHour && !myPlayer.InMailEditor)
                 {
                     lastHChimeHour = DateTime.Now.Hour;
                     sendToUser("{bold}{red}{bell} [[Ding Dong. It is now " + (DateTime.Now.AddHours(myPlayer.JetLag)).ToShortTimeString() + "]{reset}", true, true, false);
@@ -507,6 +529,7 @@ namespace MudServer
                             showMOTD(false);
                             if (myPlayer.PlayerRank >= (int)Player.Rank.Admin)
                                 cmdCheckLogs("");
+                            checkMail();
 
                             sendToUser("\r\nLast login " + myPlayer.LastLogon.ToShortDateString() + " from " + myPlayer.LastIP + "\r\n", true, false, false);
                             myState = 10;
@@ -534,7 +557,12 @@ namespace MudServer
                 string cmd = line.Trim();
                 bool adminIdle = false;
 
-                if (cmd != "")
+                if (myPlayer.InMailEditor)
+                {
+                    myPlayer.LastActive = DateTime.Now;
+                    mailEdit(line);
+                }
+                else if (cmd != "")
                 {
                     if (cmd.Substring(0, 1) == "#" && myPlayer.PlayerRank >= (int)Player.Rank.Admin)
                     {
@@ -769,7 +797,7 @@ namespace MudServer
         {
             foreach (Connection conn in connections)
             {
-                if (conn.myPlayer != null && conn.myPlayer.UserName != sender && conn.myPlayer.UserRoom == room)
+                if (conn.myPlayer != null && conn.myPlayer.UserName != sender && conn.myPlayer.UserRoom == room && !conn.myPlayer.InMailEditor)
                 {
                     sendToUser(msgToOthers, conn.myPlayer.UserName, newline, conn.myPlayer.DoColour, receiverPrompt, true);
                 }
@@ -778,9 +806,6 @@ namespace MudServer
                     if (msgToSender != "")
                     {
                         sendToUser(msgToSender, sender, newline, myPlayer.DoColour, senderPrompt, true);
-                        //conn.Writer.Write(AnsiColour.Colorise(msgToSender, !conn.myPlayer.DoColour));
-                        //if (newline)
-                        //    conn.Writer.WriteLine();
                     }
                 }
                 
@@ -795,7 +820,7 @@ namespace MudServer
         {
             foreach (Connection conn in connections)
             {
-                if (conn.myPlayer.PlayerRank >= rank && myPlayer.onStaffChannel((Player.Rank)rank))
+                if (conn.myPlayer.PlayerRank >= rank && myPlayer.onStaffChannel((Player.Rank)rank) && !conn.myPlayer.InMailEditor)
                 {
                     string col = null;
                     switch (rank)
@@ -831,7 +856,7 @@ namespace MudServer
             {
                 foreach (Connection c in connections)
                 {
-                    if (chan.OnChannel(c.myPlayer.UserName) && !c.myPlayer.ClubChannelMute)
+                    if (chan.OnChannel(c.myPlayer.UserName) && !c.myPlayer.ClubChannelMute && !c.myPlayer.InMailEditor)
                     {
                         sendToUser(chan.FormatMessage(message), true, c.myPlayer.UserName != myPlayer.UserName, nohistory);
                     }
@@ -1145,9 +1170,14 @@ namespace MudServer
                         {
                             if (c.myPlayer != null && c.myPlayer.UserName.ToLower() == matches[0].ToLower() && !c.myPlayer.Invisible)
                             {
-                                sendToUser("You " + tellWord(text) + c.myPlayer.UserName + " \"" + wibbleText(text, false) + "{reset}\"", true, false);
-                                sendToUser(">>" + myPlayer.ColourUserName + " " + tellWord(text, false) + "\"" + wibbleText(text, false) + "{reset}\"", c.myPlayer.UserName, true, c.myPlayer.DoColour, false, true);
-                                found = true;
+                                if (c.myPlayer.InMailEditor)
+                                    sendToUser(c.myPlayer.ColourUserName + " is editing at the moment and can't be disturbed", true, false, false);
+                                else
+                                {
+                                    sendToUser("You " + tellWord(text) + c.myPlayer.UserName + " \"" + wibbleText(text, false) + "{reset}\"", true, false);
+                                    sendToUser(">>" + myPlayer.ColourUserName + " " + tellWord(text, false) + "\"" + wibbleText(text, false) + "{reset}\"", c.myPlayer.UserName, true, c.myPlayer.DoColour, false, true);
+                                    found = true;
+                                }
                             }
                         }
                         if (found == false)
@@ -1186,12 +1216,16 @@ namespace MudServer
                         {
                             if (c.myPlayer != null && c.myPlayer.UserName == matches[0] && !c.myPlayer.Invisible)
                             {
-                                if (!text.StartsWith("'"))
-                                    text = " " + text;
+                                if (c.myPlayer.InMailEditor)
+                                    sendToUser(c.myPlayer.ColourUserName + " is editing at the moment and can't be disturbed", true, false, false);
+                                else
+                                {
+                                    if (!text.StartsWith("'"))
+                                        text = " " + text;
 
-                                sendToUser("You emote \"" + myPlayer.ColourUserName + wibbleText(text, true) + "{reset}\" to " + c.myPlayer.ColourUserName, true, false, true);
-                                sendToUser(">>" + myPlayer.ColourUserName + "{bold}{yellow}" + wibbleText(text, true) + "{reset}", matches[0], true, c.myPlayer.DoColour, false, true);
-                                
+                                    sendToUser("You emote \"" + myPlayer.ColourUserName + wibbleText(text, true) + "{reset}\" to " + c.myPlayer.ColourUserName, true, false, true);
+                                    sendToUser(">>" + myPlayer.ColourUserName + "{bold}{yellow}" + wibbleText(text, true) + "{reset}", matches[0], true, c.myPlayer.DoColour, false, true);
+                                }
                                 found = true;
                             }
                         }
@@ -1231,11 +1265,16 @@ namespace MudServer
                         {
                             if (c.myPlayer != null && c.myPlayer.UserName == matches[0] && !c.myPlayer.Invisible)
                             {
-                                if (!text.StartsWith("'"))
-                                    text = " " + text;
+                                if (c.myPlayer.InMailEditor)
+                                    sendToUser(c.myPlayer.ColourUserName + " is editing at the moment and can't be disturbed", true, false, false);
+                                else
+                                {
+                                    if (!text.StartsWith("'"))
+                                        text = " " + text;
 
-                                sendToUser("You sing o/~ " + wibbleText(text, true) + " {reset}o/~ to " + c.myPlayer.ColourUserName, true, false);
-                                sendToUser(">>" + myPlayer.ColourUserName + " sings o/~" + wibbleText(text, true) + " {reset}o/~ to you", matches[0], true, c.myPlayer.DoColour, false, true);
+                                    sendToUser("You sing o/~ " + wibbleText(text, true) + " {reset}o/~ to " + c.myPlayer.ColourUserName, true, false);
+                                    sendToUser(">>" + myPlayer.ColourUserName + " sings o/~" + wibbleText(text, true) + " {reset}o/~ to you", matches[0], true, c.myPlayer.DoColour, false, true);
+                                }
                                 
                                 found = true;
                             }
@@ -1264,13 +1303,16 @@ namespace MudServer
             {
                 foreach (Connection c in connections)
                 {
-                    if (myPlayer.PlayerRank >= (int)Player.Rank.Admin || !c.myPlayer.SeeEcho)
+                    if (!c.myPlayer.InMailEditor)
                     {
-                        sendToUser(wibbleText(message, false), c.myPlayer.UserName, true, c.myPlayer.DoColour, c.myPlayer.UserName == myPlayer.UserName ? false : true, true);
-                    }
-                    else
-                    {
-                        sendToUser("{bold}{yellow}[" + myPlayer.UserName + "]{reset} " + wibbleText(message, false), c.myPlayer.UserName, true, c.myPlayer.DoColour, c.myPlayer.UserName == myPlayer.UserName ? false : true, true);
+                        if (myPlayer.PlayerRank >= (int)Player.Rank.Admin || !c.myPlayer.SeeEcho)
+                        {
+                            sendToUser(wibbleText(message, false), c.myPlayer.UserName, true, c.myPlayer.DoColour, c.myPlayer.UserName == myPlayer.UserName ? false : true, true);
+                        }
+                        else
+                        {
+                            sendToUser("{bold}{yellow}[" + myPlayer.UserName + "]{reset} " + wibbleText(message, false), c.myPlayer.UserName, true, c.myPlayer.DoColour, c.myPlayer.UserName == myPlayer.UserName ? false : true, true);
+                        }
                     }
                 }
             }
@@ -1293,7 +1335,7 @@ namespace MudServer
                     {
                         if (c.myPlayer != null && c.myPlayer.UserName != myPlayer.UserName)
                         {
-                            if (c.myPlayer.HearShouts)
+                            if (c.myPlayer.HearShouts && !c.myPlayer.InMailEditor)
                                 sendToUser(myPlayer.ColourUserName + " shouts \"" + wibbleText(message, false) + "{reset}\"", c.myPlayer.UserName);
                         }
                     }
@@ -2755,6 +2797,28 @@ namespace MudServer
                     Player.RemovePlayerFile(target[0]);
                     rename.UserName = split[1];
                     rename.SavePlayer();
+
+                    // Iterate through and change To and From as required in messages
+                    messages = loadMessages();
+                    for(int i = 0; i < messages.Count; i++)
+                    {
+                        if (messages[i].To == target[0])
+                        {
+                            message temp = messages[i];
+                            temp.To = split[1];
+                            messages[i] = temp;
+                        }
+                        else if (messages[i].From == target[0])
+                        {
+                            message temp = messages[i];
+                            temp.From = split[1];
+                            messages[i] = temp;
+                        }
+                    }
+                    saveMessages();
+
+
+
                     if (isOnline(target[0]))
                     {
                         foreach (Connection c in connections)
@@ -2762,15 +2826,12 @@ namespace MudServer
                             if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
                             {
                                 // Set rank temporarially to 0 to prevent the Player class destructor saving the old file
-                                int tempRank = c.myPlayer.PlayerRank;
-                                c.myPlayer.PlayerRank = 0;
                                 c.myPlayer = rename;
-                                c.myPlayer.PlayerRank = tempRank;
                             }
                         }
                     }
                     sendToUser("You rename \"" + target[0] + "\" to \"" + split[1] + "\"", true, false, false);
-                    logToFile(myPlayer.UserName + "renames \"" + target[0] + "\" to \"" + split[1] + "\"", "admin");
+                    logToFile(myPlayer.UserName + " renames \"" + target[0] + "\" to \"" + split[1] + "\"", "admin");
                 }
             }
         }
@@ -2919,6 +2980,418 @@ namespace MudServer
 
         #endregion
 
+        #region Messaging System
+
+        public void cmdMessage(string message)
+        {
+            messages = loadMessages();
+
+            if (message == "" || message.IndexOf(" ") == -1)
+                sendToUser("Syntax: message <player" + (myPlayer.PlayerRank >= (int)Player.Rank.Admin ? "/all/allstaff/admin/staff/guide" : "") + "> <message>");
+            else
+            {
+                string[] split = message.Split(new char[] { ' ' }, 2);
+                string[] target = matchPartial(split[0]);
+
+                if (target.Length == 0 && myPlayer.PlayerRank < (int)Player.Rank.Admin)
+                    sendToUser("No such user \"" + split[0] + "\"", true, false, false);
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (target.Length == 1 &&(target[0].ToLower() == myPlayer.UserName.ToLower()))
+                    sendToUser("Sending a message to yourself, eh?", true, false, false);
+                else if (target.Length == 1 && isOnline(target[0]))
+                    sendToUser(target[0] + " is online at the moment", true, false, false);
+                else
+                {
+                    List<Player> recipients = new List<Player>();
+                    switch (split[0].ToLower())
+                    {
+                        case "all":
+                            recipients = getPlayers(false, false, false, false);
+                            break;
+                        case "allstaff":
+                            recipients = getPlayers(true, false, false, false);
+                            break;
+                        case "guide":
+                            recipients = getPlayers((int)Player.Rank.Guide, true);
+                            break;
+                        case "staff":
+                            recipients = getPlayers((int)Player.Rank.Staff, true);
+                            break;
+                        case "admin":
+                            recipients = getPlayers((int)Player.Rank.Admin, false);
+                            break;
+                        default:
+                            if (target.Length == 0)
+                            {
+                                recipients = null;
+                                sendToUser("No such user \"" + split[0] + "\"", true, false, false);
+                            }
+                            else
+                                recipients.Add(Player.LoadPlayer(target[0],0));
+                            break;
+                    }
+
+                    if (recipients != null)
+                    {
+                        foreach (Player to in recipients)
+                        {
+                            message m = new message();
+                            m.To = to.UserName;
+                            m.From = myPlayer.UserName;
+                            m.Date = DateTime.Now;
+                            m.Body = split[1];
+                            m.Deleted = false;
+                            m.Read = false;
+                            m.Warning = false;
+                            messages.Add(m);
+                            saveMessages();
+                        }
+                        sendToUser("Message saved for " + split[0], true, false, false);
+                    }
+                }
+            }
+        }
+
+        public void listMessages()
+        {
+            string mList = "";
+
+            foreach (message m in messages)
+            {
+                if (m.To == myPlayer.UserName && !m.Warning && !m.Deleted)
+                    mList += "{bold}{blue}   From:{reset} " + m.From + "\r\n{bold}{blue}   Date:{reset} " + m.Date.ToShortDateString() + "\r\n{bold}{blue} Status:{reset} " + (m.Read ? "Read" : "{bold}New{reset}") + "\r\n{bold}{blue}Message:{reset} " + m.Body + "\r\n\r\n";
+            }
+            if (mList != "")
+                sendToUser("{bold}{cyan}---[{red}Messages{cyan}]".PadRight(103, ' ') + "{reset}\r\n" + mList + "{bold}{cyan}".PadRight(96, ' '), true, false, false);
+        }
+
+        public void saveMessages()
+        {
+            try
+            {
+                string path = @"messages" + Path.DirectorySeparatorChar;
+                string fname = "messages.xml";
+                string fpath = path + fname;
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+
+                XmlSerializer serial = new XmlSerializer(typeof(List<message>));
+                TextWriter textWriter = new StreamWriter(@fpath.ToLower());
+                serial.Serialize(textWriter, messages);
+                textWriter.Close();
+            }
+            catch (Exception ex)
+            {
+                Connection.logError(ex.ToString(), "filesystem");
+            }
+        }
+
+        public List<message> loadMessages()
+        {
+            List<message> load = new List<message>();
+            string path = @"messages" + Path.DirectorySeparatorChar;
+            string fname = "messages.xml";
+            string fpath = path + fname;
+
+            if (Directory.Exists(path) && File.Exists(fpath))
+            {
+                try
+                {
+                    XmlSerializer deserial = new XmlSerializer(typeof(List<message>));
+                    TextReader textReader = new StreamReader(@fpath);
+                    load = (List<message>)deserial.Deserialize(textReader);
+                    textReader.Close();
+                }
+                catch (Exception e)
+                {
+                    Debug.Print(e.ToString());
+                }
+            }
+            return load;
+        }
+
+        #endregion
+
+        #region Mail System
+
+        public void cmdMail(string message)
+        {
+            mail = loadMails();
+            // Monster mailing system
+            if (message == "")
+                sendToUser("Syntax: mail <list/read/send/reply/del>");
+            else
+            {
+                string action = (message.IndexOf(" ") > -1 ? (message.Split(new char[] {' '},2))[0] : message);
+                int mailID = 0;
+                try
+                {
+                    mailID = (message.IndexOf(" ") > -1 ? Convert.ToInt32((message.Split(new char[] { ' ' }, 2)[1])) : 0);
+                }
+                catch(Exception ex)
+                {
+                    Debug.Print(ex.ToString());
+                }
+
+                string body = (message.IndexOf(" ") > -1 ? message.Split(new char[] {' '},2)[1] : "");
+
+                switch (action.ToLower())
+                {
+                    case "list":
+                        listMail();
+                        break;
+                    case "read":
+                        if (mailID == 0)
+                            sendToUser("Syntax: mail read <mail id>", true, false, false);
+                        else
+                            showMail(mailID);
+                        break;
+                    case "send":
+                        if (body == "" || body.IndexOf(" ") == -1)
+                            sendToUser("Syntax: mail send <player> <subject>");
+                        else
+                        {
+                            string[] split = body.Split(new char[] { ' ' }, 2);
+                            string[] target = matchPartial(split[0]);
+                            if (target.Length == 0)
+                                sendToUser("No such player \"" + split[0] + "\"", true, false, false);
+                            else if (target.Length > 1)
+                                sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                            else if (target.Length == 1 && (target[0].ToLower() == myPlayer.UserName.ToLower()))
+                                sendToUser("Sending a message to yourself, eh?", true, false, false);
+                            else
+                            {
+                                myPlayer.InMailEditor = true;
+                                sendToUser("Now entering mail editor. Type \".help\" for a list of editor commands", true, false, false);
+                                editMail = new message();
+                                editMail.From = myPlayer.UserName;
+                                editMail.To = target[0];
+                                editMail.Subject = split[1];
+                                editMail.Date = DateTime.Now;
+                                editMail.Read = false;
+                            }
+                        }
+                        break;
+                    case "reply":
+                        if (mailID == 0)
+                            sendToUser("Syntax: mail reply <mail id>", true, false, false);
+                        else
+                        {
+                            int count = 0;
+                            bool found = false;
+                            foreach (message m in mail)
+                            {
+                                if (m.To == myPlayer.UserName && m.Deleted == false)
+                                {
+                                    if (++count == mailID)
+                                    {
+                                        found = true;
+                                        myPlayer.InMailEditor = true;
+                                        sendToUser("Now entering mail editor. Type \".help\" for a list of editor commands", true, false, false);
+                                        editMail = new message();
+                                        editMail.From = myPlayer.UserName;
+                                        editMail.To = m.From;
+                                        editMail.Subject = (m.Subject.ToLower().IndexOf("re:") == -1 ? "Re: " : "") + m.Subject;
+                                        editMail.Date = DateTime.Now;
+                                        editMail.Read = false;
+                                    }
+                                }
+                            }
+                            if (!found)
+                                sendToUser("No such mail ID \"" + mailID.ToString() + "\"", true, false, false);
+                        }
+                        break;
+                    case "del":
+                        if (mailID == 0)
+                            sendToUser("Syntax: mail del <mail id>", true, false, false);
+                        else
+                        {
+                            int count = 0;
+                            bool found = false;
+                            for (int i = 0; i < mail.Count; i++)
+                            {
+                                message m = mail[i];
+                                if (m.To == myPlayer.UserName && m.Deleted == false)
+                                {
+                                    if (++count == mailID)
+                                    {
+                                        found = true;
+                                        m.Deleted = true;
+                                        mail[i] = m;
+                                        sendToUser("Mail ID \"" + mailID + "\" deleted", true, false, false);
+                                        saveMails();
+                                    }
+                                }
+                            }
+                            if (!found)
+                                sendToUser("No such mail ID \"" + mailID.ToString() + "\"", true, false, false);
+                        }
+                        break;
+                    default:
+                        sendToUser("Syntax: mail <list/read/send/reply/del>");
+                        break;
+
+                }
+            }
+        }
+
+        public void listMail()
+        {
+            string output = "";
+            int count = 1;
+            foreach (message m in mail)
+            {
+                if (m.To == myPlayer.UserName && !m.Deleted)
+                {
+                    output += " " + (m.Read ? " " : "{bold}{red}*{white}") + " " + count++.ToString() + "{reset}".PadRight(13, ' ') + m.From.PadRight(16, ' ') + m.Subject + "\r\n";
+                }
+            }
+            if (output == "")
+                output = "No messages\r\n";
+            sendToUser("{bold}{cyan}-[{red} ID {cyan}]--[{red}From{cyan}]----------[{red}Subject{cyan}]" + "{reset}".PadLeft(53, '-') + "\r\n" + output + "{bold}{cyan}".PadRight(92, '-') + "{reset}", true, false, false);
+        }
+
+
+
+        public void showMail(int mailPlace)
+        {
+            int count = 0;
+            bool found = false;
+
+            for (int i = 0; i < mail.Count; i++)
+            {
+                if (mail[i].To == myPlayer.UserName && mail[i].Deleted == false)
+                {
+                    if (++count == mailPlace)
+                    {
+                        found = true;
+                        string output = ("{bold}{cyan}---[{red}Mail: " + mailPlace.ToString() + "{cyan}]").PadRight(103, '-') + "\r\n";
+                        message m = mail[i];
+                        if (!m.Read)
+                            m.Read = true;
+
+                        output += "{bold}{blue}   From: {reset}" + m.From + "\r\n";
+                        output += "{bold}{blue}     To: {reset}" + m.To + "\r\n";
+                        output += "{bold}{blue}Subject: {reset}" + m.Subject + "\r\n";
+                        output += "{bold}{blue}   Date: {reset}" + m.Date.ToShortDateString() + " " + m.Date.ToShortTimeString() + "\r\n";
+                        output += "{bold}{cyan}".PadRight(92, '-') + "{reset}\r\n";
+                        output += "{bold}{blue}Message:{reset}\r\n" + m.Body + "\r\n";
+                        output += "{bold}{cyan}".PadRight(92, '-') + "{reset}\r\n";
+                        sendToUser(output);
+                        mail[i] = m;
+                        saveMails();
+                    }
+                }
+            }
+
+            if (!found)
+                sendToUser("No such mail ID \"" + mailPlace.ToString() + "\"", true, false, false);
+
+        }
+
+        public void mailEdit(string message)
+        {
+            if (message.StartsWith("."))
+            {
+                switch (message)
+                {
+                    case ".end":
+                    case ".":
+                        myPlayer.InMailEditor = false;
+                        mail.Add(editMail);
+                        if (isOnline(editMail.To))
+                        {
+                            sendToUser("{bold}{yellow}{bell}YYou have just received a new mail from " + myPlayer.ColourUserName, editMail.To, true, false, true, false);
+                        }
+                        sendToUser("Mail sent to " + editMail.To, true, false, false);
+                        editMail = new message();
+                        saveMails();
+                        break;
+                    case ".wipe":
+                        editMail.Body = "";
+                        break;
+                    case ".view":
+                        sendToUser(editMail.Body, true, false, false);
+                        break;
+                    case ".quit":
+                        editMail = new message();
+                        myPlayer.InMailEditor = false;
+                        sendToUser("Mail aborted", true, false, false);
+                        break;
+                    default:
+                        sendToUser("Commands available:\r\n.view - show current meesage content\r\n.wipe - wipe current message content\r\n.quit - exit the editor without saving message\r\n.end - exit the editor and send message", true, false, false);
+                        break;
+                }
+            }
+            else
+            {
+                editMail.Body += message + "\r\n";
+            }
+            doPrompt();
+        }
+
+        public void saveMails()
+        {
+            try
+            {
+                string path = @"mail" + Path.DirectorySeparatorChar;
+                string fname = "mail.xml";
+                string fpath = path + fname;
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+
+                XmlSerializer serial = new XmlSerializer(typeof(List<message>));
+                TextWriter textWriter = new StreamWriter(@fpath.ToLower());
+                serial.Serialize(textWriter, mail);
+                textWriter.Close();
+            }
+            catch (Exception ex)
+            {
+                Connection.logError(ex.ToString(), "filesystem");
+            }
+        }
+
+        public List<message> loadMails()
+        {
+            List<message> load = new List<message>();
+            string path = @"mail" + Path.DirectorySeparatorChar;
+            string fname = "mail.xml";
+            string fpath = path + fname;
+
+            if (Directory.Exists(path) && File.Exists(fpath))
+            {
+                try
+                {
+                    XmlSerializer deserial = new XmlSerializer(typeof(List<message>));
+                    TextReader textReader = new StreamReader(@fpath);
+                    load = (List<message>)deserial.Deserialize(textReader);
+                    textReader.Close();
+                }
+                catch (Exception e)
+                {
+                    Debug.Print(e.ToString());
+                }
+            }
+            return load;
+        }
+
+        public void checkMail()
+        {
+            mail = loadMails();
+            int count = 0;
+            foreach (message m in mail)
+            {
+                if (m.To == myPlayer.UserName && m.Read == false)
+                    count++;
+            }
+
+            if (count > 0)
+                sendToUser("{bold}{yellow}{bell}YYou have " + count.ToString() + " unread mail" + (count > 1 ? "s" : ""), true, false, false);
+        }
+
+        #endregion
+
         #region Warnings and Slaps
 
         public void cmdSlap(string message)
@@ -3039,9 +3512,28 @@ namespace MudServer
                 FileInfo[] fi = dir.GetFiles();
                 foreach (FileInfo file in fi)
                 {
-                    //sendToUser(file.Name.Replace(".xml", ""));
                     Player load = Player.LoadPlayer(file.Name.Replace(".xml",""),0);
                     if (load != null && ((staffOnly && load.PlayerRank >= (int)Player.Rank.Guide) || (builderOnly && load.SpecialPrivs.builder) || (testerOnly && load.SpecialPrivs.tester) || (gitsOnly && load.Git)) || (!staffOnly && !builderOnly && !testerOnly && !gitsOnly))
+                        list.Add(load);
+                }
+            }
+            return list;
+        }
+
+        private List<Player> getPlayers(int rank, bool singleRankOnly)
+        {
+            List<Player> list = new List<Player>();
+            string path = (@"players" + Path.DirectorySeparatorChar);
+            DirectoryInfo di = new DirectoryInfo(path);
+            DirectoryInfo[] subs = di.GetDirectories();
+            foreach (DirectoryInfo dir in subs)
+            {
+                FileInfo[] fi = dir.GetFiles();
+                foreach (FileInfo file in fi)
+                {
+                    Player load = Player.LoadPlayer(file.Name.Replace(".xml", ""), 0);
+
+                    if (load != null && (load.PlayerRank == rank || (load.PlayerRank > rank && !singleRankOnly)))
                         list.Add(load);
                 }
             }
@@ -3898,14 +4390,14 @@ namespace MudServer
         private void doPrompt(string user)
         {
             if (user == myPlayer.UserName)
-                sendToUser(myPlayer.Prompt.Replace("%t", DateTime.Now.ToShortTimeString()).Replace("%d", DateTime.Now.ToShortDateString()), false, false, false);
+                sendToUser(myPlayer.InMailEditor ? "> " : myPlayer.Prompt.Replace("%t", DateTime.Now.ToShortTimeString()).Replace("%d", DateTime.Now.ToShortDateString()), false, false, false);
             else
             {
                 foreach (Connection c in connections)
                 {
                     if (c.myPlayer.UserName == user)
                     {
-                        sendToUser(c.myPlayer.Prompt.Replace("%t", DateTime.Now.ToShortTimeString()).Replace("%d", DateTime.Now.ToShortDateString()), c.myPlayer.UserName, false, c.myPlayer.DoColour, false, false);
+                        sendToUser(c.myPlayer.InMailEditor ? "> " :  c.myPlayer.Prompt.Replace("%t", DateTime.Now.ToShortTimeString()).Replace("%d", DateTime.Now.ToShortDateString()), c.myPlayer.UserName, false, c.myPlayer.DoColour, false, false);
                     }
                 }
             }

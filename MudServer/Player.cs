@@ -30,8 +30,8 @@ namespace MudServer
 
         public struct friend
         {
-            static string friendName;
-            static bool friendNotify;
+            static string   friendName;
+            static bool     friendNotify;
         }
 
         #region attributes
@@ -125,6 +125,8 @@ namespace MudServer
         #endregion
 
         private friend[]    friends = new friend[50];                       // Friends list
+
+        private bool        inMailEditor = false;                           // Are they in the editor?
 
         #endregion
 
@@ -515,6 +517,12 @@ namespace MudServer
         {
             get { return clubChanMute; }
             set { clubChanMute = value; }
+        }
+
+        public bool InMailEditor
+        {
+            get { return inMailEditor; }
+            set { inMailEditor = value; }
         }
 
         #endregion
