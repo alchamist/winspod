@@ -28,12 +28,6 @@ namespace MudServer
             public bool noidle;
         }
 
-        public struct friend
-        {
-            static string   friendName;
-            static bool     friendNotify;
-        }
-
         #region attributes
 
         private string      username;                                       // Players username
@@ -125,9 +119,13 @@ namespace MudServer
 
         #endregion
 
-        private friend[]    friends = new friend[50];                       // Friends list
-
         private bool        inMailEditor = false;                           // Are they in the editor?
+
+        private bool        informAll;                                      // Do they want to be notified when anyone logs on/off?
+        private bool        informFriends;                                  // Are they being informed of everyone?
+
+        public List<string> friends = new List<string>();                   // Friends list - set to public so can be manipulated
+        public List<string> informList = new List<string>();                // Inform list - set to public so can be manipulated
 
         #endregion
 
@@ -526,6 +524,18 @@ namespace MudServer
             set { clubChanMute = value; }
         }
 
+        public bool InformAll
+        {
+            get { return informAll; }
+            set { informAll = value; }
+        }
+
+        public bool InformFriends
+        {
+            get { return informFriends; }
+            set { informFriends = value; }
+        }
+
         public bool InMailEditor
         {
             get { return inMailEditor; }
@@ -687,6 +697,11 @@ namespace MudServer
         public bool onStaffChannel(Rank r)
         {
             return onDuty && ((r == Rank.Guide && guideChan) || (r == Rank.Staff && staffChan) || (r == Rank.Admin && adminChan) || (r == Rank.HCAdmin && hcAdminChan));
+        }
+
+        public bool InformFor(string username)
+        {
+            return (informAll || (informFriends && friends.IndexOf(username) > -1));
         }
 
         #endregion
