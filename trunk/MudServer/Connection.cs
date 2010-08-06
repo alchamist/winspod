@@ -1684,6 +1684,7 @@ namespace MudServer
 
                     output += "{bold}{yellow}Gender {reset}".PadRight(50, ' ') + ": {yellow}" + (gender)ex.Gender + "{reset}\r\n";
                     output += "{bold}{yellow}Rank {reset}".PadRight(50, ' ') + ": " + ex.GetRankColour() + rankName(ex.PlayerRank) + "{reset}\r\n";
+                    output += "{bold}{yellow}Blocking Shouts {reset}".PadRight(50, ' ') + ": {yellow}" + (ex.HearShouts ? "No" : "Yes") + "{reset}\r\n";
 
                     if (ex.PlayerRank >= (int)Player.Rank.Staff)
                         output += "{bold}{yellow}Has ressed{reset}".PadRight(50, ' ') + ": {yellow}" + ex.ResCount.ToString() + " player" + (ex.ResCount == 1 ? "" : "s") + "{reset}\r\n";
@@ -1699,6 +1700,9 @@ namespace MudServer
                     }
 
                     output += "{bold}{yellow}On Channels {reset}".PadRight(50, ' ') + ": {yellow}" + getChannels(ex.UserName) + "{reset}\r\n";
+                    if (ex.InformTag != "")
+                        output += "{bold}{yellow}Inform Tag {reset}".PadRight(50, ' ') + ": {yellow}[" + ex.InformTag + "{reset}{yellow}]{reset}\r\n";
+
                     if (myPlayer.PlayerRank >= (int)Player.Rank.Staff)
                     {
                         output += "{bold}{red}Kicked {reset}".PadRight(47, ' ') + ": {red}" + ex.KickedCount.ToString() + "{reset}\r\n";
@@ -2970,6 +2974,48 @@ namespace MudServer
                     }
                     sendToUser("You rename \"" + target[0] + "\" to \"" + split[1] + "\"", true, false, false);
                     logToFile(myPlayer.UserName + " renames \"" + target[0] + "\" to \"" + split[1] + "\"", "admin");
+                }
+            }
+        }
+
+        public void cmdITag(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: itag <player> <inform tag>");
+            else
+            {
+                string[] target = (message.IndexOf(" ") > -1 ? matchPartial(message.Split(new char[] { ' ' }, 2)[0]) : matchPartial(message));
+                string tag = (message.IndexOf(" ") > -1 ? message.Split(new char[] { ' ' }, 2)[1] : "");
+
+                if (target.Length == 0)
+                    sendToUser("Player \"" + (message.IndexOf(" ") > -1 ? message.Split(new char[] { ' ' }, 2)[0] : message) + "\" not found", true, false, false);
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (!isOnline(target[0]))
+                    sendToUser("Player \"" + target[0] + "\" is not online at the moment", true, false, false);
+                else
+                {
+                    if (target[0] == myPlayer.UserName)
+                    {
+                        sendToUser(tag == "" ? "You remove your own inform tag" : "You set your inform tag to: " + tag, true, false, false);
+                        myPlayer.InformTag = tag;
+                        myPlayer.SavePlayer();
+                    }
+                    else
+                    {
+                        foreach (Connection c in connections)
+                        {
+                            if (c.myPlayer.UserName == target[0])
+                            {
+                                sendToUser(tag == "" ? "You remove " + c.myPlayer.UserName + "'s inform tag" : "You set " + c.myPlayer.UserName + "'s inform tag to: " + tag, true, false, false);
+                                if (!c.myPlayer.InMailEditor)
+                                    c.sendToUser("\r\n" + myPlayer.ColourUserName +  (tag == "" ? " has just removed your inform tag" : " has just set your inform tag to: " + tag), true, false, false);
+
+                                c.myPlayer.InformTag = tag;
+                                c.myPlayer.SavePlayer();
+                            }
+                        }
+                    }
                 }
             }
         }
