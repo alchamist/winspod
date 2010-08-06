@@ -1350,6 +1350,140 @@ namespace MudServer
             }
         }
 
+        public void cmdTellFriends(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: tf <message>", true, false, false);
+            else
+            {
+                int count = 0;
+                foreach (Connection c in connections)
+                {
+                    if (myPlayer.friends.IndexOf(c.myPlayer.UserName) != -1)
+                    {
+                        count++;
+                        if (!c.myPlayer.InMailEditor)
+                            c.sendToUser("\r\n{bold}{green}(To friends) " + myPlayer.UserName + " " + sayWord(message, false) + " \"" + message + "\"", true, true, true);
+                    }
+                }
+                if (count == 0)
+                    sendToUser("None of your friends are online right now");
+                else
+                    sendToUser("You " + sayWord(message, true) + " to your friends \"" + message + "\"", true, false, true);
+            }
+        }
+
+        public void cmdEmoteFriends(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: rf <message>", true, false, false);
+            else
+            {
+                int count = 0;
+                foreach (Connection c in connections)
+                {
+                    if (myPlayer.friends.IndexOf(c.myPlayer.UserName) != -1)
+                    {
+                        count++;
+                        if (!c.myPlayer.InMailEditor)
+                            c.sendToUser("\r\n{bold}{green}(To friends) " + myPlayer.UserName + (message.Substring(0,1) == "'" ? "" : " ") + message , true, true, true);
+                    }
+                }
+                if (count == 0)
+                    sendToUser("None of your friends are online right now");
+                else
+                    sendToUser("You emote to your friends: " + myPlayer.UserName + (message.Substring(0,1) == "'" ? "" : " ") + message, true, false, true);
+            }
+        }
+
+        public void cmdTellToFriends(string message)
+        {
+            if (message == "" || message.IndexOf(" ") == -1)
+                sendToUser("Syntax: ttf <player> <message>", true, false, false);
+            else
+            {
+                string[] split = message.Split(new char[] { ' ' }, 2);
+                string[] target = matchPartial(split[0]);
+                if (target.Length == 0)
+                    sendToUser("No such player \"" + message + "\"", true, false, false);
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (!isOnline(target[0]))
+                    sendToUser("Player \"" + target[0] + "\" is not online at the moment", true, false, false);
+                else if (target.Length == 1 && (target[0].ToLower() == myPlayer.UserName.ToLower()))
+                    cmdTellFriends(split[1]);
+                else
+                {
+                    Player temp = Player.LoadPlayer(target[0], 0);
+                    if (temp.friends.IndexOf(myPlayer.UserName) == -1)
+                        sendToUser("You are not on " + temp.UserName + "'s friends list", true, false, false);
+                    else
+                    {
+                        int count = 0;
+                        foreach (Connection c in connections)
+                        {
+                            if (c.myPlayer.UserName != myPlayer.UserName && (temp.friends.IndexOf(c.myPlayer.UserName) != -1 || c.myPlayer.UserName == temp.UserName))
+                            {
+                                count++;
+                                if (!c.myPlayer.InMailEditor)
+                                {
+                                    c.sendToUser("\r\n{bold}{green}(To " + (c.myPlayer.UserName == temp.UserName ? "your" : temp.UserName + "'s") + " friends) " + myPlayer.UserName + " " + sayWord(split[1], false) + " \"" + split[1] + "\"", true, true, true);
+                                }
+                            }
+                        }
+                        if (count == 0)
+                            sendToUser("None of " + temp.UserName + "'s friends can receive messages at the moment", true, false, false);
+                        else
+                            sendToUser("You " + sayWord(split[1], true) + " to " + temp.UserName + "'s friends \"" + split[1] + "\"", true, false, true);
+                    }
+                }
+            }
+        }
+
+        public void cmdEmoteToFriends(string message)
+        {
+            if (message == "" || message.IndexOf(" ") == -1)
+                sendToUser("Syntax: rtf <player> <message>", true, false, false);
+            else
+            {
+                string[] split = message.Split(new char[] { ' ' }, 2);
+                string[] target = matchPartial(split[0]);
+                if (target.Length == 0)
+                    sendToUser("No such player \"" + message + "\"", true, false, false);
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (!isOnline(target[0]))
+                    sendToUser("Player \"" + target[0] + "\" is not online at the moment", true, false, false);
+                else if (target.Length == 1 && (target[0].ToLower() == myPlayer.UserName.ToLower()))
+                    cmdTellFriends(split[1]);
+                else
+                {
+                    Player temp = Player.LoadPlayer(target[0], 0);
+                    if (temp.friends.IndexOf(myPlayer.UserName) == -1)
+                        sendToUser("You are not on " + temp.UserName + "'s friends list", true, false, false);
+                    else
+                    {
+                        int count = 0;
+                        foreach (Connection c in connections)
+                        {
+                            if (c.myPlayer.UserName != myPlayer.UserName && (temp.friends.IndexOf(c.myPlayer.UserName) != -1 || c.myPlayer.UserName == temp.UserName))
+                            {
+                                count++;
+                                if (!c.myPlayer.InMailEditor)
+                                {
+                                    c.sendToUser("\r\n{bold}{green}(To " + (c.myPlayer.UserName == temp.UserName ? "your" : temp.UserName + "'s") + " friends) " + myPlayer.UserName + (split[1].Substring(0, 1) == "'" ? "" : " ") + split[1], true, true, true);
+                                }
+                            }
+                        }
+                        if (count == 0)
+                            sendToUser("None of " + temp.UserName + "'s friends can receive messages at the moment", true, false, false);
+                        else
+                            sendToUser("You emote to " + temp.UserName + "'s friends: " + myPlayer.UserName + (split[1].Substring(0,1)=="'" ? "" : " ") + split[1], true, false, true);
+                    }
+                }
+            }
+        }
+
         #endregion
 
         public void cmdListCommands(string message)
@@ -2840,6 +2974,59 @@ namespace MudServer
             }
         }
 
+        #region Friends stuff
+
+        public void cmdFriend(string message)
+        {
+            if (message == "")
+            {
+                string output = "";
+                if (myPlayer.friends.Count == 0)
+                {
+                    output = "You have no friends";
+                }
+                else
+                {
+                    int tabcount = 1;
+                    foreach (string friend in myPlayer.friends)
+                    {
+                        output += ((tabcount++ +1)% 4 == 0 ? "\r\n" : "") + friend.PadRight(20, ' ');
+                    }
+                }
+                sendToUser("{bold}{cyan}---[{red}Friends{cyan}]".PadRight(103, '-') + "{reset}\r\n" + output + "\r\n{bold}{cyan}".PadRight(94, '-'), true, false, false);
+            }
+            else
+            {
+                string[] target = matchPartial(message);
+                if (target.Length == 0)
+                    sendToUser("No such player \"" + message + "\"", true, false, false);
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (target.Length == 1 && (target[0].ToLower() == myPlayer.UserName.ToLower()))
+                    sendToUser("You can't add yourself to your own friends list!", true, false, false);
+                else
+                {
+                    if (myPlayer.friends.IndexOf(target[0]) == -1)
+                    {
+                        // Not already in friends list
+                        myPlayer.friends.Add(target[0]);
+                        sendToUser(target[0] + " added to your friends list", true, false, false);
+                        if (isOnline(target[0]))
+                            sendToUser(myPlayer.UserName + " has made you " + getGender("poss") + " friend", target[0], true, false, true, false);
+                        myPlayer.SavePlayer();
+                    }
+                    else
+                    {
+                        myPlayer.friends.Remove(target[0]);
+                        sendToUser(target[0] + " removed from your friends list", true, false, false);
+                        myPlayer.SavePlayer();
+                    }
+                }
+            }
+        }
+
+        #endregion
+
         #region Room Stuff
 
         public void cmdWhere(string message)
@@ -3255,8 +3442,6 @@ namespace MudServer
                 output = "No messages\r\n";
             sendToUser("{bold}{cyan}-[{red} ID {cyan}]--[{red}From{cyan}]----------[{red}Subject{cyan}]" + "{reset}".PadLeft(53, '-') + "\r\n" + output + "{bold}{cyan}".PadRight(92, '-') + "{reset}", true, false, false);
         }
-
-
 
         public void showMail(int mailPlace)
         {
@@ -4543,6 +4728,24 @@ namespace MudServer
                 default:
                     return "Newbie";
             }
+        }
+
+        private string getGender(string type)
+        {
+            string ret;
+            switch (type)
+            {
+                case "self":
+                    ret = (myPlayer.Gender == 0 ? "itself" : (myPlayer.Gender == 1 ? "himself" : "herself"));
+                    break;
+                case "poss":
+                    ret = (myPlayer.Gender == 0 ? "its" : (myPlayer.Gender == 1 ? "his" : "her"));
+                    break;
+                default:
+                    ret = (myPlayer.Gender == 0 ? "it" : (myPlayer.Gender == 1 ? "he" : "she"));
+                    break;
+            }
+            return ret;
         }
 
         private static bool IsDate(Object obj)
