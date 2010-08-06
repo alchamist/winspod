@@ -60,6 +60,7 @@ namespace MudServer
         private string      enterMessage = "walks into the room";           // Enter message for when they enter a room
         private string      exitMessage = "wanders off into the distance";  // Exit message for when they leave a room
         private string      informTag = "";                                 // Settable inform tag to send to through notify system
+        private string      logonScript = "";                               // Logon script
 
         #endregion
 
@@ -541,6 +542,12 @@ namespace MudServer
         {
             get { return informTag; }
             set { informTag = value; }
+        }
+
+        public string LogonScript
+        {
+            get { return logonScript; }
+            set { logonScript = value; }
         }
 
         public bool InMailEditor

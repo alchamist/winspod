@@ -535,6 +535,8 @@ namespace MudServer
                             doWarnings();
 
                             myState = 10;
+                            doLAlias();
+
                             sendToRoom(myPlayer.UserName + " " + myPlayer.EnterMsg, "", myPlayer.UserRoom, myPlayer.UserName);
                             myPlayer.LoginCount++;
                             myPlayer.SavePlayer();
@@ -3078,6 +3080,95 @@ namespace MudServer
                 }
             }
         }
+
+        public void cmdLogonScript(string message)
+        {
+            if (message == "" && myPlayer.LogonScript == "")
+                sendToUser("Syntax: logonscript <command(s);>", true, false, false);
+            else if (message == "")
+            {
+                sendToUser("You remove your logon script", true, false, false);
+                myPlayer.LogonScript = "";
+                myPlayer.SavePlayer();
+            }
+            else
+            {
+                sendToUser("Logon script set", true, false, false);
+                myPlayer.LogonScript = message;
+                myPlayer.SavePlayer();
+            }
+        }
+
+        #region Alias stuff
+
+        public string aliasText(string preText)
+        {
+            return aliasText(preText, "");
+        }
+
+        public string aliasText(string preText, string stack)
+        {
+            // preText = the original command text, stack is the optional text supplied to the alias command
+            // for each %1 in preText, take a word off the front of stack and replace
+            // for each %0, dump in the remaining stack
+            // Randoms are presented between curly braces, seperated by a pipe - eg {1|2|3|4}
+
+            // First, see if there are any %1's in there
+            while (preText.IndexOf("%1") > -1)
+            {
+                if (stack.Length == 0)
+                {
+                    // If there's no stack, there's nothing to replace it with!
+                    preText = preText.Replace("%1", "");
+                }
+                else
+                {
+                    string[] split = stack.Split(new char[] { ' ' }, 2);
+                    preText = preText.Substring(0, preText.IndexOf("%1")) + split[0] + preText.Substring(preText.IndexOf("%1") + 2);
+                    if (split.Length == 1)
+                        stack = "";
+                    else
+                        stack = split[1];
+                }
+            }
+            // Next, see if there are any %0's
+            preText = preText.Replace("%0", stack);
+
+            // Now for the ticksy part ... sorting out if there are any randoms
+            while (preText.IndexOf("{") > -1 && preText.IndexOf("}") > preText.IndexOf("{"))
+            {
+                string toReplace = preText.Substring(preText.IndexOf("{"), (preText.IndexOf("}") - preText.IndexOf("{"))+1);
+                if (toReplace.IndexOf("|") == -1)
+                    preText = preText.Replace(toReplace, toReplace.Substring(1, toReplace.Length - 2));
+                else
+                {
+                    string[] options = toReplace.Substring(1, toReplace.Length - 2).Split(new char[] { '|' });
+                    preText = preText.Replace(toReplace, options[new Random().Next(options.Length)]);
+                }
+
+            }
+            return preText;
+        }
+
+        public void cmdAlias(string message)
+        {
+            sendToUser(aliasText("remote %1 %1 to you and says \"%0\" {} {apples|pears|oranges|banana|peach}", "alchamist waves good morning matey"));
+        }
+
+        public void doLAlias()
+        {
+            if (myPlayer.LogonScript != "")
+            {
+                string[] split = myPlayer.LogonScript.Split(new char[] { ';' });
+                foreach (string s in split)
+                {
+                    string cmd = aliasText(s);
+                    ProcessLine(cmd);
+                }
+            }
+        }
+
+        #endregion
 
         #region Friends stuff
 
