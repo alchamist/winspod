@@ -59,6 +59,7 @@ namespace MudServer
         private string      logoffMessage = "leaves for normality";         // The message the room gets when they log off
         private string      enterMessage = "walks into the room";           // Enter message for when they enter a room
         private string      exitMessage = "wanders off into the distance";  // Exit message for when they leave a room
+        private string      informTag = "";                                 // Settable inform tag to send to through notify system
 
         #endregion
 
@@ -534,6 +535,12 @@ namespace MudServer
         {
             get { return informFriends; }
             set { informFriends = value; }
+        }
+
+        public string InformTag
+        {
+            get { return informTag; }
+            set { informTag = value; }
         }
 
         public bool InMailEditor
