@@ -3020,6 +3020,65 @@ namespace MudServer
             }
         }
 
+        public void cmdRecap(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: recap " + (myPlayer.PlayerRank >= (int)Player.Rank.Admin ? "<player> " : "") + "<re-capped name>",true, false, false);
+            else
+            {
+                if (message.IndexOf(" ") == -1)
+                {
+                    // Are they trying to recap themselves?
+                    if (message.ToLower() != myPlayer.UserName.ToLower())
+                        sendToUser("Error: name does not match", true, false, false);
+                    else
+                    {
+                        myPlayer.UserName = message;
+                        myPlayer.SavePlayer();
+                        sendToUser("You recap yourself to " + myPlayer.UserName, true, false, false);
+                    }
+                }
+                else if (myPlayer.PlayerRank < (int)Player.Rank.Admin)
+                {
+                    sendToUser("Syntax: recap <re-capped name>", true, false, false);
+                }
+                else
+                {
+                    string[] split = message.Split(new char[] { ' ' }, 2);
+                    string[] target = matchPartial(split[0]);
+                    if (target.Length == 0)
+                        sendToUser("Player \"" + (message.IndexOf(" ") > -1 ? message.Split(new char[] { ' ' }, 2)[0] : message) + "\" not found", true, false, false);
+                    else if (target.Length > 1)
+                        sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                    else if (target[0].ToLower() != split[1].ToLower())
+                        sendToUser("Error: names do not match", true, false, false);
+                    else
+                    {
+                        if (!isOnline(target[0]))
+                        {
+                            Player temp = Player.LoadPlayer(target[0], 0);
+                            temp.UserName = split[1];
+                            temp.SavePlayer();
+                            sendToUser("You recap " + target[0] + " to " + temp.UserName, true, false, false);
+                        }
+                        else
+                        {
+                            foreach (Connection c in connections)
+                            {
+                                if (c.myPlayer.UserName == target[0])
+                                {
+                                    c.myPlayer.UserName = split[1];
+                                    c.myPlayer.SavePlayer();
+                                    sendToUser("You recap " + target[0] + " to " + c.myPlayer.UserName, true, false, false);
+                                    c.sendToUser("\r\nYou have been recapped to " + c.myPlayer.UserName + " by " + myPlayer.ColourUserName, true, true, false);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         #region Friends stuff
 
         public void cmdFriend(string message)
