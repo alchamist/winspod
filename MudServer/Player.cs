@@ -119,6 +119,7 @@ namespace MudServer
         private bool        wibbled;                                        // Has the user been wibbled?
         private string      wibbledBy;                                      // Who wibbled them
         private bool        isGit = false;                                  // Is the user a git?
+        private bool        isAutoGit = false;                              // Has the user been auto-gitted for too many warnings?
         private int         slapped;                                        // Number of times a player has been slapped
         private int         logons;                                         // Number of times they have logged on
 
@@ -505,6 +506,12 @@ namespace MudServer
         {
             get { return isGit; }
             set { isGit = value; }
+        }
+
+        public bool AutoGit
+        {
+            get { return isAutoGit; }
+            set { isAutoGit = value; }
         }
 
         public bool SeeEcho

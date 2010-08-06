@@ -531,7 +531,9 @@ namespace MudServer
                                 cmdCheckLogs("");
                             checkMail();
 
-                            sendToUser("\r\nLast login " + myPlayer.LastLogon.ToShortDateString() + " from " + myPlayer.LastIP + "\r\n", true, false, false);
+                            sendToUser("\r\nLast login " + myPlayer.LastLogon.ToShortDateString() + " from " + myPlayer.LastIP, true, false, false);
+                            doWarnings();
+
                             myState = 10;
                             sendToRoom(myPlayer.UserName + " " + myPlayer.EnterMsg, "", myPlayer.UserRoom, myPlayer.UserName);
                             myPlayer.LoginCount++;
@@ -1033,7 +1035,7 @@ namespace MudServer
                 string motd = AnsiColour.Colorise(loadTextFile(path + "motd.txt"));
                 string sumotd = AnsiColour.Colorise(loadTextFile(path + "sumotd.txt"));
                 motd = "{bold}{cyan}---[{red}Message of the Day{cyan}]".PadRight(103, '-') + "\r\n{reset}" + motd;
-                sumotd = "\r\n{bold}{cyan}---[{green}Staff Message of the Day{cyan}]".PadRight(103, '-') + "\r\n{reset}" + sumotd;
+                sumotd = "\r\n{bold}{cyan}---[{green}Staff Message of the Day{cyan}]".PadRight(107, '-') + "\r\n{reset}" + sumotd;
                 sendToUser(motd + (myPlayer.PlayerRank >= (int)Player.Rank.Guide ? sumotd : "") + "\r\n{bold}{cyan}" + "".PadRight(80, '-') + "{reset}\r\n", true, false, false);
             }
         }
@@ -1563,14 +1565,16 @@ namespace MudServer
                     }
 
                     output += "{bold}{yellow}On Channels {reset}".PadRight(50, ' ') + ": {yellow}" + getChannels(ex.UserName) + "{reset}\r\n";
-                    if (myPlayer.PlayerRank >= (int)Player.Rank.Staff || 1==1)
+                    if (myPlayer.PlayerRank >= (int)Player.Rank.Staff)
                     {
                         output += "{bold}{red}Kicked {reset}".PadRight(47, ' ') + ": {red}" + ex.KickedCount.ToString() + "{reset}\r\n";
                         output += "{bold}{red}Warned {reset}".PadRight(47, ' ') + ": {red}" + ex.WarnedCount.ToString() + "{reset}\r\n";
                         output += "{bold}{red}Idled {reset}".PadRight(47, ' ') + ": {red}" + ex.IdledCount.ToString() + "{reset}\r\n";
                         output += "{bold}{red}Slapped {reset}".PadRight(47, ' ') + ": {red}" + ex.SlappedCount.ToString() + "{reset}\r\n";
+                        output += "{bold}{red}Tags {reset}".PadRight(47, ' ') + ": {red}" + (ex.Git || ex.AutoGit ? (ex.Git ? "[GIT] " : "") + (ex.AutoGit ? "[AUTOGIT]" : "") : "None") + "{reset}\r\n";
                         if (ex.Wibbled)
                             output += "{bold}{red}Wibbled By {reset}".PadRight(47, ' ') + ": {red}" + ex.WibbledBy + "{reset}\r\n";
+                        
                     }
                     output += "{bold}{cyan}" + line + "{reset}";
 
@@ -3060,7 +3064,7 @@ namespace MudServer
             foreach (message m in messages)
             {
                 if (m.To == myPlayer.UserName && !m.Warning && !m.Deleted)
-                    mList += "{bold}{blue}   From:{reset} " + m.From + "\r\n{bold}{blue}   Date:{reset} " + m.Date.ToShortDateString() + "\r\n{bold}{blue} Status:{reset} " + (m.Read ? "Read" : "{bold}New{reset}") + "\r\n{bold}{blue}Message:{reset} " + m.Body + "\r\n\r\n";
+                    mList += "{bold}{blue}   From:{reset} " + m.From + "\r\n{bold}{blue}   Date:{reset} " + m.Date.ToShortDateString() + "\r\n{bold}{blue}Message:{reset} " + m.Body + "\r\n\r\n";
             }
             if (mList != "")
                 sendToUser("{bold}{cyan}---[{red}Messages{cyan}]".PadRight(103, ' ') + "{reset}\r\n" + mList + "{bold}{cyan}".PadRight(96, ' '), true, false, false);
@@ -3482,6 +3486,224 @@ namespace MudServer
             }
         }
 
+        public void cmdWarn(string message)
+        {
+            if (message == "" || (message.ToLower() == "list" && myPlayer.PlayerRank < (int)Player.Rank.Admin) || (message.ToLower() != "list" && message.IndexOf(" ") == -1))
+                sendToUser("Syntax: warn <player> <warning>");
+            else if (message.ToLower() == "list" && myPlayer.PlayerRank >= (int)Player.Rank.Admin)
+            {
+                string output = "";
+                int place = 1;
+                foreach (message m in messages)
+                {
+                    if (m.Warning && !m.Deleted)
+                    {
+                        output += "{bold}{red}[" + place++.ToString() + "]{blue} From:{reset} " + m.From + " {bold}{blue}To:{reset} " + m.To + "\r\n{bold}{red}Warning:{reset} " + m.Subject + "\r\n";
+                    }
+                }
+                output = "{bold}{cyan}---[{red}Warnings{cyan}]".PadRight(103, '-') + "{reset}\r\n" + (output == "" ? "No warnings" : output) + "\r\n{bold}{cyan}".PadRight(94, '-') + "{reset}";
+                sendToUser(output, true, false, false);
+            }
+            else
+            {
+                string[] split = message.Split(new char[] { ' ' }, 2);
+                string[] target = matchPartial(split[0]);
+
+                if (target.Length == 0)
+                    sendToUser("No such player \"" + split[0] + "\"", true, false, false);
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (target.Length == 1 && (target[0].ToLower() == myPlayer.UserName.ToLower()))
+                    sendToUser("Trying to warn yourself, eh?", true, false, false);
+                else
+                {
+                    bool autoGitted = false;
+                    if (isOnline(target[0]))
+                    {
+                        foreach (Connection c in connections)
+                        {
+                            if (c.myPlayer.UserName == target[0])
+                            {
+                                if (c.myPlayer.WarnedCount++ >= 5 && !c.myPlayer.AutoGit && c.myPlayer.PlayerRank < (int)Player.Rank.Admin)
+                                {
+                                    c.myPlayer.AutoGit = true;
+                                    autoGitted = true;
+                                }
+                                
+                                c.sendToUser("{bold}{red}[WARNING] (From: " + myPlayer.ColourUserName + "{bold}{red}) - " + split[1]);
+                                sendToStaff("[WARNING] " + myPlayer.UserName + " warns " + c.myPlayer.UserName + " " + split[1] + (autoGitted ? " [Auto Gitted]" : ""), (int)Player.Rank.Staff, true);
+                                logToFile("[WARNING] " + myPlayer.UserName + " warns " + c.myPlayer.UserName + " " + split[1] + (autoGitted ? " [Auto Gitted]" : ""), "warning");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Player temp = Player.LoadPlayer(target[0], 0);
+                        messages = loadMessages();
+
+                        if (temp.WarnedCount++ >= 5 && !temp.AutoGit && temp.PlayerRank < (int)Player.Rank.Admin)
+                        {
+                            temp.AutoGit = true;
+                            autoGitted = true;
+                        }
+                                
+                        sendToStaff("[WARNING] " + myPlayer.UserName + " warns " + temp.UserName + " " + split[1] + (autoGitted ? " [Auto Gitted]" : "") + " [Saved]", (int)Player.Rank.Staff, true);
+                        logToFile("[WARNING] " + myPlayer.UserName + " warns " + temp.UserName + " " + split[1] + (autoGitted ? " [Auto Gitted]" : ""), "warning");
+                        message m = new message();
+                        m.From = myPlayer.UserName;
+                        m.To = temp.UserName;
+                        m.Warning = true;
+                        m.Subject = split[1];
+                        m.Date = DateTime.Now;
+                        messages.Add(m);
+                        saveMessages();
+                        temp.SavePlayer();
+                    }
+
+                }
+            }
+        }
+
+        public void cmdAGit(string message)
+        {
+            if (message == "" || message.IndexOf(' ') > -1)
+                sendToUser("Syntax: agit <player>", true, false, false);
+            else
+            {
+                string[] target = matchPartial(message);
+                if (target.Length == 0)
+                    sendToUser("No such player \"" + message + "\"", true, false, false);
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (target.Length == 1 && (target[0].ToLower() == myPlayer.UserName.ToLower()))
+                    sendToUser("You're a spanner, not a git!", true, false, false);
+                else
+                {
+                    if (isOnline(target[0]))
+                    {
+                        foreach (Connection c in connections)
+                        {
+                            if (c.myPlayer.UserName == target[0])
+                            {
+                                if (!c.myPlayer.AutoGit)
+                                    sendToUser(c.myPlayer.UserName + " isn't auto-gitted", true, false, false);
+                                else
+                                {
+                                    sendToUser("You remove the AUTOGIT tag from " + c.myPlayer.UserName, true, false, false);
+                                    c.myPlayer.AutoGit = false;
+                                    c.myPlayer.SavePlayer();
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Player temp = Player.LoadPlayer(target[0], 0);
+                        if (!temp.AutoGit)
+                            sendToUser(temp.UserName + " isn't auto-gitted", true, false, false);
+                        else
+                        {
+                            sendToUser("You remove the AUTOGIT tag from " + temp.UserName, true, false, false);
+                            temp.AutoGit = false;
+                            temp.SavePlayer();
+                        }
+                    }
+                }
+            }
+        }
+
+        public void cmdGit(string message)
+        {
+            if (message == "" || message.IndexOf(' ') > -1)
+                sendToUser("Syntax: git <player>", true, false, false);
+            else
+            {
+                string[] target = matchPartial(message);
+                if (target.Length == 0)
+                    sendToUser("No such player \"" + message + "\"", true, false, false);
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (target.Length == 1 && (target[0].ToLower() == myPlayer.UserName.ToLower()))
+                    sendToUser("You're a spanner, not a git!", true, false, false);
+                else
+                {
+                    if (isOnline(target[0]))
+                    {
+                        foreach (Connection c in connections)
+                        {
+                            if (c.myPlayer.UserName == target[0])
+                            {
+                                if (c.myPlayer.PlayerRank >= (int)Player.Rank.Admin)
+                                {
+                                    sendToUser("Admin are always gits!", true, false, false);
+                                }
+                                else
+                                {
+                                    if (!c.myPlayer.Git)
+                                    {
+                                        sendToUser("You add a GIT tag to " + c.myPlayer.UserName, true, false, false);
+                                        logToFile(myPlayer.UserName + " adds a GIT tag to " + c.myPlayer.UserName, "git");
+                                    }
+                                    else
+                                    {
+                                        sendToUser("You remove the GIT tag from " + c.myPlayer.UserName, true, false, false);
+                                        logToFile(myPlayer.UserName + " removes the GIT tag from " + c.myPlayer.UserName, "git");
+                                    }
+                                    c.myPlayer.Git = !c.myPlayer.Git;
+                                    c.myPlayer.SavePlayer();
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Player temp = Player.LoadPlayer(target[0], 0);
+                        if (temp.PlayerRank >= (int)Player.Rank.Admin)
+                        {
+                            sendToUser("Admin are always gits!", true, false, false);
+                        }
+                        else
+                        {
+                            if (!temp.AutoGit)
+                            {
+                                sendToUser("You add a GIT tag to " + temp.UserName, true, false, false);
+                                logToFile(myPlayer.UserName + " adds a GIT tag to " + temp.UserName, "git");
+                            }
+                            else
+                            {
+                                sendToUser("You remove the GIT tag from " + temp.UserName, true, false, false);
+                                logToFile(myPlayer.UserName + " removes the GIT tag from " + temp.UserName, "git");
+                            }
+                            temp.Git = !temp.Git;
+                            temp.SavePlayer();
+                        }
+                    }
+                }
+            }
+        }
+
+        public void doWarnings()
+        {
+            messages = loadMessages();
+            string output = "";
+
+            for(int i = 0; i < messages.Count; i++)
+            {
+                if (messages[i].To == myPlayer.UserName && messages[i].Warning && !messages[i].Deleted)
+                {
+                    message temp = messages[i];
+                    temp.Deleted = true;
+                    output += "{bold}{red}   From:{reset} " + temp.From + "\r\n{bold}{red}Message:{reset} " + temp.Subject + "\r\n";
+                    messages[i] = temp;
+                }
+            }
+            if (output != "")
+            {
+                saveMessages();
+                sendToUser("{bold}{cyan}---[{red}Warnings{cyan}]".PadRight(103, '-') + "\r\n" + output + "\r\n{bold}{cyan}".PadRight(94, '-') + "{reset}", true, false, false);
+            }
+        }
+
         #endregion
 
         #region getPlayers
@@ -3513,7 +3735,7 @@ namespace MudServer
                 foreach (FileInfo file in fi)
                 {
                     Player load = Player.LoadPlayer(file.Name.Replace(".xml",""),0);
-                    if (load != null && ((staffOnly && load.PlayerRank >= (int)Player.Rank.Guide) || (builderOnly && load.SpecialPrivs.builder) || (testerOnly && load.SpecialPrivs.tester) || (gitsOnly && load.Git)) || (!staffOnly && !builderOnly && !testerOnly && !gitsOnly))
+                    if (load != null && ((staffOnly && load.PlayerRank >= (int)Player.Rank.Guide) || (builderOnly && load.SpecialPrivs.builder) || (testerOnly && load.SpecialPrivs.tester) || (gitsOnly && (load.Git || load.AutoGit))) || (!staffOnly && !builderOnly && !testerOnly && !gitsOnly))
                         list.Add(load);
                 }
             }
