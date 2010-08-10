@@ -73,7 +73,8 @@ namespace MudServer
         #region user RL details
 
         private string      realName = "";                                  // Their real name
-        private string      description = "is a newbie, be nice";           // Their description
+        private string      title = "is a newbie, be nice";                 // Their title
+        private string      description = "";                               // Their description
         private string      email = "";                                     // Their e-mail address
         private string      jabber = "";                                    // Their Jabber ID
         private string      icq = "";                                       // Their ICQ number
@@ -128,6 +129,7 @@ namespace MudServer
         #endregion
 
         private bool        inMailEditor = false;                           // Are they in the editor?
+        private bool        inDescriptionEditor = false;                    // Are they editing their description?
 
         private bool        informAll;                                      // Do they want to be notified when anyone logs on/off?
         private bool        informFriends;                                  // Are they being informed of everyone?
@@ -281,6 +283,12 @@ namespace MudServer
         {
             get { return hourlyChime; }
             set { hourlyChime = value; }
+        }
+
+        public string Title
+        {
+            get { return title; }
+            set { title = value; }
         }
 
         public string Description
@@ -562,6 +570,17 @@ namespace MudServer
         {
             get { return inMailEditor; }
             set { inMailEditor = value; }
+        }
+
+        public bool InDescriptionEditor
+        {
+            get { return inDescriptionEditor; }
+            set { inDescriptionEditor = value; }
+        }
+
+        public bool InEditor
+        {
+            get { return inMailEditor || inDescriptionEditor; }
         }
 
         public List<alias> AliasList
