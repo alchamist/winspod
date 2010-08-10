@@ -157,6 +157,7 @@
 "stats","cmdStats",1,"system"
 "tf","cmdTellFriends",1,"comms"
 "ttf","cmdTellToFriends",1,"comms"
+"tagline","cmdTagline",1,"player"
 "take","cmdTake",1,"player"
 "tblank","cmdTBlank",3,"staff"
 "tell","cmdTell",0,"comms"
