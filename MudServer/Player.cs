@@ -28,6 +28,12 @@ namespace MudServer
             public bool noidle;
         }
 
+        public struct alias
+        {
+            public string aliasName;
+            public string aliasCommand;
+        }
+
         #region attributes
 
         private string      username;                                       // Players username
@@ -128,6 +134,8 @@ namespace MudServer
 
         public List<string> friends = new List<string>();                   // Friends list - set to public so can be manipulated
         public List<string> informList = new List<string>();                // Inform list - set to public so can be manipulated
+
+        private List<alias> aliasList = new List<alias>();                  // Alias commands
 
         #endregion
 
@@ -556,6 +564,11 @@ namespace MudServer
             set { inMailEditor = value; }
         }
 
+        public List<alias> AliasList
+        {
+            get { return aliasList; }
+        }
+
         #endregion
 
         #region Constructor/Destructor
@@ -717,6 +730,74 @@ namespace MudServer
         {
             return (informAll || (informFriends && friends.IndexOf(username) > -1));
         }
+
+        #region Alias Stuff
+
+        public void AddAlias(string aliasName, string aliasCommand)
+        {
+            alias a = new alias();
+            a.aliasName = aliasName.ToLower();
+            a.aliasCommand = aliasCommand;
+            aliasList.Add(a);
+        }
+
+        public void DeleteAlias(string aliasName)
+        {
+            alias temp = new alias();
+            foreach (alias a in aliasList)
+            {
+                if (a.aliasName == aliasName)
+                {
+                    temp = a;
+                }
+            }
+            if (temp.aliasName != "")
+                aliasList.Remove(temp);
+        }
+
+        public void UpdateAlias(string aliasName, string aliasCommand)
+        {
+            // Horrible, kludgy replace ... need to rewrite when brain is working better
+
+            alias search = new alias();
+            alias temp = new alias();
+            temp.aliasName = aliasName.ToLower();
+            temp.aliasCommand = aliasCommand;
+
+            foreach (alias a in aliasList)
+            {
+                if (a.aliasName.ToLower() == aliasName.ToLower())
+                    search = a;
+            }
+            if (aliasList.IndexOf(search) > -1)
+            {
+                aliasList[aliasList.IndexOf(search)] = temp;
+            }
+        }
+
+        public string GetAliasCommand(string aliasName)
+        {
+            string ret = "";
+            foreach (alias a in aliasList)
+            {
+                if (a.aliasName.ToLower() == aliasName.ToLower())
+                    ret = a.aliasCommand;
+            }
+            return ret;
+        }
+
+        public bool IsAlias(string aliasName)
+        {
+            bool ret = false;
+            foreach (alias a in aliasList)
+            {
+                if (a.aliasName.ToLower() == aliasName.ToLower())
+                    ret = true;
+            }
+            return ret;
+        }
+
+        #endregion
 
         #endregion
     }

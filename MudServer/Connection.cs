@@ -241,6 +241,11 @@ namespace MudServer
 
         void ProcessLine(string line)
         {
+            ProcessLine(line, false);
+        }
+
+        void ProcessLine(string line, bool noAlias)
+        {
             line = cleanLine(line);
             if (myPlayer!=null)
                 loadCommands();
@@ -630,7 +635,8 @@ namespace MudServer
                                     found = true;
                                     if (!adminIdle)
                                         myPlayer.LastActive = DateTime.Now;
-                                    doPrompt();
+                                    if (!noAlias)
+                                        doPrompt();
                                 }
                             }
                         }
@@ -660,13 +666,20 @@ namespace MudServer
                                         found = true;
                                         if (!adminIdle)
                                             myPlayer.LastActive = DateTime.Now;
-                                        doPrompt();
+                                        if (!noAlias)
+                                            doPrompt();
                                     }
                                 }
                             }
                         }
+                        if (!found && !noAlias)
+                            found = doAlias(cmd);
+
                         if (!found)
                             sendToUser("Huh?", true, true, false);
+                        
+                        //if (!noAlias && found)
+                        //    doPrompt();
                     }
                 }
                 else
@@ -1311,7 +1324,8 @@ namespace MudServer
                     {
                         if (myPlayer.PlayerRank >= (int)Player.Rank.Admin || !c.myPlayer.SeeEcho)
                         {
-                            sendToUser(wibbleText(message, false), c.myPlayer.UserName, true, c.myPlayer.DoColour, c.myPlayer.UserName == myPlayer.UserName ? false : true, true);
+                            //sendToUser(wibbleText(message, false), c.myPlayer.UserName, true, c.myPlayer.DoColour, c.myPlayer.UserName == myPlayer.UserName ? false : true, true);
+                            c.sendToUser(wibbleText(message, false), true, false, false);
                         }
                         else
                         {
@@ -3152,7 +3166,66 @@ namespace MudServer
 
         public void cmdAlias(string message)
         {
-            sendToUser(aliasText("remote %1 %1 to you and says \"%0\" {} {apples|pears|oranges|banana|peach}", "alchamist waves good morning matey"));
+            if (message == "")
+            {
+                // Listing aliases
+                string output = headerLine("Aliases") + "\r\n";
+                if (myPlayer.AliasList.Count == 0)
+                    output += "No aliases defined\r\n";
+                else
+                {
+                    string alist = "";
+                    foreach (Player.alias a in myPlayer.AliasList)
+                    {
+                        alist += "{bold}{blue}" + a.aliasName + "{reset} : " + a.aliasCommand + "\r\n";
+                    }
+                    output += alist;
+                }
+                output += footerLine();
+                if (myPlayer.LogonScript != "")
+                {
+                    output += "\r\n{bold}{blue}Logon Script {reset}: " + myPlayer.LogonScript + "\r\n" + footerLine();
+                }
+                sendToUser(output, true, false, false);
+            }
+            else 
+            {
+                string aliasName = "";
+                string aliasText = "";
+                if (message.IndexOf(" ") == -1)
+                    aliasName = message;
+                else
+                {
+                    string[] split = message.Split(new char[] { ' ' }, 2);
+                    aliasName = split[0];
+                    aliasText = split[1];
+                }
+
+                if (myPlayer.IsAlias(aliasName))
+                {
+                    if (aliasText == "")
+                    {
+                        sendToUser("Alias \"" + aliasName + "\" deleted", true, false, false);
+                        myPlayer.DeleteAlias(aliasName);
+                    }
+                    else
+                    {
+                        sendToUser("Alias \"" + aliasName + "\" updated", true, false, false);
+                        myPlayer.UpdateAlias(aliasName, aliasText);
+                    }
+                }
+                else
+                {
+                    if (aliasText == "")
+                        sendToUser("Alias \"" + aliasName + "\" not found to delete", true, false, false);
+                    else
+                    {
+                        sendToUser("Alias \"" + aliasName + "\" defined", true, false, false);
+                        myPlayer.AddAlias(aliasName, aliasText);
+                    }
+                }
+                myPlayer.SavePlayer();
+            }
         }
 
         public void doLAlias()
@@ -3163,9 +3236,25 @@ namespace MudServer
                 foreach (string s in split)
                 {
                     string cmd = aliasText(s);
-                    ProcessLine(cmd);
+                    ProcessLine(cmd, true);
                 }
             }
+        }
+
+        public bool doAlias(string message)
+        {
+            bool ret = false;
+            if (myPlayer.IsAlias(message))
+            {
+                ret = true;
+                string[] split = myPlayer.GetAliasCommand(message).Split(new char[] { ';' });
+                foreach (string s in split)
+                {
+                    ProcessLine(s, true);
+                }
+                doPrompt();
+            }
+            return ret;
         }
 
         #endregion
@@ -5247,6 +5336,21 @@ namespace MudServer
                     c.Writer.Flush();
                 }
             }
+        }
+
+        private static string headerLine(string title)
+        {
+            return headerLine(title, "{red}");
+        }
+
+        private static string headerLine(string title, string titleColour)
+        {
+            return ("{bold}{cyan}---[" + titleColour + title + "{bold}{cyan}]").PadRight(104 + titleColour.Length, '-') + "{reset}";
+        }
+
+        private static string footerLine()
+        {
+            return "{bold}{cyan}".PadRight(92, '-') + "{reset}";
         }
 
 
