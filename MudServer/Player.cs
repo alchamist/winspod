@@ -75,6 +75,7 @@ namespace MudServer
         private string      realName = "";                                  // Their real name
         private string      title = "is a newbie, be nice";                 // Their title
         private string      description = "";                               // Their description
+        private string      tagline = "";                                   // Their tagline
         private string      email = "";                                     // Their e-mail address
         private string      jabber = "";                                    // Their Jabber ID
         private string      icq = "";                                       // Their ICQ number
@@ -295,6 +296,12 @@ namespace MudServer
         {
             get { return description; }
             set { description = value; }
+        }
+
+        public string Tagline
+        {
+            get { return tagline; }
+            set { tagline = value; }
         }
 
         public string LastIP

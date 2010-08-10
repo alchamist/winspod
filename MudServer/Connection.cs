@@ -1633,7 +1633,11 @@ namespace MudServer
                     //output = output.PadRight(104, '-') + "{reset}\r\n";
                     output += (ex.Prefix + " " + ex.ColourUserName + " " + ex.Title).Trim() + "\r\n";
                     output += "{bold}{cyan}" + line + "{reset}\r\n";
-                    
+                    if (ex.Tagline != "")
+                    {
+                        output += ex.Tagline + "\r\n{bold}{cyan}" + line + "{reset}\r\n";
+                    }
+
                     if (myPlayer.PlayerRank >= (int)Player.Rank.Admin)
                     {
                         if (!online || ex.Invisible)
@@ -3306,6 +3310,30 @@ namespace MudServer
                     Player targ = Player.LoadPlayer(target[0],0);
                     sendToUser(headerLine("Description: " + targ.UserName) + "\r\n" + targ.Description + "\r\n" + footerLine());
                 }
+            }
+        }
+
+        public void cmdTagline(string message)
+        {
+            if (message == "" && myPlayer.Tagline == "")
+            {
+                sendToUser("Syntax: tagline <text>", true, false, false);
+            }
+            else if (message == "")
+            {
+                myPlayer.Tagline = "";
+                myPlayer.SavePlayer();
+                sendToUser("You blank your tagline", true, false, false);
+            }
+            else if (AnsiColour.Colorise(message, true).Length > 160)
+            {
+                sendToUser("Message too long - try again", true, false, false);
+            }
+            else
+            {
+                myPlayer.Tagline = message;
+                myPlayer.SavePlayer();
+                sendToUser("You set your tagline to: " + myPlayer.Tagline, true, false, false);
             }
         }
 
