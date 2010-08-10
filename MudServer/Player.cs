@@ -21,6 +21,13 @@ namespace MudServer
             HCAdmin
         }
 
+        public enum ShowTo
+        {
+            Public,
+            Friends,
+            Private
+        }
+
         public struct privs
         {
             public bool builder;
@@ -32,6 +39,21 @@ namespace MudServer
         {
             public string aliasName;
             public string aliasCommand;
+        }
+
+        public struct playerList
+        {
+            public string name;
+            public bool friend;
+            public bool find;
+            public bool noisy;
+            public bool ignore;
+            public bool inform;
+            public bool grabme;
+            public bool bar;
+            public bool beep;
+            public bool block;
+            public bool mailblock;
         }
 
         #region attributes
@@ -77,6 +99,7 @@ namespace MudServer
         private string      description = "";                               // Their description
         private string      tagline = "";                                   // Their tagline
         private string      email = "";                                     // Their e-mail address
+        private int         emailPermissions = (int)ShowTo.Friends;         // Who we show e-mail address to
         private string      jabber = "";                                    // Their Jabber ID
         private string      icq = "";                                       // Their ICQ number
         private string      msn = "";                                       // Their MSN ID
@@ -135,8 +158,14 @@ namespace MudServer
         private bool        informAll;                                      // Do they want to be notified when anyone logs on/off?
         private bool        informFriends;                                  // Are they being informed of everyone?
 
-        public List<string> friends = new List<string>();                   // Friends list - set to public so can be manipulated
-        public List<string> informList = new List<string>();                // Inform list - set to public so can be manipulated
+        //public List<string> friends = new List<string>();                   // Friends list - set to public so can be manipulated
+        //public List<string> informList = new List<string>();                // Inform list - set to public so can be manipulated
+
+        private List<playerList> myList = new List<playerList>();           // Friends/Inform/Bar/etc list;
+        private int         myListMaxSize = 20;                             // How many people can we have on the list?
+        private playerList  allFriendsList = new playerList();              // Settings for all friends
+        private playerList  allStaffList = new playerList();                // Settings for all staff
+        private playerList  allPlayersList = new playerList();               // Settings for everyone
 
         private List<alias> aliasList = new List<alias>();                  // Alias commands
 
@@ -375,6 +404,12 @@ namespace MudServer
             set { email = value; }
         }
 
+        public int EmailPermissions
+        {
+            get { return emailPermissions; }
+            set { emailPermissions = value; }
+        }
+
         public string JabberAddress
         {
             get { return jabber; }
@@ -549,6 +584,17 @@ namespace MudServer
             set { clubChanMute = value; }
         }
 
+        public int MyListMaxSize
+        {
+            get { return myListMaxSize; }
+            set { myListMaxSize = value; }
+        }
+
+        public List<playerList> MyList
+        {
+            get { return myList; }
+        }
+
         public bool InformAll
         {
             get { return informAll; }
@@ -593,6 +639,20 @@ namespace MudServer
         public List<alias> AliasList
         {
             get { return aliasList; }
+        }
+
+        public List<string> FriendsArray
+        {
+            get
+            {
+                List<string> ret = new List<string>();
+                foreach (playerList p in myList)
+                {
+                    if (p.friend)
+                        ret.Add(p.name);
+                }
+                return ret;
+            }
         }
 
         #endregion
@@ -754,7 +814,78 @@ namespace MudServer
 
         public bool InformFor(string username)
         {
-            return (informAll || (informFriends && friends.IndexOf(username) > -1));
+            bool ret = false;
+            if (allPlayersList.inform)
+                ret = true;
+            else if (allFriendsList.inform && isFriend(username))
+                ret = true;
+            else if (allStaffList.inform)
+            {
+                Player p = Player.LoadPlayer(username, 0);
+                if (p.PlayerRank >= (int)Rank.Guide)
+                    ret = true;
+            }
+            else
+            {
+                foreach (playerList p in myList)
+                {
+                    if (p.name.ToLower() == username.ToLower() && p.inform)
+                        ret = true;
+                }
+            }
+            return ret;
+        }
+
+        public bool isFriend(string username)
+        {
+            bool ret = false;
+            foreach(playerList p in myList)
+            {
+                if (p.name.ToLower() == username.ToLower() && p.friend)
+                    ret = true;
+            }
+            return ret;
+        }
+
+        public bool AddFriend(string username)
+        {
+            if (myList.Count >= myListMaxSize)
+                return false;
+            else
+            {
+                bool found = false;
+                for (int i = 0; i < myList.Count; i++)
+                {
+                    if (myList[i].name.ToLower() == username.ToLower())
+                    {
+                        found = true;
+                        playerList temp = myList[i];
+                        temp.friend = true;
+                        myList[i] = temp;
+                    }
+                }
+                if (!found)
+                {
+                    playerList temp = new playerList();
+                    temp.name = username;
+                    temp.friend = true;
+                    myList.Add(temp);
+                }
+                return true;
+            }
+        }
+
+        public void RemoveFriend(string username)
+        {
+            for (int i = 0; i < myList.Count; i++)
+            {
+                if (myList[i].name.ToLower() == username.ToLower())
+                {
+                    //playerList temp = myList[i];
+                    //myList[i] = temp;
+                    myList.RemoveAt(i);
+                }
+            }
         }
 
         #region Alias Stuff
