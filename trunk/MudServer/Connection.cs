@@ -79,6 +79,7 @@ namespace MudServer
         public List<message>        mail = new List<message>();
 
         public message              editMail = new message();
+        public string               editText = "";
 
         
         public Connection(Socket socket, int conNum)
@@ -104,7 +105,7 @@ namespace MudServer
         {
             if (myPlayer != null)
             {
-                if (myPlayer.HourlyChime && DateTime.Now.Minute == 0 && DateTime.Now.Hour != lastHChimeHour && !myPlayer.InMailEditor)
+                if (myPlayer.HourlyChime && DateTime.Now.Minute == 0 && DateTime.Now.Hour != lastHChimeHour && !myPlayer.InEditor)
                 {
                     lastHChimeHour = DateTime.Now.Hour;
                     sendToUser("{bold}{red}{bell} [[Ding Dong. It is now " + (DateTime.Now.AddHours(myPlayer.JetLag)).ToShortTimeString() + "]{reset}", true, true, false);
@@ -377,7 +378,7 @@ namespace MudServer
                                 myPlayer.ResBy = "System";
                                 myPlayer.PlayerRank = (int)Player.Rank.HCAdmin;
                                 myPlayer.ResDate = DateTime.Now;
-                                myPlayer.Description = "is da admin";
+                                myPlayer.Title = "is da admin";
                                 Player.privs p = new Player.privs();
                                 p.builder = true;
                                 p.tester = true;
@@ -570,6 +571,11 @@ namespace MudServer
                 {
                     myPlayer.LastActive = DateTime.Now;
                     mailEdit(line);
+                }
+                else if (myPlayer.InDescriptionEditor)
+                {
+                    myPlayer.LastActive = DateTime.Now;
+                    descriptionEdit(line);
                 }
                 else if (cmd != "")
                 {
@@ -817,7 +823,7 @@ namespace MudServer
         {
             foreach (Connection conn in connections)
             {
-                if (conn.myPlayer != null && conn.myPlayer.UserName != sender && conn.myPlayer.UserRoom == room && !conn.myPlayer.InMailEditor)
+                if (conn.myPlayer != null && conn.myPlayer.UserName != sender && conn.myPlayer.UserRoom == room && !conn.myPlayer.InEditor)
                 {
                     sendToUser(msgToOthers, conn.myPlayer.UserName, newline, conn.myPlayer.DoColour, receiverPrompt, true);
                 }
@@ -840,7 +846,7 @@ namespace MudServer
         {
             foreach (Connection conn in connections)
             {
-                if (conn.myPlayer.PlayerRank >= rank && myPlayer.onStaffChannel((Player.Rank)rank) && !conn.myPlayer.InMailEditor)
+                if (conn.myPlayer.PlayerRank >= rank && myPlayer.onStaffChannel((Player.Rank)rank) && !conn.myPlayer.InEditor)
                 {
                     string col = null;
                     switch (rank)
@@ -876,7 +882,7 @@ namespace MudServer
             {
                 foreach (Connection c in connections)
                 {
-                    if (chan.OnChannel(c.myPlayer.UserName) && !c.myPlayer.ClubChannelMute && !c.myPlayer.InMailEditor)
+                    if (chan.OnChannel(c.myPlayer.UserName) && !c.myPlayer.ClubChannelMute && !c.myPlayer.InEditor)
                     {
                         sendToUser(chan.FormatMessage(message), true, c.myPlayer.UserName != myPlayer.UserName, nohistory);
                     }
@@ -1190,7 +1196,7 @@ namespace MudServer
                         {
                             if (c.myPlayer != null && c.myPlayer.UserName.ToLower() == matches[0].ToLower() && !c.myPlayer.Invisible)
                             {
-                                if (c.myPlayer.InMailEditor)
+                                if (c.myPlayer.InEditor)
                                     sendToUser(c.myPlayer.ColourUserName + " is editing at the moment and can't be disturbed", true, false, false);
                                 else
                                 {
@@ -1236,7 +1242,7 @@ namespace MudServer
                         {
                             if (c.myPlayer != null && c.myPlayer.UserName == matches[0] && !c.myPlayer.Invisible)
                             {
-                                if (c.myPlayer.InMailEditor)
+                                if (c.myPlayer.InEditor)
                                     sendToUser(c.myPlayer.ColourUserName + " is editing at the moment and can't be disturbed", true, false, false);
                                 else
                                 {
@@ -1285,7 +1291,7 @@ namespace MudServer
                         {
                             if (c.myPlayer != null && c.myPlayer.UserName == matches[0] && !c.myPlayer.Invisible)
                             {
-                                if (c.myPlayer.InMailEditor)
+                                if (c.myPlayer.InEditor)
                                     sendToUser(c.myPlayer.ColourUserName + " is editing at the moment and can't be disturbed", true, false, false);
                                 else
                                 {
@@ -1323,7 +1329,7 @@ namespace MudServer
             {
                 foreach (Connection c in connections)
                 {
-                    if (!c.myPlayer.InMailEditor)
+                    if (!c.myPlayer.InEditor)
                     {
                         if (myPlayer.PlayerRank >= (int)Player.Rank.Admin || !c.myPlayer.SeeEcho)
                         {
@@ -1356,7 +1362,7 @@ namespace MudServer
                     {
                         if (c.myPlayer != null && c.myPlayer.UserName != myPlayer.UserName)
                         {
-                            if (c.myPlayer.HearShouts && !c.myPlayer.InMailEditor)
+                            if (c.myPlayer.HearShouts && !c.myPlayer.InEditor)
                                 sendToUser(myPlayer.ColourUserName + " shouts \"" + wibbleText(message, false) + "{reset}\"", c.myPlayer.UserName);
                         }
                     }
@@ -1381,7 +1387,7 @@ namespace MudServer
                     if (myPlayer.friends.IndexOf(c.myPlayer.UserName) != -1)
                     {
                         count++;
-                        if (!c.myPlayer.InMailEditor)
+                        if (!c.myPlayer.InEditor)
                             c.sendToUser("\r\n{bold}{green}(To friends) " + myPlayer.UserName + " " + sayWord(message, false) + " \"" + message + "\"", true, true, true);
                     }
                 }
@@ -1404,7 +1410,7 @@ namespace MudServer
                     if (myPlayer.friends.IndexOf(c.myPlayer.UserName) != -1)
                     {
                         count++;
-                        if (!c.myPlayer.InMailEditor)
+                        if (!c.myPlayer.InEditor)
                             c.sendToUser("\r\n{bold}{green}(To friends) " + myPlayer.UserName + (message.Substring(0,1) == "'" ? "" : " ") + message , true, true, true);
                     }
                 }
@@ -1444,7 +1450,7 @@ namespace MudServer
                             if (c.myPlayer.UserName != myPlayer.UserName && (temp.friends.IndexOf(c.myPlayer.UserName) != -1 || c.myPlayer.UserName == temp.UserName))
                             {
                                 count++;
-                                if (!c.myPlayer.InMailEditor)
+                                if (!c.myPlayer.InEditor)
                                 {
                                     c.sendToUser("\r\n{bold}{green}(To " + (c.myPlayer.UserName == temp.UserName ? "your" : temp.UserName + "'s") + " friends) " + myPlayer.UserName + " " + sayWord(split[1], false) + " \"" + split[1] + "\"", true, true, true);
                                 }
@@ -1488,7 +1494,7 @@ namespace MudServer
                             if (c.myPlayer.UserName != myPlayer.UserName && (temp.friends.IndexOf(c.myPlayer.UserName) != -1 || c.myPlayer.UserName == temp.UserName))
                             {
                                 count++;
-                                if (!c.myPlayer.InMailEditor)
+                                if (!c.myPlayer.InEditor)
                                 {
                                     c.sendToUser("\r\n{bold}{green}(To " + (c.myPlayer.UserName == temp.UserName ? "your" : temp.UserName + "'s") + " friends) " + myPlayer.UserName + (split[1].Substring(0, 1) == "'" ? "" : " ") + split[1], true, true, true);
                                 }
@@ -1625,7 +1631,7 @@ namespace MudServer
                     string line = "".PadRight(80, '-');
                     string output = ("{bold}{cyan}---[" + ex.UserName + "{bold}{cyan}]").PadRight(104,'-').Replace(ex.UserName, ex.ColourUserName) + "{reset}\r\n";
                     //output = output.PadRight(104, '-') + "{reset}\r\n";
-                    output += (ex.Prefix + " " + ex.ColourUserName + " " + ex.Description).Trim() + "\r\n";
+                    output += (ex.Prefix + " " + ex.ColourUserName + " " + ex.Title).Trim() + "\r\n";
                     output += "{bold}{cyan}" + line + "{reset}\r\n";
                     
                     if (myPlayer.PlayerRank >= (int)Player.Rank.Admin)
@@ -1830,7 +1836,7 @@ namespace MudServer
                         }
 
                         output += " " + conn.myPlayer.GetRankColour() + "[" + ((Player.Rank)conn.myPlayer.PlayerRank).ToString().Substring(0, 1) + "]{reset} ";
-                        output += (conn.myPlayer.Prefix + " " + conn.myPlayer.ColourUserName + " " + conn.myPlayer.Description).Trim() + "\r\n";
+                        output += (conn.myPlayer.Prefix + " " + conn.myPlayer.ColourUserName + " " + conn.myPlayer.Title).Trim() + "\r\n";
                         userCount++;
                     }
                 }
@@ -1867,7 +1873,7 @@ namespace MudServer
                         }
 
                         output += " " + conn.myPlayer.GetRankColour() + "[" + ((Player.Rank)conn.myPlayer.PlayerRank).ToString().Substring(0, 1) + "]{reset} ";
-                        output += (conn.myPlayer.Prefix + " " + conn.myPlayer.ColourUserName + " " + conn.myPlayer.Description).Trim() + "\r\n";
+                        output += (conn.myPlayer.Prefix + " " + conn.myPlayer.ColourUserName + " " + conn.myPlayer.Title).Trim() + "\r\n";
                         userCount++;
                     }
                 }
@@ -2154,7 +2160,7 @@ namespace MudServer
             if (message == "" || AnsiColour.Colorise(message, true) == "")
             {
                 sendToUser("You remove your title", true, false, false);
-                myPlayer.Description = "";
+                myPlayer.Title = "";
                 myPlayer.SavePlayer();
             }
             else
@@ -2163,8 +2169,8 @@ namespace MudServer
                     sendToUser("Title too long, try again", true, false, false);
                 else
                 {
-                    myPlayer.Description = message + "{reset}";
-                    sendToUser("You change your title to read: " + myPlayer.Description, true, false, false);
+                    myPlayer.Title = message + "{reset}";
+                    sendToUser("You change your title to read: " + myPlayer.Title, true, false, false);
                     myPlayer.SavePlayer();
                 }
             }
@@ -2803,6 +2809,46 @@ namespace MudServer
             }
         }
 
+        public void cmdTBlank(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: tblank <player>", true, false, false);
+            else
+            {
+                string[] target = matchPartial(message);
+                if (target.Length == 0)
+                    sendToUser("No such user \"" + message.Substring(0, message.IndexOf(" ")) + "\"");
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (target[0].ToLower() == myPlayer.UserName.ToLower())
+                    sendToUser("Trying to blank yourself?", true, false, false);
+                else if (!isOnline(target[0]))
+                    sendToUser("User \"" + target[0] + "\" is not online", true, false, false);
+                else
+                {
+                    bool found = false;
+                    foreach (Connection c in connections)
+                    {
+                        if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                        {
+                            if (c.myPlayer.PlayerRank >= myPlayer.PlayerRank)
+                                sendToUser("Trying to abuse a fellow staff member, eh?");
+                            else
+                            {
+                                found = true;
+                                c.myPlayer.Title = "";
+                                sendToUser("Your title has been removed by " + myPlayer.ColourUserName, c.myPlayer.UserName, true, c.myPlayer.DoColour, true, false);
+                                sendToUser("You remove " + c.myPlayer.UserName + "'s title", true, false, false);
+                                c.myPlayer.SavePlayer();
+                            }
+                        }
+                    }
+                    if (!found)
+                        sendToUser("Strange, something wierd has happened", true, false, false);
+                }
+            }
+        }
+
         public void cmdDBlank(string message)
         {
             if (message == "")
@@ -2830,9 +2876,9 @@ namespace MudServer
                             else
                             {
                                 found = true;
-                                c.myPlayer.Description = "";
-                                sendToUser("Your description has been removed by " + myPlayer.ColourUserName, c.myPlayer.UserName, true, c.myPlayer.DoColour, true, false);
-                                sendToUser("You remove " + c.myPlayer.UserName + "'s description", true, false, false);
+                                c.myPlayer.Title = "";
+                                sendToUser("Your title has been removed by " + myPlayer.ColourUserName, c.myPlayer.UserName, true, c.myPlayer.DoColour, true, false);
+                                sendToUser("You remove " + c.myPlayer.UserName + "'s title", true, false, false);
                                 c.myPlayer.SavePlayer();
                             }
                         }
@@ -3027,7 +3073,7 @@ namespace MudServer
                             if (c.myPlayer.UserName == target[0])
                             {
                                 sendToUser(tag == "" ? "You remove " + c.myPlayer.UserName + "'s inform tag" : "You set " + c.myPlayer.UserName + "'s inform tag to: " + tag, true, false, false);
-                                if (!c.myPlayer.InMailEditor)
+                                if (!c.myPlayer.InEditor)
                                     c.sendToUser("\r\n" + myPlayer.ColourUserName +  (tag == "" ? " has just removed your inform tag" : " has just set your inform tag to: " + tag), true, false, false);
 
                                 c.myPlayer.InformTag = tag;
@@ -3235,6 +3281,31 @@ namespace MudServer
             catch (Exception ex)
             {
                 Debug.Print(ex.ToString());
+            }
+        }
+
+        public void cmdDescription(string message)
+        {
+            if (message == "")
+            {
+                myPlayer.InDescriptionEditor = true;
+                sendToUser("Now entering description editor. Type \".help\" for a list of editor commands", true, false, false);
+                editText = myPlayer.Description;
+            }
+            else
+            {
+                if (message == "me")
+                    message = myPlayer.UserName;
+                string[] target = matchPartial(message);
+                if (target.Length == 0)
+                sendToUser("Player \"" + message + "\" not found", true, false, false);
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else
+                {
+                    Player targ = Player.LoadPlayer(target[0],0);
+                    sendToUser(headerLine("Description: " + targ.UserName) + "\r\n" + targ.Description + "\r\n" + footerLine());
+                }
             }
         }
 
@@ -3926,6 +3997,43 @@ namespace MudServer
             else
             {
                 editMail.Body += message + "\r\n";
+            }
+            doPrompt();
+        }
+
+        public void descriptionEdit(string message)
+        {
+            if (message.StartsWith("."))
+            {
+                switch (message)
+                {
+                    case ".end":
+                    case ".":
+                        myPlayer.InDescriptionEditor = false;
+                        myPlayer.Description = editText;
+                        sendToUser("Description set", true, false, false);
+                        editText = "";
+                        myPlayer.SavePlayer();
+                        break;
+                    case ".wipe":
+                        editText = "";
+                        break;
+                    case ".view":
+                        sendToUser(editText, true, false, false);
+                        break;
+                    case ".quit":
+                        editText = "";
+                        myPlayer.InDescriptionEditor = false;
+                        sendToUser("Description edit aborted", true, false, false);
+                        break;
+                    default:
+                        sendToUser("Commands available:\r\n.view - show current description content\r\n.wipe - wipe current description content\r\n.quit - exit the editor without saving desctiption\r\n.end - exit the editor and save description", true, false, false);
+                        break;
+                }
+            }
+            else
+            {
+                editText += message + "\r\n";
             }
             doPrompt();
         }
@@ -5225,14 +5333,14 @@ namespace MudServer
         private void doPrompt(string user)
         {
             if (user == myPlayer.UserName)
-                sendToUser(myPlayer.InMailEditor ? "> " : myPlayer.Prompt.Replace("%t", DateTime.Now.ToShortTimeString()).Replace("%d", DateTime.Now.ToShortDateString()), false, false, false);
+                sendToUser(myPlayer.InEditor ? "> " : myPlayer.Prompt.Replace("%t", DateTime.Now.ToShortTimeString()).Replace("%d", DateTime.Now.ToShortDateString()), false, false, false);
             else
             {
                 foreach (Connection c in connections)
                 {
                     if (c.myPlayer.UserName == user)
                     {
-                        sendToUser(c.myPlayer.InMailEditor ? "> " :  c.myPlayer.Prompt.Replace("%t", DateTime.Now.ToShortTimeString()).Replace("%d", DateTime.Now.ToShortDateString()), c.myPlayer.UserName, false, c.myPlayer.DoColour, false, false);
+                        sendToUser(c.myPlayer.InEditor ? "> " :  c.myPlayer.Prompt.Replace("%t", DateTime.Now.ToShortTimeString()).Replace("%d", DateTime.Now.ToShortDateString()), c.myPlayer.UserName, false, c.myPlayer.DoColour, false, false);
                     }
                 }
             }
