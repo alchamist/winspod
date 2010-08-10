@@ -1384,7 +1384,7 @@ namespace MudServer
                 int count = 0;
                 foreach (Connection c in connections)
                 {
-                    if (myPlayer.friends.IndexOf(c.myPlayer.UserName) != -1)
+                    if (myPlayer.isFriend(c.myPlayer.UserName))
                     {
                         count++;
                         if (!c.myPlayer.InEditor)
@@ -1407,7 +1407,7 @@ namespace MudServer
                 int count = 0;
                 foreach (Connection c in connections)
                 {
-                    if (myPlayer.friends.IndexOf(c.myPlayer.UserName) != -1)
+                    if (myPlayer.isFriend(c.myPlayer.UserName))
                     {
                         count++;
                         if (!c.myPlayer.InEditor)
@@ -1440,14 +1440,14 @@ namespace MudServer
                 else
                 {
                     Player temp = Player.LoadPlayer(target[0], 0);
-                    if (temp.friends.IndexOf(myPlayer.UserName) == -1)
+                    if (!temp.isFriend(myPlayer.UserName))
                         sendToUser("You are not on " + temp.UserName + "'s friends list", true, false, false);
                     else
                     {
                         int count = 0;
                         foreach (Connection c in connections)
                         {
-                            if (c.myPlayer.UserName != myPlayer.UserName && (temp.friends.IndexOf(c.myPlayer.UserName) != -1 || c.myPlayer.UserName == temp.UserName))
+                            if (c.myPlayer.UserName != myPlayer.UserName && (temp.isFriend(c.myPlayer.UserName) || c.myPlayer.UserName == temp.UserName))
                             {
                                 count++;
                                 if (!c.myPlayer.InEditor)
@@ -1484,14 +1484,14 @@ namespace MudServer
                 else
                 {
                     Player temp = Player.LoadPlayer(target[0], 0);
-                    if (temp.friends.IndexOf(myPlayer.UserName) == -1)
+                    if (!temp.isFriend(myPlayer.UserName))
                         sendToUser("You are not on " + temp.UserName + "'s friends list", true, false, false);
                     else
                     {
                         int count = 0;
                         foreach (Connection c in connections)
                         {
-                            if (c.myPlayer.UserName != myPlayer.UserName && (temp.friends.IndexOf(c.myPlayer.UserName) != -1 || c.myPlayer.UserName == temp.UserName))
+                            if (c.myPlayer.UserName != myPlayer.UserName && (temp.isFriend(c.myPlayer.UserName) || c.myPlayer.UserName == temp.UserName))
                             {
                                 count++;
                                 if (!c.myPlayer.InEditor)
@@ -1683,7 +1683,7 @@ namespace MudServer
                         output += "{bold}{blue}Ressed by {reset}".PadRight(48, ' ') + ": {blue}" + ex.ResBy + "{reset}\r\n";
                     }
 
-                    if (ex.EmailAddress != "")
+                    if (ex.EmailAddress != "" && ((ex.isFriend(myPlayer.UserName) && ex.EmailPermissions == (int)Player.ShowTo.Friends) || ex.EmailPermissions == (int)Player.ShowTo.Public || myPlayer.PlayerRank >= (int)Player.Rank.Admin || myPlayer.UserName == ex.UserName))
                         output += "{bold}{magenta}E-mail Address {reset}".PadRight(51, ' ') + ": {magenta}" + ex.EmailAddress + "{reset}\r\n";
                     if (ex.JabberAddress != "")
                         output += "{bold}{magenta}Jabber {reset}".PadRight(51, ' ') + ": {magenta}" + ex.JabberAddress + "{reset}\r\n";
@@ -1708,11 +1708,11 @@ namespace MudServer
                         output += "{bold}{cyan}Occupation {reset}".PadRight(48, ' ') + ": {cyan}" + ex.Occupation + "{reset}\r\n";
                     if (ex.Hometown != "")
                         output += "{bold}{cyan}Home Town {reset}".PadRight(48, ' ') + ": {cyan}" + ex.Hometown + "{reset}\r\n";
-
+                    
                     output += "{bold}{cyan}Local Time {reset}".PadRight(48, ' ') + ": {cyan}" + DateTime.Now.AddHours(ex.JetLag).ToShortTimeString() + "{reset}\r\n";
 
                     output += "{bold}{yellow}Gender {reset}".PadRight(50, ' ') + ": {yellow}" + (gender)ex.Gender + "{reset}\r\n";
-                    output += "{bold}{yellow}Rank {reset}".PadRight(50, ' ') + ": " + ex.GetRankColour() + rankName(ex.PlayerRank) + "{reset}\r\n";
+                    output += "{bold}{yellow}Rank {reset}".PadRight(50, ' ') + ": " + rankName(ex.PlayerRank) + "{reset}\r\n";
                     output += "{bold}{yellow}Blocking Shouts {reset}".PadRight(50, ' ') + ": {yellow}" + (ex.HearShouts ? "No" : "Yes") + "{reset}\r\n";
 
                     if (ex.PlayerRank >= (int)Player.Rank.Staff)
@@ -2027,8 +2027,33 @@ namespace MudServer
                         sendToUser(split.Length > 1 ? "You set your Skype id to " + split[1] : "You blank your Skype id", true, false, false);
                         break;
                     case "email":
-                        myPlayer.EmailAddress = (split.Length > 1 ? split[1] : "");
-                        sendToUser(split.Length > 1 ? "You set your Email address to " + split[1] : "You blank your Email Address", true, false, false);
+                        if (split.Length == 1)
+                            sendToUser("Your e-mail address visibility is set to " + (Player.ShowTo)myPlayer.EmailPermissions, true, false, false);
+                        else if (split[1] == "public")
+                        {
+                            myPlayer.EmailPermissions = (int)Player.ShowTo.Public;
+                            sendToUser("You set your e-mail visible to everyone", true, false, false);
+                        }
+                        else if (split[1] == "private")
+                        {
+                            myPlayer.EmailPermissions = (int)Player.ShowTo.Private;
+                            sendToUser("You set your e-mail visible to only admin", true, false, false);
+                        }
+                        else if (split[1] == "friends")
+                        {
+                            myPlayer.EmailPermissions = (int)Player.ShowTo.Friends;
+                            sendToUser("You set your e-mail visible to your friends", true, false, false);
+                        }
+                        else
+                        {
+                            if (testEmailRegex(split[1]))
+                            {
+                                myPlayer.EmailAddress = split[1];
+                                sendToUser("You set your Email address to " + split[1], true, false, false);
+                            }
+                            else
+                                sendToUser("Please enter a valid e-mail address", true, false, false);
+                        }
                         break;
                     case "hurl":
                         myPlayer.HomeURL = (split.Length > 1 ? split[1] : "");
@@ -2079,7 +2104,14 @@ namespace MudServer
                 {
                     sendToUser("You set your Date of Birth to " + dob.ToLongDateString(), true, false, false);
                     myPlayer.DateOfBirth = dob;
+                    myPlayer.SavePlayer();
                 }
+            }
+            else if (message == "" && myPlayer.DateOfBirth != DateTime.MinValue)
+            {
+                sendToUser("You blank your Date of Birth", true, false, false);
+                myPlayer.DateOfBirth = DateTime.MinValue;
+                myPlayer.SavePlayer();
             }
             else
             {
@@ -2251,7 +2283,7 @@ namespace MudServer
         public void cmdDoList(string message)
         {
             if (message == "")
-                sendToUser("Syntax: list <newbies/staff/tester/players" + (myPlayer.PlayerRank >= (int)Player.Rank.Staff ? "/ip/gits/objects/rooms" : "") + ">");
+                sendToUser("Syntax: plist <newbies/staff/tester/players" + (myPlayer.PlayerRank >= (int)Player.Rank.Staff ? "/ip/gits/objects/rooms" : "") + ">");
             else
             {
                 string[] split = message.Split(new char[] { ' ' }, 2);
@@ -3240,6 +3272,48 @@ namespace MudServer
             }
         }
 
+        public void cmdList(string message)
+        {
+            if (message == "")
+            {
+                string output = headerLine("List") + "\r\n{bold}{blue}" 
+                    + "Name".PadRight(36)
+                    + "Frd".PadRight(4)
+                    + "Fnd".PadRight(4)
+                    + "Inf".PadRight(4)
+                    + "Noi".PadRight(4)
+                    + "Ign".PadRight(4)
+                    + "Bar".PadRight(4)
+                    + "Bee".PadRight(4)
+                    + "Blo".PadRight(4)
+                    + "MBl".PadRight(4)
+                    + "Grb"
+                    +"{reset}\r\n";
+
+
+                List<Player.playerList> myList = myPlayer.MyList;
+                myList.Sort(delegate(Player.playerList p1, Player.playerList p2) { return p1.name.CompareTo(p2.name); });
+                foreach (Player.playerList p in myList)
+                {
+                    output += p.name.PadRight(37)
+                        + "{bold}{white}"
+                        + (p.friend ? "Y |" : "N |").PadRight(4)
+                        + (p.find ? "Y |" : "N |").PadRight(4)
+                        + (p.inform ? "Y |" : "N |").PadRight(4)
+                        + (p.noisy ? "Y |" : "N |").PadRight(4)
+                        + (p.ignore ? "Y |" : "N |").PadRight(4)
+                        + (p.bar ? "Y |" : "N |").PadRight(4)
+                        + (p.beep ? "Y |" : "N |").PadRight(4)
+                        + (p.block ? "Y |" : "N |").PadRight(4)
+                        + (p.mailblock ? "Y |" : "N |").PadRight(4)
+                        + (p.grabme ? "Y" : "N")
+                        + "\r\n{reset}";
+                }
+                output += footerLine();
+                sendToUser(output, true, false, false);
+            }
+        }
+
         public void cmdLogonScript(string message)
         {
             if (message == "" && myPlayer.LogonScript == "")
@@ -3490,16 +3564,17 @@ namespace MudServer
             if (message == "")
             {
                 string output = "";
-                if (myPlayer.friends.Count == 0)
+                if (myPlayer.FriendsArray.Count == 0)
                 {
                     output = "You have no friends";
                 }
                 else
                 {
                     int tabcount = 1;
-                    foreach (string friend in myPlayer.friends)
+                    foreach (string friend in myPlayer.FriendsArray)
                     {
-                        output += ((tabcount++ +1)% 4 == 0 ? "\r\n" : "") + friend.PadRight(20, ' ');
+                        Player temp = Player.LoadPlayer(friend,0);
+                        output += ((tabcount++ +1)% 4 == 0 ? "\r\n" : "") + temp.UserName.PadRight(20, ' ').Replace(temp.UserName, temp.ColourUserName);
                     }
                 }
                 sendToUser("{bold}{cyan}---[{red}Friends{cyan}]".PadRight(103, '-') + "{reset}\r\n" + output + "\r\n{bold}{cyan}".PadRight(94, '-'), true, false, false);
@@ -3515,18 +3590,22 @@ namespace MudServer
                     sendToUser("You can't add yourself to your own friends list!", true, false, false);
                 else
                 {
-                    if (myPlayer.friends.IndexOf(target[0]) == -1)
+                    if (!myPlayer.isFriend(target[0]))
                     {
                         // Not already in friends list
-                        myPlayer.friends.Add(target[0]);
-                        sendToUser(target[0] + " added to your friends list", true, false, false);
-                        if (isOnline(target[0]))
-                            sendToUser(myPlayer.UserName + " has made you " + getGender("poss") + " friend", target[0], true, false, true, false);
-                        myPlayer.SavePlayer();
+                        if (myPlayer.AddFriend(target[0]))
+                        {
+                            sendToUser(target[0] + " added to your friends list", true, false, false);
+                            if (isOnline(target[0]))
+                                sendToUser(myPlayer.UserName + " has made you " + getGender("poss") + " friend", target[0], true, false, true, false);
+                            myPlayer.SavePlayer();
+                        }
+                        else
+                            sendToUser("Sorry, your list is full", true, false, false);
                     }
                     else
                     {
-                        myPlayer.friends.Remove(target[0]);
+                        myPlayer.RemoveFriend(target[0]);
                         sendToUser(target[0] + " removed from your friends list", true, false, false);
                         myPlayer.SavePlayer();
                     }
