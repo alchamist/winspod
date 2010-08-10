@@ -579,20 +579,20 @@ namespace MudServer
                         cmd = cmd.Substring(1);
                     }
 
-                    if (cmd.ToLower() == "quit")
-                    {
-                        Console.WriteLine("[" + DateTime.Now.ToShortTimeString() + "] Logout: " + myPlayer.UserName);
-                        sendToRoom(myPlayer.UserName + " " + myPlayer.LogoffMsg, "");
-                        myPlayer.TotalOnlineTime += Convert.ToInt16((DateTime.Now - myPlayer.CurrentLogon).TotalSeconds);
-                        myPlayer.LastLogon = DateTime.Now;
-                        myPlayer.LastIP = myPlayer.CurrentIP;
-                        int longCheck = (int)(DateTime.Now - myPlayer.CurrentLogon).TotalSeconds;
-                        if (longCheck > myPlayer.LongestLogin) myPlayer.LongestLogin = longCheck;
-                        myPlayer.SavePlayer();
-                        socket.Shutdown(SocketShutdown.Both);
-                    }
-                    else
-                    {
+                    //if (cmd.ToLower() == "quit")
+                    //{
+                    //    Console.WriteLine("[" + DateTime.Now.ToShortTimeString() + "] Logout: " + myPlayer.UserName);
+                    //    sendToRoom(myPlayer.UserName + " " + myPlayer.LogoffMsg, "");
+                    //    myPlayer.TotalOnlineTime += Convert.ToInt16((DateTime.Now - myPlayer.CurrentLogon).TotalSeconds);
+                    //    myPlayer.LastLogon = DateTime.Now;
+                    //    myPlayer.LastIP = myPlayer.CurrentIP;
+                    //    int longCheck = (int)(DateTime.Now - myPlayer.CurrentLogon).TotalSeconds;
+                    //    if (longCheck > myPlayer.LongestLogin) myPlayer.LongestLogin = longCheck;
+                    //    myPlayer.SavePlayer();
+                    //    socket.Shutdown(SocketShutdown.Both);
+                    //}
+                    //else
+                    //{
                         string shortCMD = cmd.Substring(0, 1);
                         string firstWord = "";
                         string message = "";
@@ -680,7 +680,7 @@ namespace MudServer
                         
                         //if (!noAlias && found)
                         //    doPrompt();
-                    }
+                    //}
                 }
                 else
                 {
@@ -753,30 +753,33 @@ namespace MudServer
         {
             foreach (Connection conn in connections)
             {
-                if (conn.myPlayer != null && conn.myPlayer.UserName.ToLower() == user.ToLower())
+                if (conn.myPlayer != null && conn.myPlayer.UserName.ToLower() == user.ToLower() && msg != null)
                 {
                     try
                     {
-                        string prefix = "";
-                        if (conn.myPlayer != null && conn.lastSent == conn.myPlayer.Prompt && !msg.StartsWith(conn.myPlayer.Prompt) && conn.myPlayer.UserName != myPlayer.UserName)
-                            prefix = "\r\n";
-                        if (newline)
-                            conn.Writer.WriteLine(prefix + AnsiColour.Colorise(msg, (removeColour || !conn.myPlayer.DoColour)));
-                        else
-                            conn.Writer.Write(prefix + AnsiColour.Colorise(msg, (removeColour || !conn.myPlayer.DoColour)));
-
-                        conn.lastSent = msg;
-
-                        if (doHistory)
+                        if (conn.socket.Connected)
                         {
-                            conn.history.Add(msg);
-                            if (conn.history.Count > 50)
-                                conn.history.RemoveAt(0);
-                        }
+                            string prefix = "";
+                            if (conn.myPlayer != null && conn.lastSent == conn.myPlayer.Prompt && !msg.StartsWith(conn.myPlayer.Prompt) && conn.myPlayer.UserName != myPlayer.UserName)
+                                prefix = "\r\n";
+                            if (newline)
+                                conn.Writer.WriteLine(prefix + AnsiColour.Colorise(msg, (removeColour || !conn.myPlayer.DoColour)));
+                            else
+                                conn.Writer.Write(prefix + AnsiColour.Colorise(msg, (removeColour || !conn.myPlayer.DoColour)));
 
-                        if (sendPrompt)
-                            doPrompt(user);
-                        break;
+                            conn.lastSent = msg;
+
+                            if (doHistory)
+                            {
+                                conn.history.Add(msg);
+                                if (conn.history.Count > 50)
+                                    conn.history.RemoveAt(0);
+                            }
+
+                            if (sendPrompt)
+                                doPrompt(user);
+                            break;
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -1309,7 +1312,7 @@ namespace MudServer
         {
             if (!message.StartsWith("'"))
                 message = " " + message;
-            sendToRoom(myPlayer.UserName + wibbleText(message, true), "You emote: " + myPlayer.UserName + wibbleText(message, true), false, false);
+            sendToRoom(myPlayer.UserName + wibbleText(message, true), "You emote: " + myPlayer.UserName + wibbleText(message, true), false, true);
         }
 
         public void cmdEcho(string message)
@@ -3202,6 +3205,36 @@ namespace MudServer
                 sendToUser("Logon script set", true, false, false);
                 myPlayer.LogonScript = message;
                 myPlayer.SavePlayer();
+            }
+        }
+
+        public void cmdQuit(string message)
+        {
+            Writer.WriteLine(AnsiColour.Colorise("Thanks for visiting &t. Goodbye", myPlayer.DoColour));
+            Writer.Flush();
+            
+            Console.WriteLine("[" + DateTime.Now.ToShortTimeString() + "] Logout: " + myPlayer.UserName);
+
+            if (myPlayer.LogoffMsg != "")
+                sendToRoom(myPlayer.UserName + " " + myPlayer.LogoffMsg, null);
+            else
+                sendToRoom(myPlayer.UserName + " leaves for normality", null);
+
+            myPlayer.TotalOnlineTime += Convert.ToInt16((DateTime.Now - myPlayer.CurrentLogon).TotalSeconds);
+            myPlayer.LastLogon = DateTime.Now;
+            myPlayer.LastIP = myPlayer.CurrentIP;
+            int longCheck = (int)(DateTime.Now - myPlayer.CurrentLogon).TotalSeconds;
+            if (longCheck > myPlayer.LongestLogin) myPlayer.LongestLogin = longCheck;
+
+            myPlayer.SavePlayer();
+
+            try
+            {
+                socket.Shutdown(SocketShutdown.Both);
+            }
+            catch (Exception ex)
+            {
+                Debug.Print(ex.ToString());
             }
         }
 
