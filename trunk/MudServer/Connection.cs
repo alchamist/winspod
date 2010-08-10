@@ -3095,6 +3095,98 @@ namespace MudServer
             }
         }
 
+        public void cmdLogonMsg(string message)
+        {
+            if (message == "" && myPlayer.LogonMsg == "")
+                sendToUser("Syntax: logonmsg <message>", true, false, false);
+            else if (message == "" && myPlayer.LogonMsg != "")
+            {
+                myPlayer.LogonMsg = "";
+                myPlayer.SavePlayer();
+                sendToUser("Logon message blanked", true, false, false);
+            }
+            else
+            {
+                myPlayer.LogonMsg = message;
+                myPlayer.SavePlayer();
+                sendToUser("You set your logon message to: " + myPlayer.ColourUserName + " " + message);
+            }
+        }
+
+        public void cmdLogoffMsg(string message)
+        {
+            if (message == "" && myPlayer.LogoffMsg == "")
+                sendToUser("Syntax: logoffmsg <message>", true, false, false);
+            else if (message == "" && myPlayer.LogoffMsg != "")
+            {
+                myPlayer.LogoffMsg = "";
+                myPlayer.SavePlayer();
+                sendToUser("Logoff message blanked", true, false, false);
+            }
+            else
+            {
+                myPlayer.LogoffMsg = message;
+                myPlayer.SavePlayer();
+                sendToUser("You set your logoff message to: " + myPlayer.ColourUserName + " " + message);
+            }
+        }
+
+        public void cmdEnterMsg(string message)
+        {
+            if (message == "" && myPlayer.EnterMsg == "")
+                sendToUser("Syntax: entermsg <message>", true, false, false);
+            else if (message == "" && myPlayer.EnterMsg != "")
+            {
+                myPlayer.EnterMsg = "";
+                myPlayer.SavePlayer();
+                sendToUser("Enter message blanked", true, false, false);
+            }
+            else
+            {
+                myPlayer.EnterMsg = message;
+                myPlayer.SavePlayer();
+                sendToUser("You set your enter message to: " + myPlayer.ColourUserName + " " + message);
+            }
+        }
+
+        public void cmdExitMsg(string message)
+        {
+            if (message == "" && myPlayer.ExitMsg == "")
+                sendToUser("Syntax: exitmsg <message>", true, false, false);
+            else if (message == "" && myPlayer.ExitMsg != "")
+            {
+                myPlayer.ExitMsg = "";
+                myPlayer.SavePlayer();
+                sendToUser("Exit message blanked", true, false, false);
+            }
+            else
+            {
+                myPlayer.ExitMsg = message;
+                myPlayer.SavePlayer();
+                sendToUser("You set your exit message to: " + myPlayer.ColourUserName + " " + message);
+            }
+        }
+
+        public void cmdPinfo(string message)
+        {
+            string[] target = matchPartial(message == "" ? myPlayer.UserName : (myPlayer.PlayerRank >= (int)Player.Rank.Staff ? message : myPlayer.UserName));
+            if (target.Length == 0)
+                sendToUser("Player \"" + message + "\" not found", true, false, false);
+            else if (target.Length > 1)
+                sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+            else
+            {
+                Player p = Player.LoadPlayer(target[0], 0);
+                string output = headerLine("Player Info: " + p.ColourUserName) + "\r\n";
+                output += "{bold}{blue}  Logon Message{reset}: " + p.LogonMsg + "\r\n";
+                output += "{bold}{blue} Logoff Message{reset}: " + p.LogoffMsg + "\r\n";
+                output += "{bold}{blue}  Enter Message{reset}: " + p.EnterMsg + "\r\n";
+                output += "{bold}{blue}   Exit Message{reset}: " + p.ExitMsg + "\r\n";
+                output += footerLine();
+                sendToUser(output, true, false, false);
+            }
+        }
+
         public void cmdLogonScript(string message)
         {
             if (message == "" && myPlayer.LogonScript == "")
