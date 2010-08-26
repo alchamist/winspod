@@ -288,6 +288,7 @@ namespace MudServer
                                 newUser.createStatus = 1;
                                 newUser.username = line.Trim();
                                 myPlayer = Player.LoadPlayer(line.Trim(), myNum);
+                                myPlayer.UserName = line.Trim();
                                 sendEchoOff();
                                 sendToUser("Please enter a password: ",false, false, false);
                                 Writer.Flush();
@@ -370,6 +371,20 @@ namespace MudServer
                         {
                             if (line.Trim() == newUser.tPassword)
                             {
+                                sendEchoOn();
+                                sendToUser("\r\nPlease enter your e-mail address: ", true, false, false);
+                                newUser.createStatus = 3;
+                            }
+                            else
+                            {
+                                sendToUser("\r\nPasswords do not match\r\nPlease enter a password: ", true, false, false);
+                                newUser.createStatus = 1;
+                            }
+                        }
+                        else if (newUser.createStatus == 3)
+                        {
+                            if (testEmailRegex(line.Trim()))
+                            {
                                 myPlayer.UserName = newUser.username;
                                 myPlayer.Password = newUser.tPassword;
                                 myPlayer.CurrentIP = connPoint;
@@ -379,21 +394,21 @@ namespace MudServer
                                 myPlayer.PlayerRank = (int)Player.Rank.HCAdmin;
                                 myPlayer.ResDate = DateTime.Now;
                                 myPlayer.Title = "is da admin";
+                                myPlayer.EmailAddress = line.Trim();
                                 Player.privs p = new Player.privs();
                                 p.builder = true;
                                 p.tester = true;
                                 p.noidle = true;
                                 myPlayer.SpecialPrivs = p;
 
-                                myState = 3;
-                                sendEchoOn();
+                                myState = 10;
                                 sendToUser("\r\nWelcome, " + myPlayer.ColourUserName + ". You are now the admin of the system", true);
                                 myPlayer.SavePlayer();
+                                doPrompt();
                             }
                             else
                             {
-                                sendToUser("\r\nPasswords do not match\r\nPlease enter a password: ", true, false, false);
-                                newUser.createStatus = 1;
+                                sendToUser("Sorry, that is not a valid e-mail address.\r\n\r\nPlease enter your e-mail address: ", true, false, false);
                             }
                         }
                     }
