@@ -3426,6 +3426,80 @@ namespace MudServer
             }
         }
 
+        public void cmdInform(string message)
+        {
+            if (message == "")
+            {
+                string output = "";
+                int tabCount = 1;
+                foreach (Player.playerList p in myPlayer.MyList)
+                {
+                    if (p.inform)
+                    {
+                        output += p.name.PadRight(20) + (tabCount++ % 4 == 0 ? "\r\n" : "");
+                    }
+                }
+                if (output == "")
+                    output = "No inform players set";
+
+                output = "\r\nInform All set to " + (myPlayer.InformAll ? "On" : "Off") + "\r\n" + "Inform Friends set to " + (myPlayer.InformFriends ? "On" : "Off") + "\r\n" + footerLine() + "\r\n" + output + "\r\n";
+                sendToUser(headerLine("Inform") + output + footerLine(), true, false, false);
+            }
+            else if (message.ToLower() == "all")
+            {
+                myPlayer.InformAll = !myPlayer.InformAll;
+                sendToUser("Inform All set to " + (myPlayer.InformAll ? "On" : "Off"), true, false, false);
+                myPlayer.SavePlayer();
+            }
+            else if (message.ToLower() == "friends")
+            {
+                myPlayer.InformFriends = !myPlayer.InformFriends;
+                sendToUser("Inform Friends set to " + (myPlayer.InformFriends ? "On" : "Off"), true, false, false);
+                myPlayer.SavePlayer();
+            }
+            else
+            {
+                string[] target = matchPartial(message);
+                if (target.Length == 0)
+                    sendToUser("No such player \"" + message + "\"", true, false, false);
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (target.Length == 1 && (target[0].ToLower() == myPlayer.UserName.ToLower()))
+                    sendToUser("You can't add yourself to your own inform list!", true, false, false);
+                else
+                {
+                    bool found = false;
+                    foreach (Player.playerList p in myPlayer.MyList)
+                    {
+                        if (p.name.ToLower() == target[0].ToLower())
+                        {
+                            found = true;
+                        }
+                    }
+                    if (!found)
+                    {
+                        if (myPlayer.SetInform(target[0]))
+                            sendToUser(target[0] + " added to your inform list", true, false, false);
+                        else
+                            sendToUser("No more space in your list", true, false, false);
+                    }
+                    else
+                    {
+                        if (myPlayer.InformFor(target[0]))
+                        {
+                            myPlayer.RemoveInform(target[0]);
+                            sendToUser(target[0] + " removed from your inform list", true, false, false);
+                        }
+                        else
+                        {
+                            myPlayer.SetInform(target[0]);
+                            sendToUser(target[0] + " added to your inform list", true, false, false);
+                        }
+                    }
+                }
+            }
+        }
+
         #region Alias stuff
 
         public string aliasText(string preText)

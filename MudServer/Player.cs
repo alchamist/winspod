@@ -836,6 +836,61 @@ namespace MudServer
             return ret;
         }
 
+        public void CleanMyList()
+        {
+            for (int i = 0; i < myList.Count; i++)
+            {
+                if (!myList[i].bar && !myList[i].beep && !myList[i].block && !myList[i].find && !myList[i].friend && !myList[i].grabme && !myList[i].ignore && !myList[i].inform && !myList[i].mailblock && !myList[i].noisy)
+                {
+                    myList.RemoveAt(i);
+                }
+            }
+        }
+
+        public bool SetInform(string username)
+        {
+            bool ret = false;
+            for (int i = 0; i < myList.Count(); i++)
+            {
+                if (myList[i].name.ToLower() == username.ToLower())
+                {
+                    ret = true;
+                    playerList temp = myList[i];
+                    temp.inform = true;
+                    myList[i] = temp;
+                }
+            }
+            if (!ret)
+            {
+                if (myList.Count > myListMaxSize)
+                {
+                    ret = true;
+                    playerList temp = new playerList();
+                    temp.name = username;
+                    temp.inform = true;
+                    myList.Add(temp);
+                }
+            }
+            return ret;
+        }
+
+        public bool RemoveInform(string username)
+        {
+            bool ret = false;
+            for (int i = 0; i < myList.Count(); i++)
+            {
+                if (myList[i].name.ToLower() == username.ToLower())
+                {
+                    ret = true;
+                    playerList temp = myList[i];
+                    temp.inform = false;
+                    myList[i] = temp;
+                }
+            }
+            CleanMyList();
+            return ret;
+        }
+
         public bool isFriend(string username)
         {
             bool ret = false;
@@ -886,6 +941,7 @@ namespace MudServer
                     myList.RemoveAt(i);
                 }
             }
+            CleanMyList();
         }
 
         #region Alias Stuff
