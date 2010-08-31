@@ -146,6 +146,16 @@ namespace MudServer
                     }
                 }
             }
+
+            foreach (Room r in roomList)
+            {
+                string roomMessage = r.timerFire();
+                if (roomMessage != "")
+                {
+                    sendToRoom("\r\n" + roomMessage, roomMessage, r.shortName, "");
+                }
+
+            }
         }
 
         #region Socket stuff
@@ -788,6 +798,8 @@ namespace MudServer
                             else
                                 conn.Writer.Write(prefix + AnsiColour.Colorise(msg, (removeColour || !conn.myPlayer.DoColour)));
 
+                            conn.Writer.Flush();
+
                             conn.lastSent = msg;
 
                             if (doHistory)
@@ -844,7 +856,7 @@ namespace MudServer
                 }
                 else
                 {
-                    if (msgToSender != "")
+                    if (msgToSender != "" && myPlayer != null)
                     {
                         sendToUser(msgToSender, sender, newline, myPlayer.DoColour, senderPrompt, true);
                     }
@@ -969,16 +981,14 @@ namespace MudServer
             if (Directory.Exists(path))
             {
                 DirectoryInfo di = new DirectoryInfo(path);
-                DirectoryInfo[] subs = di.GetDirectories();
-                foreach (DirectoryInfo dir in subs)
+
+                FileInfo[] fi = di.GetFiles();
+
+                foreach (FileInfo file in fi)
                 {
-                    FileInfo[] fi = dir.GetFiles();
-                    foreach (FileInfo file in fi)
-                    {
-                        Room load = Room.LoadRoom(file.Name.Replace(".xml", ""));
-                        if (load != null)
-                            list.Add(load);
-                    }
+                    Room load = Room.LoadRoom(file.Name.Replace(".xml", ""));
+                    if (load != null)
+                        list.Add(load);
                 }
             }
 
@@ -3844,6 +3854,66 @@ namespace MudServer
         public void movePlayer(string room)
         {
 
+        }
+
+        public void cmdRoomMessage(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: roommsg DEL/SHOW/<min seconds> <max seconds> <message>", true, false, false);
+            else
+            {
+                Room currentRoom = getRoom(myPlayer.UserRoom);
+                if (currentRoom.roomOwner == myPlayer.UserName || myPlayer.PlayerRank >= (int)Player.Rank.Admin)
+                {
+                    if (message.ToLower() == "del")
+                    {
+                        currentRoom.remRoomMessage();
+                        sendToUser("Room message removed", true, false, false);
+                        //currentRoom.SaveRoom();
+                        roomList = loadRooms();
+                    }
+                    else if (message.ToLower() == "show")
+                    {
+                        if (currentRoom.roomMessage.message == null || currentRoom.roomMessage.message == "")
+                            sendToUser("No room message set", true, false, false);
+                        else
+                            sendToUser("Room message set to \"" + currentRoom.roomMessage.message + "\", firing every " + currentRoom.roomMessage.minTime.ToString() + (currentRoom.roomMessage.minTime == currentRoom.roomMessage.maxTime ? "" : " to " + currentRoom.roomMessage.maxTime.ToString()) + " seconds", true, false, false);
+                    }
+                    else
+                    {
+                        string[] split = message.Split(new char[] { ' ' }, 3);
+                        if (split.Length < 3)
+                        {
+                            sendToUser("Syntax: roommsg DEL/SHOW/<min seconds> <max seconds> <message>", true, false, false);
+                        }
+                        else
+                        {
+                            int minTime;
+                            int maxTime;
+                            if (int.TryParse(split[0], out minTime) && int.TryParse(split[1], out maxTime))
+                            {
+                                if (maxTime < minTime)
+                                    sendToUser("Max seconds cannot be less than Min seconds", true, false, false);
+                                else
+                                {
+                                    currentRoom.setRoomMessage(split[2], minTime, maxTime, minTime != maxTime);
+                                    //currentRoom.SaveRoom();
+                                    roomList = loadRooms();
+                                    sendToUser("Room message set to \"" + split[2] + "\", firing every " + minTime.ToString() + (minTime == maxTime ? "" : " to " + maxTime.ToString()) + " seconds", true, false, false);
+                                }
+                            }
+                            else
+                            {
+                                sendToUser("Sorry, that is not a valid " + (!int.TryParse(split[0], out minTime) ? "min" : "max") + " seconds value", true, false, false);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    sendToUser("Sorry, you do not have permission to edit this room", true, false, false);
+                }
+            }
         }
 
         #endregion
