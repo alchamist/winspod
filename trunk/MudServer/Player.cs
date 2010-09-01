@@ -154,7 +154,9 @@ namespace MudServer
 
         private bool        inMailEditor = false;                           // Are they in the editor?
         private bool        inDescriptionEditor = false;                    // Are they editing their description?
+
         private bool        inRoomEditor = false;                           // Are they editing a room description?
+        private int         maxRooms = 3;                                   // How many rooms are they allowed?
 
         private bool        informAll;                                      // Do they want to be notified when anyone logs on/off?
         private bool        informFriends;                                  // Are they being informed of everyone?
@@ -660,6 +662,12 @@ namespace MudServer
                 }
                 return ret;
             }
+        }
+
+        public int MaxRooms
+        {
+            get { return maxRooms; }
+            set { maxRooms = value; }
         }
 
         #endregion
