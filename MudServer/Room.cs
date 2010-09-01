@@ -71,7 +71,7 @@ namespace MudServer
 
         public Room(string shrtName, string owner, bool sysRoom)
         {
-            systemName = owner.ToLower() + "." + shrtName;
+            systemName = owner.ToLower() + "." + shrtName.ToLower();
             shortName = shrtName;
             fullName = "Undefined Room Name";
             description = "A boring room with no description";

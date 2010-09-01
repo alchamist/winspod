@@ -3802,12 +3802,7 @@ namespace MudServer
                         Room exit = Room.LoadRoom(s);
                         if (exit.fullName != null)
                         {
-                            if (exit.shortName.ToLower() == message.ToLower())
-                            {
-                                found = true;
-                                movePlayer(s);
-                            }
-                            else if (exit.shortName.ToLower().StartsWith(message.ToLower()))
+                            if (exit.shortName.ToLower() == message.ToLower() || exit.shortName.ToLower().StartsWith(message.ToLower()))
                             {
                                 found = true;
                                 movePlayer(s);
@@ -3823,7 +3818,19 @@ namespace MudServer
                                 if (r.systemName.ToLower() == message.ToLower())
                                 {
                                     found = true;
-                                    movePlayer(r.systemName);
+                                    Player owner = null;
+                                    if (!r.systemRoom)
+                                    {
+                                        owner = Player.LoadPlayer(r.roomOwner, 0);
+                                    }
+                                    if ((r.locks.FullLock || (r.locks.AdminLock && myPlayer.PlayerRank < (int)Player.Rank.Admin) || (r.locks.StaffLock && myPlayer.PlayerRank < (int)Player.Rank.Staff) || (r.locks.GuideLock && myPlayer.PlayerRank < (int)Player.Rank.Guide) || (!r.systemRoom && r.locks.FriendLock && owner != null && !owner.isFriend(myPlayer.UserName))) && myPlayer.PlayerRank < (int)Player.Rank.HCAdmin)
+                                    {
+                                        sendToUser("You try the door, but find it locked shut", true, false, false);
+                                    }
+                                    else
+                                    {
+                                        movePlayer(r.systemName);
+                                    }
                                 }
                             }
                             if (!found)
@@ -3840,6 +3847,60 @@ namespace MudServer
                 else
                 {
                     sendToUser("Strange. You don't seem to be in a room at all ...", true, false, false);
+                }
+            }
+        }
+
+        public void cmdHome(string message)
+        {
+            // First check to see if they have a home room, and if not then create it!
+            string roomName = myPlayer.UserName.ToLower() + ".home";
+            Room check = Room.LoadRoom(roomName);
+            if (check == null || check.fullName == null)
+            {
+                check = new Room("home", myPlayer.UserName, false);
+                check.fullName = myPlayer.UserName + "'" + (myPlayer.UserName.EndsWith("s") ? "" : "s") + " little home";
+                check.SaveRoom();
+                roomList = loadRooms();
+            }
+            movePlayer(check.systemName);
+        }
+
+        public void cmdJoin(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: join <player name>", true, false, false);
+            else
+            {
+                string[] target = matchPartial(message);
+                if (target.Length == 0)
+                    sendToUser("Player \"" + message + "\" not found", true, false, false);
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (!isOnline(target[0]))
+                    sendToUser("Player \"" + target[0] + "\" is not online", true, false, false);
+                else
+                {
+                    foreach (Connection c in connections)
+                    {
+                        if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                        {
+                            if (c.myPlayer.Hidden)
+                                sendToUser("Try as you might, you cannot seem to find " + target[0] + " anywhere!", true, false, false);
+                            else
+                            {
+                                Room targetRoom = Room.LoadRoom(c.myPlayer.UserRoom);
+                                if (targetRoom.locks.FullLock || (targetRoom.locks.AdminLock && myPlayer.PlayerRank < (int)Player.Rank.Admin) || (targetRoom.locks.StaffLock && myPlayer.PlayerRank < (int)Player.Rank.Staff) || (targetRoom.locks.GuideLock && myPlayer.PlayerRank < (int)Player.Rank.Guide) || (targetRoom.locks.FriendLock && !c.myPlayer.isFriend(myPlayer.UserName)))
+                                {
+                                    sendToUser("You try the door, but find it locked shut", true, false, false);
+                                }
+                                else
+                                {
+                                    movePlayer(c.myPlayer.UserRoom);
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -4195,6 +4256,143 @@ namespace MudServer
                             sendToUser("You delete the link from this room to \"" + remove + "\"", true, false, false);
                         }
                     }
+                }
+            }
+        }
+
+        public void cmdRoomList(string message)
+        {
+            string output = "\r\n{red}" + "System Name".PadRight(20) + "Short Name".PadRight(20) + "Full Name".PadRight(20) + "Owner{reset}\r\n";
+            if (message == "")
+            {
+                // List all the rooms
+                roomList = loadRooms();
+                int roomCount = 0;
+                foreach (Room r in roomList)
+                {
+                    output += (r.systemName.Length >= 20 ? r.systemName.Substring(0,16) + "..." : r.systemName).PadRight(20) 
+                        + (r.shortName.Length >= 20 ? r.shortName.Substring(0,16) + "..." : r.shortName).PadRight(20) 
+                        + (r.fullName.Length >= 20 ? r.fullName.Substring(0,16) + "..." : r.fullName).PadRight(20) 
+                        + (r.roomOwner.Length >= 20 ? r.roomOwner.Substring(0,16) + "..." : r.roomOwner) + "\r\n";
+                    roomCount++;
+                }
+                sendToUser(headerLine("All Rooms") + "\r\nThere " + (roomCount != 1 ? "are " + roomCount.ToString() + " rooms" : "is one room") + ":" + output + footerLine(), true, false, false);
+            }
+            else
+            {
+                roomList = loadRooms();
+                int roomCount = 0;
+                foreach (Room r in roomList)
+                {
+                    if (r.roomOwner.ToLower().StartsWith(message.ToLower()))
+                    {
+                        output += r.systemName.PadRight(20) + r.shortName.PadRight(20) + r.fullName.PadRight(20) + r.roomOwner + "\r\n";
+                        roomCount++;
+                    }
+                }
+                sendToUser(headerLine("Rooms matching \"" + message + "\"") + "\r\nThere " + (roomCount != 1 ? "are " + roomCount.ToString() + " rooms" : "is one room") + ":" + output + footerLine(), true, false, false);
+            }
+        }
+
+        public void cmdRoomLock(string message)
+        {
+            Room currentRoom = getRoom(myPlayer.UserRoom);
+            if (message == "")
+            {
+                if (currentRoom.roomOwner.ToLower() == myPlayer.UserName.ToLower() || myPlayer.PlayerRank > (int)Player.Rank.Staff)
+                {
+                    string output = headerLine("Current room locks for " + currentRoom.shortName) + "\r\n";
+                    output += "Full lock:".PadRight(15) + (currentRoom.locks.FullLock ? "Yes" : "No") + "\r\n";
+                    if (myPlayer.PlayerRank >= (int)Player.Rank.Admin)
+                    {
+                        output += "Admin lock:".PadRight(15) + (currentRoom.locks.AdminLock ? "Yes" : "No") + "\r\n";
+                        output += "Staff lock:".PadRight(15) + (currentRoom.locks.StaffLock ? "Yes" : "No") + "\r\n";
+                        output += "Guide lock:".PadRight(15) + (currentRoom.locks.GuideLock ? "Yes" : "No") + "\r\n";
+                    }
+                    output += "Friends lock:".PadRight(15) + (currentRoom.locks.FriendLock ? "Yes" : "No") + "\r\n";
+                    output += footerLine();
+                    sendToUser(output, true, false, false);
+                }
+                else
+                    sendToUser("You are not authorised to see the locks on this room", true, false, false);
+            }
+            else
+            {
+                if (currentRoom.roomOwner.ToLower() != myPlayer.UserName.ToLower() && myPlayer.PlayerRank < (int)Player.Rank.Admin)
+                    sendToUser("Sorry, you do not have permission to change the locks in this room", true, false, false);
+                else
+                {
+                    switch (message.ToLower())
+                    {
+                        case "full":
+                            currentRoom.locks.FullLock = !currentRoom.locks.FullLock;
+                            sendToUser("You " + (currentRoom.locks.FullLock ? "add" : "remove") + " the full room lock", true, false, false);
+                            break;
+                        case "admin":
+                            if (myPlayer.PlayerRank >= (int)Player.Rank.Admin)
+                            {
+                                currentRoom.locks.AdminLock = !currentRoom.locks.AdminLock;
+                                sendToUser("You " + (currentRoom.locks.AdminLock ? "add" : "remove") + " the admin only lock", true, false, false);
+                            }
+                            else
+                            {
+                                sendToUser("Syntax: roomlock <full/friends/none>", true, false, false);
+                            }
+                            break;
+                        case "staff":
+                            if (myPlayer.PlayerRank >= (int)Player.Rank.Admin)
+                            {
+                                currentRoom.locks.StaffLock = !currentRoom.locks.StaffLock;
+                                sendToUser("You " + (currentRoom.locks.StaffLock ? "add" : "remove") + " the staff only lock", true, false, false);
+                            }
+                            else
+                            {
+                                sendToUser("Syntax: roomlock <full/friends/none>", true, false, false);
+                            }
+                            break;
+                        case "guide":
+                            if (myPlayer.PlayerRank >= (int)Player.Rank.Admin)
+                            {
+                                currentRoom.locks.GuideLock = !currentRoom.locks.GuideLock;
+                                sendToUser("You " + (currentRoom.locks.GuideLock ? "add" : "remove") + " the guide only lock", true, false, false);
+                            }
+                            else
+                            {
+                                sendToUser("Syntax: roomlock <full/friends/none>", true, false, false);
+                            }
+                            break;
+                        case "friend":
+                            currentRoom.locks.FriendLock = !currentRoom.locks.FriendLock;
+                            sendToUser("You " + (currentRoom.locks.FriendLock ? "add" : "remove") + " the friends only lock", true, false, false);
+                            break;
+                        case "all":
+                            currentRoom.locks.FullLock = true;
+                            currentRoom.locks.FriendLock = true;
+                            if (myPlayer.PlayerRank >= (int)Player.Rank.Admin)
+                            {
+                                currentRoom.locks.AdminLock = true;
+                                currentRoom.locks.StaffLock = true;
+                                currentRoom.locks.GuideLock = true;
+                            }
+                            sendToUser("You add all the locks", true, false, false);
+                            break;
+                        case "none":
+                            currentRoom.locks.FullLock = false;
+                            currentRoom.locks.FriendLock = false;
+                            if (myPlayer.PlayerRank >= (int)Player.Rank.Admin)
+                            {
+                                currentRoom.locks.AdminLock = false;
+                                currentRoom.locks.StaffLock = false;
+                                currentRoom.locks.GuideLock = false;
+                            }
+                            sendToUser("You remove all the locks", true, false, false);
+                            break;
+                        default:
+                            sendToUser("Syntax: roomlock <full/" + (myPlayer.PlayerRank >= (int)Player.Rank.Admin ? "admin/staff/guide/all/" : "") + "friends/none>", true, false, false);
+                            break;
+                    }
+                    currentRoom.SaveRoom();
+                    roomList = loadRooms();
                 }
             }
         }
