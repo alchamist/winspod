@@ -3069,7 +3069,7 @@ namespace MudServer
                     rename.UserName = split[1];
                     rename.SavePlayer();
 
-                    // Iterate through and change To and From as required in messages
+                    // Iterate through messages and change To and From as required in messages
                     messages = loadMessages();
                     for(int i = 0; i < messages.Count; i++)
                     {
@@ -3088,7 +3088,46 @@ namespace MudServer
                     }
                     saveMessages();
 
+                    // Iterate through the rooms and change owners as necessary
+                    roomList = loadRooms();
+                    {
+                        foreach (Room r in roomList)
+                        {
+                            Room temp = r;
+                            if (temp.roomOwner.ToLower() == target[0])
+                            {
+                                temp.roomOwner = split[1];
+                            }
+                            if (temp.systemName.StartsWith(target[0].ToLower() + "."))
+                            {
+                                string path = ("rooms" + Path.DirectorySeparatorChar + r.systemName.ToLower() + ".xml");
 
+                                if (File.Exists(path))
+                                {
+                                    try
+                                    {
+                                        File.Delete(path);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        Debug.Print(e.ToString());
+                                    }
+                                }
+
+                                temp.systemName = temp.systemName.Replace(split[0].ToLower() + ".", split[1].ToLower() + ".");
+
+                            }
+                            for (int i = 0; i < temp.exits.Count; i++)
+                            {
+                                if (temp.exits[i].StartsWith(target[0].ToLower() + "."))
+                                {
+                                    temp.exits[i] = temp.exits[i].Replace(target[0].ToLower() + ".", target[1].ToLower() + ".");
+                                }
+                            }
+                            temp.SaveRoom();
+                        }
+                        roomList = loadRooms();
+                    }
 
                     if (isOnline(target[0]))
                     {
