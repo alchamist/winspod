@@ -154,6 +154,7 @@ namespace MudServer
 
         private bool        inMailEditor = false;                           // Are they in the editor?
         private bool        inDescriptionEditor = false;                    // Are they editing their description?
+        private bool        inRoomEditor = false;                           // Are they editing a room description?
 
         private bool        informAll;                                      // Do they want to be notified when anyone logs on/off?
         private bool        informFriends;                                  // Are they being informed of everyone?
@@ -631,9 +632,15 @@ namespace MudServer
             set { inDescriptionEditor = value; }
         }
 
+        public bool InRoomEditor
+        {
+            get { return inRoomEditor; }
+            set { inRoomEditor = value; }
+        }
+
         public bool InEditor
         {
-            get { return inMailEditor || inDescriptionEditor; }
+            get { return inMailEditor || inDescriptionEditor || inRoomEditor; }
         }
 
         public List<alias> AliasList

@@ -602,6 +602,11 @@ namespace MudServer
                     myPlayer.LastActive = DateTime.Now;
                     descriptionEdit(line);
                 }
+                else if (myPlayer.InRoomEditor)
+                {
+                    myPlayer.LastActive = DateTime.Now;
+                    roomEdit(line);
+                }
                 else if (cmd != "")
                 {
                     if (cmd.Substring(0, 1) == "#" && myPlayer.PlayerRank >= (int)Player.Rank.Admin)
@@ -624,27 +629,58 @@ namespace MudServer
                     //}
                     //else
                     //{
-                        string shortCMD = cmd.Substring(0, 1);
-                        string firstWord = "";
-                        string message = "";
+                    string shortCMD = cmd.Substring(0, 1);
+                    string firstWord = "";
+                    string message = "";
 
-                        if (cmd.IndexOf(" ") != -1)
+                    if (cmd.IndexOf(" ") != -1)
+                    {
+                        firstWord = cmd.Substring(0, cmd.IndexOf(" ")).Trim().ToLower();
+                        message = cmd.Substring(cmd.IndexOf(" ")).Trim();
+                    }
+                    else
+                    {
+                        //firstWord = message;
+                        firstWord = cmd;
+                    }
+
+
+                    bool found = false;
+                    foreach (commands c in cmds)
+                    {
+                        //if (shortCMD == c.cmdText || firstWord == c.cmdText || cmd == c.cmdText)
+                        if (firstWord == c.cmdText || cmd == c.cmdText)
                         {
-                            firstWord = cmd.Substring(0, cmd.IndexOf(" ")).Trim().ToLower();
-                            message = cmd.Substring(cmd.IndexOf(" ")).Trim();
+                            try
+                            {
+                                if (myPlayer.Away && !adminIdle)
+                                {
+                                    myPlayer.Away = false;
+                                    sendToUser("You set yourself as back", true, false, false);
+                                }
+                                MethodInfo mInfo = typeof(Connection).GetMethod(c.cmdCall);
+                                mInfo.Invoke(this, new object[] { cmd.Substring(c.cmdText.Length).Trim() });
+                            }
+                            catch (Exception e)
+                            {
+                                logError("Error parsing command " + c.cmdText + ": " + e.ToString(), "Command");
+                                sendToUser("Sorry, there has been an error", true);
+                            }
+                            finally
+                            {
+                                found = true;
+                                if (!adminIdle)
+                                    myPlayer.LastActive = DateTime.Now;
+                                if (!noAlias)
+                                    doPrompt();
+                            }
                         }
-                        else
-                        {
-                            //firstWord = message;
-                            firstWord = cmd;
-                        }
-
-
-                        bool found = false;
+                    }
+                    if (!found)
+                    {
                         foreach (commands c in cmds)
                         {
-                            //if (shortCMD == c.cmdText || firstWord == c.cmdText || cmd == c.cmdText)
-                            if (firstWord == c.cmdText || cmd == c.cmdText)
+                            if (shortCMD == c.cmdText)
                             {
                                 try
                                 {
@@ -671,46 +707,15 @@ namespace MudServer
                                 }
                             }
                         }
-                        if (!found)
-                        {
-                            foreach (commands c in cmds)
-                            {
-                                if (shortCMD == c.cmdText)
-                                {
-                                    try
-                                    {
-                                        if (myPlayer.Away && !adminIdle)
-                                        {
-                                            myPlayer.Away = false;
-                                            sendToUser("You set yourself as back", true, false, false);
-                                        }
-                                        MethodInfo mInfo = typeof(Connection).GetMethod(c.cmdCall);
-                                        mInfo.Invoke(this, new object[] { cmd.Substring(c.cmdText.Length).Trim() });
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        logError("Error parsing command " + c.cmdText + ": " + e.ToString(), "Command");
-                                        sendToUser("Sorry, there has been an error", true);
-                                    }
-                                    finally
-                                    {
-                                        found = true;
-                                        if (!adminIdle)
-                                            myPlayer.LastActive = DateTime.Now;
-                                        if (!noAlias)
-                                            doPrompt();
-                                    }
-                                }
-                            }
-                        }
-                        if (!found && !noAlias)
-                            found = doAlias(cmd);
+                    }
+                    if (!found && !noAlias)
+                        found = doAlias(cmd);
 
-                        if (!found)
-                            sendToUser("Huh?", true, true, false);
-                        
-                        //if (!noAlias && found)
-                        //    doPrompt();
+                    if (!found)
+                        sendToUser("Huh?", true, true, false);
+
+                    //if (!noAlias && found)
+                    //    doPrompt();
                     //}
                 }
                 else
@@ -3916,6 +3921,42 @@ namespace MudServer
             }
         }
 
+        public void cmdRoomEdit(string message)
+        {
+            Room currentRoom = getRoom(myPlayer.UserRoom);
+            if (currentRoom.roomOwner == myPlayer.UserName || myPlayer.PlayerRank >= (int)Player.Rank.Admin)
+            {
+                myPlayer.InRoomEditor = true;
+                editText = currentRoom.description;
+                sendToUser("Entering room editor", true, false, false);
+            }
+            else
+            {
+                sendToUser("Sorry, you do not have permission to edit this room", true, false, false);
+            }
+        }
+
+        public void cmdRoomFullName(string message)
+        {
+            Room currentRoom = getRoom(myPlayer.UserRoom);
+            if (currentRoom.roomOwner == myPlayer.UserName || myPlayer.PlayerRank >= (int)Player.Rank.Admin)
+            {
+                if (message == "")
+                    sendToUser("Syntax: roomfname <full name>", true, false, false);
+                else
+                {
+                    currentRoom.fullName = message;
+                    currentRoom.SaveRoom();
+                    roomList = loadRooms();
+                    sendToUser("Room name set to \"" + currentRoom.fullName + "\"", true, false, false);
+                }
+            }
+            else
+            {
+                sendToUser("Sorry, you do not have permission to edit this room", true, false, false);
+            }
+        }
+
         #endregion
 
         #region Messaging System
@@ -4290,6 +4331,45 @@ namespace MudServer
                     case ".quit":
                         editText = "";
                         myPlayer.InDescriptionEditor = false;
+                        sendToUser("Description edit aborted", true, false, false);
+                        break;
+                    default:
+                        sendToUser("Commands available:\r\n.view - show current description content\r\n.wipe - wipe current description content\r\n.quit - exit the editor without saving desctiption\r\n.end - exit the editor and save description", true, false, false);
+                        break;
+                }
+            }
+            else
+            {
+                editText += message + "\r\n";
+            }
+            doPrompt();
+        }
+
+        public void roomEdit(string message)
+        {
+            if (message.StartsWith("."))
+            {
+                switch (message)
+                {
+                    case ".end":
+                    case ".":
+                        myPlayer.InRoomEditor = false;
+                        Room temp = Room.LoadRoom(myPlayer.UserRoom);
+                        temp.description = editText;
+                        temp.SaveRoom();
+                        roomList = loadRooms();
+                        sendToUser("Description set", true, false, false);
+                        editText = "";
+                        break;
+                    case ".wipe":
+                        editText = "";
+                        break;
+                    case ".view":
+                        sendToUser(editText, true, false, false);
+                        break;
+                    case ".quit":
+                        editText = "";
+                        myPlayer.InRoomEditor = false;
                         sendToUser("Description edit aborted", true, false, false);
                         break;
                     default:
