@@ -52,7 +52,8 @@ namespace MudServer
             public DateTime         nextFire; // Timestamp the message will be fired next
         }
 
-
+        
+        public string               systemName;
         public string               shortName;
         public string               fullName;
         public string               enterMessage = "";
@@ -68,9 +69,10 @@ namespace MudServer
             
         }
 
-        public Room(string sName, string owner, bool sysRoom)
+        public Room(string shrtName, string owner, bool sysRoom)
         {
-            shortName = sName;
+            systemName = owner.ToLower() + "." + shrtName;
+            shortName = shrtName;
             fullName = "Undefined Room Name";
             description = "A boring room with no description";
             systemRoom = sysRoom;
@@ -101,15 +103,22 @@ namespace MudServer
             {
                 load = new Room();
             }
+
+            for (int i = load.exits.Count-1; i >= 0; i--)
+            {
+                if (load.exits[i] == "" || load.exits[i] == null)
+                    load.exits.RemoveAt(i);
+            }
+
             return load;
         }
 
         public void SaveRoom()
         {
-            if (this.shortName != null && this.fullName != null)
+            if (this.systemName != null && this.fullName != null)
             {
                 string path = @"rooms" + Path.DirectorySeparatorChar;
-                string fname = this.shortName + ".xml";
+                string fname = this.systemName + ".xml";
                 string fpath = path + fname;
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
