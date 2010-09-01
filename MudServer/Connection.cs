@@ -857,16 +857,14 @@ namespace MudServer
             {
                 if (conn.myPlayer != null && conn.myPlayer.UserName != sender && conn.myPlayer.UserRoom == room && !conn.myPlayer.InEditor)
                 {
-                    sendToUser(msgToOthers, conn.myPlayer.UserName, newline, conn.myPlayer.DoColour, receiverPrompt, true);
+                    //sendToUser(msgToOthers, conn.myPlayer.UserName, newline, conn.myPlayer.DoColour, receiverPrompt, true);
+                    conn.sendToUser(msgToOthers, newline, receiverPrompt, true);
                 }
-                else
-                {
-                    if (msgToSender != "" && myPlayer != null)
-                    {
-                        sendToUser(msgToSender, sender, newline, myPlayer.DoColour, senderPrompt, true);
-                    }
-                }
-                
+            }
+            if (msgToSender != "" && myPlayer != null)
+            {
+                //sendToUser(msgToSender, sender, newline, myPlayer.DoColour, senderPrompt, true);
+                sendToUser(msgToSender, newline, senderPrompt, true);
             }
         }
 
@@ -3767,10 +3765,10 @@ namespace MudServer
             else
             {
                 string output = "";
-                for (int i = 0; i < room.exits.Length; i++)
+                foreach (string s in room.exits)
                 {
-                    if (room.exits[i] != "")
-                        output += (Room.Direction)i + " -> " + getRoomFullName(room.exits[i]) + "\r\n";
+                    if (s != "")
+                        output += s + " -> " + getRoomFullName(s) + "\r\n";
                 }
                 if (output == "")
                     sendToUser("There are no exits from this room", true, false, false);
@@ -3796,17 +3794,17 @@ namespace MudServer
                 if (currentRoom != null)
                 {
                     bool found = false;
-                    for (int i = 0; i < currentRoom.exits.Length; i++)
+                    foreach(string s in currentRoom.exits)
                     {
-                        if (((Room.Direction)i).ToString().ToLower() == message.ToLower() && currentRoom.exits[i] != "")
+                        if (s.ToLower() == message.ToLower())
                         {
                             found = true;
-                            movePlayer(currentRoom.exits[i]);
+                            movePlayer(s);
                         }
-                        else if (currentRoom.exits[i].ToLower().StartsWith(message.ToLower()))
+                        else if (s.ToLower().StartsWith(message.ToLower()))
                         {
                             found = true;
-                            movePlayer(currentRoom.exits[i]);
+                            movePlayer(s);
                         }
                     }
                     if (!found)
@@ -3858,7 +3856,29 @@ namespace MudServer
 
         public void movePlayer(string room)
         {
+            movePlayer(room, true);
+        }
 
+        public void movePlayer(string room, bool doLook)
+        {
+            Room target = getRoom(room);
+            if (target == null)
+            {
+                sendToUser("Sorry, that room is not valid", true, false, false);
+                logError("Room \"" + room + "\" appears in a link from " + myPlayer.UserRoom + " but is not valid", "room");
+            }
+            else
+            {
+                Room currentRoom = Room.LoadRoom(myPlayer.UserRoom);
+                if (currentRoom != null)
+                    sendToRoom(myPlayer.ColourUserName + " " + myPlayer.ExitMsg, "");
+
+                myPlayer.UserRoom = target.shortName;
+                sendToRoom(myPlayer.ColourUserName + " " + (target.enterMessage == "" ? myPlayer.EnterMsg : target.enterMessage), "", false, true);
+                myPlayer.SavePlayer();
+                if (doLook)
+                    cmdLook("");
+            }
         }
 
         public void cmdRoomMessage(string message)
@@ -3955,6 +3975,258 @@ namespace MudServer
             {
                 sendToUser("Sorry, you do not have permission to edit this room", true, false, false);
             }
+        }
+
+        public void cmdRoomShortName(string message)
+        {
+            Room currentRoom = getRoom(myPlayer.UserRoom);
+            
+            if (currentRoom.systemRoom && currentRoom.shortName.ToLower() == AppSettings.Default.DefaultLoginRoom.ToLower() && myPlayer.PlayerRank >= (int)Player.Rank.Admin)
+            {
+                sendToUser("You cannot change the default login room system name!", true, false, false);
+            }
+            else if (currentRoom.roomOwner == myPlayer.UserName || myPlayer.PlayerRank >= (int)Player.Rank.Admin)
+            {
+                if (message == "")
+                    sendToUser("Current Room system name: " + currentRoom.shortName, true, false, false);
+                else if (message.IndexOf(" ") > -1)
+                    sendToUser("Sorry, Room system names cannot contain spaces");
+                else
+                {
+                    roomList = loadRooms();
+                    bool found = false;
+                    foreach (Room r in roomList)
+                    {
+                        if (r.shortName == message && r.shortName != currentRoom.shortName)
+                            found = true;
+                    }
+                    if (!found)
+                    {
+                        // Cycle through all the rooms and check to see if it is linked - if so then update the links
+                        for (int i = 0; i < roomList.Count; i++)
+                        {
+                            Room temp = roomList[i];
+                            for (int j = 0; j < temp.exits.Count; j++)
+                            {
+                                if (temp.exits[j].ToLower() == currentRoom.shortName.ToLower())
+                                {
+                                    temp.exits[j] = message;
+                                    temp.SaveRoom();
+                                }
+                            }
+                        }
+
+                        //Delete the old file
+                        string path = ("rooms" + Path.DirectorySeparatorChar + currentRoom.shortName.ToLower() + ".xml");
+
+                        if (File.Exists(path))
+                        {
+                            try
+                            {
+                                File.Delete(path);
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.Print(e.ToString());
+                            }
+                        }
+
+                        currentRoom.shortName = message;
+                        currentRoom.SaveRoom();
+
+
+                        roomList = loadRooms();
+                        sendToUser("Room name set to \"" + currentRoom.shortName+ "\"", true, false, false);
+                    }
+                    else
+                    {
+                        sendToUser("Sorry, that name already exists", true, false, false);
+                    }
+                }
+            }
+            else
+            {
+                sendToUser("Sorry, you do not have permission to edit this room", true, false, false);
+            }
+        }
+
+        public void cmdRoomEnterMsg(string message)
+        {
+            Room currentRoom = getRoom(myPlayer.UserRoom);
+            if (currentRoom.roomOwner == myPlayer.UserName || myPlayer.PlayerRank >= (int)Player.Rank.Admin)
+            {
+                if (message == "")
+                    sendToUser("Current room entermsg: \"" + currentRoom.enterMessage + "\"", true, false, false);
+                else if (message.ToLower() == "del")
+                {
+                    currentRoom.enterMessage = "";
+                    currentRoom.SaveRoom();
+                    roomList = loadRooms();
+                    sendToUser("You have removed the room entermsg", true, false, false);
+                }
+                else
+                {
+                    currentRoom.enterMessage = message;
+                    currentRoom.SaveRoom();
+                    roomList = loadRooms();
+                    sendToUser("Room entermsg set to \"" + currentRoom.enterMessage + "\"", true, false, false);
+                }
+            }
+            else
+            {
+                sendToUser("Sorry, you do not have permission to edit this room", true, false, false);
+            }
+        }
+
+        public void cmdRoomAdd(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: roomadd " + (myPlayer.PlayerRank >= (int)Player.Rank.Admin ? "<#>" : "") + "<room system name>", true, false, false);
+            else
+            {
+                bool sysroom = false;
+                if (message.StartsWith("#") && myPlayer.PlayerRank >= (int)Player.Rank.Admin)
+                    sysroom = true;
+
+                if (!sysroom && roomCount() >= myPlayer.MaxRooms)
+                    sendToUser("Sorry, you have reached your maximum number of rooms", true, false, false);
+                else
+                {
+                    Room newRoom = new Room(sysroom ? message.Substring(1).ToLower() : message.ToLower(), myPlayer.UserName, sysroom);
+                    newRoom.SaveRoom();
+                    roomList = loadRooms();
+                    sendToUser("Room \"" + newRoom.shortName + "\" created. Remember to link the room somewhere!", true, false, false);
+
+                }
+            }
+        }
+
+        public void cmdRoomDel(string message)
+        {
+            Room currentRoom = getRoom(myPlayer.UserRoom);
+            if (currentRoom.systemRoom && currentRoom.shortName.ToLower() == AppSettings.Default.DefaultLoginRoom.ToLower() && myPlayer.PlayerRank >= (int)Player.Rank.Admin)
+            {
+                sendToUser("You cannot delete the default login room!", true, false, false);
+            }
+            else if (currentRoom.roomOwner == myPlayer.UserName || myPlayer.PlayerRank >= (int)Player.Rank.Admin)
+            {
+                // Remove all links to this room!
+                for (int i = 0; i < roomList.Count; i++)
+                {
+                    Room temp = roomList[i];
+                    for (int j = 0; j < temp.exits.Count; j++)
+                    {
+                        if (temp.exits[j].ToLower() == currentRoom.shortName.ToLower())
+                            temp.exits[j] = "";
+                    }
+                    temp.SaveRoom();
+                }
+                string path = ("rooms" + Path.DirectorySeparatorChar + currentRoom.shortName.ToLower() + ".xml");
+
+                if (File.Exists(path))
+                {
+                    try
+                    {
+                        File.Delete(path);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.Print(e.ToString());
+                    }
+                }
+
+                roomList = loadRooms();
+                sendToUser("Room \"" + currentRoom.shortName + "\" deleted. Moving you to main", true, false, false);
+                movePlayer(AppSettings.Default.DefaultLoginRoom, false);
+            }
+            else
+            {
+                sendToUser("Sorry, you do not have permission to edit this room", true, false, false);
+            }
+        }
+
+        public void cmdRoomLink(string message)
+        {
+            if (message == "" || message.IndexOf(" ") == -1 || !(message.ToLower().StartsWith("add") || message.ToLower().StartsWith("del")))
+                sendToUser("Syntax: roomlink <add/del> <room system name>");
+            else
+            {
+                Room currentRoom = getRoom(myPlayer.UserRoom);
+                string[] split = message.Split(new char[] { ' ' });
+
+                if (currentRoom.roomOwner.ToLower() != myPlayer.UserName.ToLower() && myPlayer.PlayerRank < (int)Player.Rank.Admin)
+                    sendToUser("Sorry, you do not have permission to link this room", true, false, false);
+                else if (currentRoom.shortName.ToLower() == split[1])
+                    sendToUser("You cannot link a room to itself!", true, false, false);
+                else
+                {
+                    if (split[0].ToLower() == "add")
+                    {
+                        roomList = loadRooms();
+                        bool found = false;
+                        foreach (Room r in roomList)
+                        {
+                            if (r.shortName.ToLower() == split[1].ToLower())
+                            {
+                                found = true;
+                                if (r.roomOwner.ToLower() != myPlayer.UserName.ToLower() && myPlayer.PlayerRank < (int)Player.Rank.Admin)
+                                    sendToUser("Sorry, you do not have permission to link to that room", true, false, false);
+                                else
+                                {
+                                    bool alreadyLinked = false;
+                                    foreach (string s in currentRoom.exits)
+                                    {
+                                        if (s.ToLower() == r.shortName.ToLower())
+                                            alreadyLinked = true;
+                                    }
+                                    if (alreadyLinked)
+                                        sendToUser("That room is already linked to this one", true, false, false);
+                                    else
+                                    {
+                                        currentRoom.exits.Add(r.shortName);
+                                        currentRoom.SaveRoom();
+                                        sendToUser("You create a link from this room to \"" + r.shortName + "\" (Don't forget to link it back the other way for two way access)", true, false, false);
+                                    }
+                                }
+                            }
+                        }
+                        if (!found)
+                        {
+                            sendToUser("Room \"" + split[1] + "\" not found", true, false, false);
+                        }
+                    }
+                    else
+                    {
+                        string remove = "";
+                        foreach (string s in currentRoom.exits)
+                        {
+                            if (s.ToLower() == split[1].ToLower())
+                                remove = s;
+                        }
+                        if (remove == "")
+                            sendToUser("Link \"" + split[1] + "\" not found", true, false, false);
+                        else
+                        {
+                            currentRoom.exits.Remove(remove);
+                            currentRoom.SaveRoom();
+                            roomList = loadRooms();
+                            sendToUser("You delete the link from this room to \"" + remove + "\"", true, false, false);
+                        }
+                    }
+                }
+            }
+        }
+
+        public int roomCount()
+        {
+            roomList = loadRooms();
+            int ret = 0;
+            foreach (Room r in roomList)
+            {
+                if (r.roomOwner.ToLower() == myPlayer.UserName.ToLower())
+                    ret++;
+            }
+            return ret;
         }
 
         #endregion
@@ -4828,10 +5100,11 @@ namespace MudServer
 
         private Room getRoom(string room)
         {
+            roomList = loadRooms();
             Room ret = null;
             foreach (Room r in roomList)
             {
-                if (r.shortName == room)
+                if (r.shortName.ToLower() == room.ToLower())
                     ret = r;
             }
             return ret;

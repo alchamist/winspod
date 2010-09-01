@@ -57,7 +57,7 @@ namespace MudServer
         public string               fullName;
         public string               enterMessage = "";
         public string               description = "";
-        public string[]             exits = new string[18];
+        public List<string>         exits = new List<string>();
         public bool                 systemRoom = false;
         public roomLocks            locks;
         public string               roomOwner = null;
@@ -65,8 +65,16 @@ namespace MudServer
 
         public Room()
         {
-            for (int i = 0; i < exits.Length; i++)
-                exits[i] = "";
+            
+        }
+
+        public Room(string sName, string owner, bool sysRoom)
+        {
+            shortName = sName;
+            fullName = "Undefined Room Name";
+            description = "A boring room with no description";
+            systemRoom = sysRoom;
+            roomOwner = sysRoom ? "System" : owner;
         }
 
         public static Room LoadRoom(string roomName)
