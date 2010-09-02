@@ -1024,14 +1024,14 @@ namespace MudServer
             }
         }
 
-        public bool InInventory(string objectName)
+        public int InInventory(string objectName)
         {
             foreach (inventory i in inventoryList)
             {
                 if (i.name.ToLower() == objectName.ToLower())
-                    return true;
+                    return i.count;
             }
-            return false;
+            return 0;
         }
 
         public void WieldInventory(string objectName)
