@@ -4675,11 +4675,11 @@ namespace MudServer
                                 break;
                             case "punique":
                                 temp.Unique.ToPlayer = !temp.Unique.ToPlayer;
-                                sendToUser("You " + (temp.Unique.ToPlayer ? "remove" : "set") + " the Unique for player flag for object \"" + temp.Name + "\"", true, false, false);
+                                sendToUser("You " + (temp.Unique.ToPlayer ? "set" : "remove") + " the Unique for player flag for object \"" + temp.Name + "\"", true, false, false);
                                 break;
                             case "sunique":
                                 temp.Unique.ToSystem = !temp.Unique.ToPlayer;
-                                sendToUser("You " + (temp.Unique.ToSystem ? "remove" : "set") + " the Unique for whole system flag for object \"" + temp.Name + "\"", true, false, false);
+                                sendToUser("You " + (temp.Unique.ToSystem ? "set" : "remove") + " the Unique for whole system flag for object \"" + temp.Name + "\"", true, false, false);
                                 break;
                             default:
                                 sendToUser("Syntax: edobj <object name> <command part> <action>", true, false, false);
@@ -4799,7 +4799,7 @@ namespace MudServer
 
         private int doObjectCode(string objectName, string action)
         {
-            // Return codes - 0 = found and ok, 1 = not in inventory, 2 = object deleted
+            // Return codes - 0 = found and ok, 1 = not in inventory, 2 = object deleted, 3 = no code to run
             playerObjects = loadObjects();
             if (!myPlayer.InInventory(objectName))
                 return 1;
@@ -4945,7 +4945,7 @@ namespace MudServer
                                     switch (split[i].Substring(0, 4))
                                     {
                                         case "%stp": // Send to player
-                                            sendToUser(split[i].Replace(split[i].Substring(0,4),""));
+                                            sendToUser(split[i].Replace(split[i].Substring(0, 4), ""));
                                             break;
                                         case "%str": // Send to room
                                             sendToRoom(split[i].Replace(split[i].Substring(0, 4), ""));
@@ -4977,6 +4977,10 @@ namespace MudServer
                                 }
                             }
                             #endregion
+                        }
+                        else
+                        {
+                            return 3;
                         }
                     }
                 }
@@ -5016,6 +5020,60 @@ namespace MudServer
                     ret = o;
             }
             return ret;
+        }
+
+        private int getInventoryWeight()
+        {
+            int totalWeight = 0;
+            List<Player.inventory> inventory = myPlayer.Inventory;
+            foreach (Player.inventory i in inventory)
+            {
+                objects inv = getObject(i.name);
+                if (inv.Name != null && !inv.Deleted)
+                {
+                    totalWeight += (i.count & inv.Weight);
+                }
+            }
+            return totalWeight;
+        }
+
+        public void cmdGet(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: get <object name>", true, false, false);
+            else
+            {
+                objects get = getObject(message);
+                if (get.Name == null || get.Name == "")
+                    sendToUser("Object \"" + message + "\" not found", true, false, false);
+                else
+                {
+                    if (getInventoryWeight() + get.Weight > myPlayer.MaxWeight)
+                        sendToUser("Sorry, that is too heavy for you", true, false, false);
+                    else if (myPlayer.InInventory(get.Name) && get.Unique.ToPlayer)
+                        sendToUser("Sorry, you can only have one of those", true, false, false);
+                    else
+                    {
+                        bool add = myPlayer.InInventory(get.Name);
+                        myPlayer.AddToInventory(get.Name);
+
+                        if (get.Actions.Get == null || get.Actions.Get == "")
+                            sendToUser("You take " + (add ? "another " : (isVowel(get.Name.Substring(0, 1)) ? "an " : "a ")) + get.Name, true, false, false);
+                        else
+                        {
+                            int status = doObjectCode(get.Name, "get");
+                            if (status == 1 || status == 2)
+                                sendToUser("Sorry - something seems to have gone wrong!", true, false, false);
+                        }
+                    }
+                }
+            }
+        }
+
+        public bool isVowel(string check)
+        {
+            check = check.ToLower();
+            return (check == "a" || check == "e" || check == "i" || check == "o" || check == "u");
         }
 
         #endregion
