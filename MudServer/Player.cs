@@ -56,6 +56,13 @@ namespace MudServer
             public bool mailblock;
         }
 
+        public struct inventory
+        {
+            public string name;
+            public int count;
+            public bool wielded;
+        }
+
         #region attributes
 
         private string      username;                                       // Players username
@@ -171,6 +178,9 @@ namespace MudServer
         private playerList  allPlayersList = new playerList();               // Settings for everyone
 
         private List<alias> aliasList = new List<alias>();                  // Alias commands
+
+        private List<inventory> inventoryList = new List<inventory>();      // Inventory list!
+        private int         maxWeight = 50;                                 // Maximum weight they can carry
 
         #endregion
 
@@ -670,6 +680,17 @@ namespace MudServer
             set { maxRooms = value; }
         }
 
+        public List<inventory> Inventory
+        {
+            get { return inventoryList; }
+        }
+
+        public int MaxWeight
+        {
+            get { return maxWeight; }
+            set { maxWeight = value; }
+        }
+
         #endregion
 
         #region Constructor/Destructor
@@ -958,6 +979,78 @@ namespace MudServer
             }
             CleanMyList();
         }
+
+        public void AddToInventory(string objectName)
+        {
+            for (int i = 0; i < inventoryList.Count; i++)
+            {
+                inventory temp = inventoryList[i];
+                if (temp.name.ToLower() == objectName.ToLower())
+                {
+                    temp.count++;
+                    inventoryList[i] = temp;
+                    SavePlayer();
+                    return;
+                }
+            }
+            inventory newInv = new inventory();
+            newInv.name = objectName;
+            newInv.count = 1;
+            inventoryList.Add(newInv);
+            SavePlayer();
+        }
+
+        public void RemoveFromInventory(string objectName)
+        {
+            if (inventoryList.Count > 0)
+            {
+                for (int i = inventoryList.Count - 1; i >= 0; i--)
+                {
+                    if (inventoryList[i].name.ToLower() == objectName.ToLower())
+                    {
+                        if (inventoryList[i].count == 1)
+                        {
+                            inventoryList.RemoveAt(i);
+                        }
+                        else
+                        {
+                            inventory temp = inventoryList[i];
+                            temp.count--;
+                            inventoryList[i] = temp;
+                        }
+                        SavePlayer();
+                    }
+                }
+            }
+        }
+
+        public bool InInventory(string objectName)
+        {
+            foreach (inventory i in inventoryList)
+            {
+                if (i.name.ToLower() == objectName.ToLower())
+                    return true;
+            }
+            return false;
+        }
+
+        public void WieldInventory(string objectName)
+        {
+            for (int i = 0; i < inventoryList.Count; i++)
+            {
+                inventory temp = inventoryList[i];
+                if (temp.name.ToLower() == objectName.ToLower())
+                {
+                    temp.wielded = !temp.wielded;
+                }
+                else
+                {
+                    temp.wielded = false;
+                }
+                inventoryList[i] = temp;
+            }
+        }
+
 
         #region Alias Stuff
 
