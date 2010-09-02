@@ -54,13 +54,16 @@ namespace MudServer
 
             public bool         Deleted;
 
-            public struct Unique
+            public unique       Unique;
+            public actions      Actions;
+
+            public struct unique
             {
                 public bool     ToPlayer;               // Can a player have only one?
                 public bool     ToSystem;               // Can there be only one across the system?
             }
 
-            public struct Actions
+            public struct actions
             {
                 public string   Drop;
                 public string   Eat;
@@ -4541,12 +4544,246 @@ namespace MudServer
 
         public void cmdCreate(string message)
         {
+            if (!myPlayer.SpecialPrivs.builder)
+                sendToUser("Sorry, you need builder privs for this command", true, false, false);
+            else if (message == "")
+                sendToUser("Syntax: create <object name>", true, false, false);
+            else
+            {
+                playerObjects = loadObjects();
+                foreach (objects o in playerObjects)
+                {
+                    if (o.Name.ToLower() == message.ToLower())
+                    {
+                        sendToUser("That name already exists", true, false, false);
+                        return;
+                    }
+                }
+                objects newObj = new objects();
+                newObj.Name = message;
+                newObj.Creator = myPlayer.UserName;
+                newObj.Owner = myPlayer.UserName;
+                newObj.Gender = (gender)myPlayer.Gender;
 
+                playerObjects.Add(newObj);
+                saveObjects();
+                sendToUser("Object \"" + newObj.Name + "\" created");
+            }
+        }
+
+        public void cmdEdObj(string message)
+        {
+            string[] split = message.Split(new char[] { ' ' }, 3);
+            if (!myPlayer.SpecialPrivs.builder)
+                sendToUser("Sorry, you need builder privs for this command", true, false, false);
+            else if (message == "" || split.Length < 2)
+                sendToUser("Syntax: edobj <object name> <command part> <action>", true, false, false);
+            else
+            {
+                playerObjects = loadObjects();
+                for (int i = playerObjects.Count - 1; i >= 0; i--)
+                {
+                    if (playerObjects[i].Name.ToLower() == split[0].ToLower())
+                    {
+                        objects temp = playerObjects[i];
+                        switch (split[1].ToLower())
+                        {
+                            case "drop":
+                                temp.Actions.Drop = (split.Length < 3 ? "" : split[2]);
+                                sendToUser("You " + (temp.Actions.Drop == "" ? "remove" : "set") + " the \"" + split[1] + "\" action for object \"" + temp.Name + "\"", true, false, false);
+                                break;
+                            case "eat":
+                                temp.Actions.Eat = (split.Length < 3 ? "" : split[2]);
+                                sendToUser("You " + (temp.Actions.Eat == "" ? "remove" : "set") + " the \"" + split[1] + "\" action for object \"" + temp.Name + "\"", true, false, false);
+                                break;
+                            case "drink":
+                                temp.Actions.Drink = (split.Length < 3 ? "" : split[2]);
+                                sendToUser("You " + (temp.Actions.Drink == "" ? "remove" : "set") + " the \"" + split[1] + "\" action for object \"" + temp.Name + "\"", true, false, false);
+                                break;
+                            case "examine":
+                                temp.Actions.Examine = (split.Length < 3 ? "" : split[2]);
+                                sendToUser("You " + (temp.Actions.Examine == "" ? "remove" : "set") + " the \"" + split[1] + "\" action for object \"" + temp.Name + "\"", true, false, false);
+                                break;
+                            case "get":
+                                temp.Actions.Get = (split.Length < 3 ? "" : split[2]);
+                                sendToUser("You " + (temp.Actions.Get == "" ? "remove" : "set") + " the \"" + split[1] + "\" action for object \"" + temp.Name + "\"", true, false, false);
+                                break;
+                            case "give":
+                                temp.Actions.Give = (split.Length < 3 ? "" : split[2]);
+                                sendToUser("You " + (temp.Actions.Give == "" ? "remove" : "set") + " the \"" + split[1] + "\" action for object \"" + temp.Name + "\"", true, false, false);
+                                break;
+                            case "pick":
+                                temp.Actions.Pick = (split.Length < 3 ? "" : split[2]);
+                                sendToUser("You " + (temp.Actions.Pick == "" ? "remove" : "set") + " the \"" + split[1] + "\" action for object \"" + temp.Name + "\"", true, false, false);
+                                break;
+                            case "play":
+                                temp.Actions.Play = (split.Length < 3 ? "" : split[2]);
+                                sendToUser("You " + (temp.Actions.Play == "" ? "remove" : "set") + " the \"" + split[1] + "\" action for object \"" + temp.Name + "\"", true, false, false);
+                                break;
+                            case "poke":
+                                temp.Actions.Poke = (split.Length < 3 ? "" : split[2]);
+                                sendToUser("You " + (temp.Actions.Poke == "" ? "remove" : "set") + " the \"" + split[1] + "\" action for object \"" + temp.Name + "\"", true, false, false);
+                                break;
+                            case "pull":
+                                temp.Actions.Pull = (split.Length < 3 ? "" : split[2]);
+                                sendToUser("You " + (temp.Actions.Pull == "" ? "remove" : "set") + " the \"" + split[1] + "\" action for object \"" + temp.Name + "\"", true, false, false);
+                                break;
+                            case "push":
+                                temp.Actions.Push = (split.Length < 3 ? "" : split[2]);
+                                sendToUser("You " + (temp.Actions.Push == "" ? "remove" : "set") + " the \"" + split[1] + "\" action for object \"" + temp.Name + "\"", true, false, false);
+                                break;
+                            case "shake":
+                                temp.Actions.Shake = (split.Length < 3 ? "" : split[2]);
+                                sendToUser("You " + (temp.Actions.Shake == "" ? "remove" : "set") + " the \"" + split[1] + "\" action for object \"" + temp.Name + "\"", true, false, false);
+                                break;
+                            case "take":
+                                temp.Actions.Take = (split.Length < 3 ? "" : split[2]);
+                                sendToUser("You " + (temp.Actions.Take == "" ? "remove" : "set") + " the \"" + split[1] + "\" action for object \"" + temp.Name + "\"", true, false, false);
+                                break;
+                            case "throw":
+                                temp.Actions.Throw = (split.Length < 3 ? "" : split[2]);
+                                sendToUser("You " + (temp.Actions.Throw == "" ? "remove" : "set") + " the \"" + split[1] + "\" action for object \"" + temp.Name + "\"", true, false, false);
+                                break;
+                            case "use":
+                                temp.Actions.Use = (split.Length < 3 ? "" : split[2]);
+                                sendToUser("You " + (temp.Actions.Use == "" ? "remove" : "set") + " the \"" + split[1] + "\" action for object \"" + temp.Name + "\"", true, false, false);
+                                break;
+                            case "wield":
+                                temp.Actions.Wield = (split.Length < 3 ? "" : split[2]);
+                                sendToUser("You " + (temp.Actions.Wield == "" ? "remove" : "set") + " the \"" + split[1] + "\" action for object \"" + temp.Name + "\"", true, false, false);
+                                break;
+                            case "desc":
+                                temp.Description = (split.Length < 3 ? "" : split[2]);
+                                sendToUser("You " + (temp.Description == "" ? "remove" : "set") + " the description for object \"" + temp.Name + "\"", true, false, false);
+                                break;
+                            case "weight":
+                                int output;
+                                if (split.Length == 3 && int.TryParse(split[2], out output))
+                                {
+                                    if (output >= 0)
+                                    {
+                                        temp.Weight = (split.Length < 3 ? 0 : output);
+                                        sendToUser("You " + (temp.Weight == 0 ? "remove" : "set") + " the weight for object \"" + temp.Name + "\"", true, false, false);
+                                    }
+                                    else
+                                        sendToUser("Negative weights are not allowed", true, false, false);
+                                }
+                                else
+                                {
+                                    sendToUser("Weight must be a positive integer", true, false, false);
+                                }
+                                break;
+                            case "punique":
+                                temp.Unique.ToPlayer = !temp.Unique.ToPlayer;
+                                sendToUser("You " + (temp.Unique.ToPlayer ? "remove" : "set") + " the Unique for player flag for object \"" + temp.Name + "\"", true, false, false);
+                                break;
+                            case "sunique":
+                                temp.Unique.ToSystem = !temp.Unique.ToPlayer;
+                                sendToUser("You " + (temp.Unique.ToSystem ? "remove" : "set") + " the Unique for whole system flag for object \"" + temp.Name + "\"", true, false, false);
+                                break;
+                            default:
+                                sendToUser("Syntax: edobj <object name> <command part> <action>", true, false, false);
+                                break;
+                        }
+                        playerObjects[i] = temp;
+                        saveObjects();
+                        return;
+                    }
+                }
+                sendToUser("Object \"" + split[0] + "\" not found", true, false, false);
+            }
+        }
+
+        public void cmdDelObj(string message)
+        {
+            if (!myPlayer.SpecialPrivs.builder)
+                sendToUser("Sorry, you need builder privs for this command", true, false, false);
+            else if (message == "")
+                sendToUser("Syntax: delobj <object name>", true, false, false);
+            else
+            {
+                playerObjects = loadObjects();
+                for (int i = playerObjects.Count-1; i >= 0; i--)
+                {
+                    if (playerObjects[i].Name.ToLower() == message.ToLower())
+                    {
+                        if (playerObjects[i].Creator.ToLower() == myPlayer.UserName.ToLower())
+                        {
+                            objects temp = playerObjects[i];
+                            temp.Deleted = true;
+                            playerObjects[i] = temp;
+                            sendToUser("Object \"" + message + "\" deleted", true, false, false);
+                            saveObjects();
+                        }
+                        else
+                        {
+                            sendToUser("You are not the owner of that object!", true, false, false);
+                        }
+                        return;
+                    }
+                }
+                sendToUser("Object \"" + message + "\" not found", true, false, false);
+            }
+        }
+
+        public void cmdExObj(string message)
+        {
+            if (!myPlayer.SpecialPrivs.builder)
+                sendToUser("Sorry, you need builder privs for this command", true, false, false);
+            else if (message == "")
+                sendToUser("Syntax: exobj <object name>", true, false, false);
+            else
+            {
+                playerObjects = loadObjects();
+
+                objects s = new objects();
+                s.Name = "Test";
+                s.Owner = "Alchamist";
+                s.Weight = 100;
+                s.Unique.ToPlayer = true;
+                s.Actions.Push = "Wibble";
+                s.Actions.Take = "Plink";
+                playerObjects.Add(s);
+
+                foreach (objects o in playerObjects)
+                {
+                    if (o.Name.ToLower() == message.ToLower() && !o.Deleted)
+                    {
+                        string output = headerLine("Object: " + o.Name) + "\r\n";
+                        output += "^BName: ^N" + o.Name.PadRight(14) + "^BOwner: ^N" + o.Owner.PadRight(15) + "^BWeight: ^N" + o.Weight.ToString().PadRight(5);
+                        output += "\r\n^BUnique to Player: ^N" + (o.Unique.ToPlayer ? "Yes" : "No").PadRight(20) + "^BUnique to System: ^N" + (o.Unique.ToSystem ? "Yes" : "No");
+                        output += "\r\n^BDescription: ^N" + o.Description + "\r\n";
+                        output += footerLine() + "\r\n";
+                        output += "^BActions:^N\r\n\r\n";
+                        output += "^PGet: ^N".PadLeft(15) + o.Actions.Get + "\r\n";
+                        output += "^PDrop: ^N".PadLeft(15) + o.Actions.Drop + "\r\n";
+                        output += "^PDrink: ^N".PadLeft(15) + o.Actions.Drink + "\r\n";
+                        output += "^PEat: ^N".PadLeft(15) + o.Actions.Eat + "\r\n";
+                        output += "^PExamine: ^N".PadLeft(15) + o.Actions.Examine + "\r\n";
+                        output += "^PGive: ^N".PadLeft(15) + o.Actions.Give + "\r\n";
+                        output += "^PPick: ^N".PadLeft(15) + o.Actions.Pick + "\r\n";
+                        output += "^PPlay: ^N".PadLeft(15) + o.Actions.Play + "\r\n";
+                        output += "^PPoke: ^N".PadLeft(15) + o.Actions.Poke + "\r\n";
+                        output += "^PPull: ^N".PadLeft(15) + o.Actions.Pull + "\r\n";
+                        output += "^PPush: ^N".PadLeft(15) + o.Actions.Push + "\r\n";
+                        output += "^PShake: ^N".PadLeft(15) + o.Actions.Shake + "\r\n";
+                        output += "^PTake: ^N".PadLeft(15) + o.Actions.Take + "\r\n";
+                        output += "^PThrow: ^N".PadLeft(15) + o.Actions.Throw + "\r\n";
+                        output += "^PUse: ^N".PadLeft(15) + o.Actions.Use + "\r\n";
+                        output += "^PWield: ^N".PadLeft(15) + o.Actions.Wield + "\r\n";
+                        output += footerLine();
+                        sendToUser(output, true, false, false);
+                        return;
+                    }
+                }
+                sendToUser("Object \"" + message + "\" not found", true, false, false);
+            }
         }
 
         public void listObjects(string message)
         {
             playerObjects = loadObjects();
+            
             string output = "";
             int place = 1;
             foreach (objects o in playerObjects)
@@ -4554,7 +4791,7 @@ namespace MudServer
                 if (!o.Deleted)
                 {
                     if (message == "" || o.Name.StartsWith(message))
-                        output += "^B(" + place++.ToString().PadRight(4) + ")^N " + o.Name.PadRight(15) + "^BOwner: ^N" + o.Owner.PadRight(15) + "^BWeight: ^N" + o.Weight.ToString().PadRight(5) + "^BDescription: ^N" + o.Description + "\r\n";
+                        output += "^B( " + place++.ToString().PadLeft(playerObjects.Count.ToString().Length,'0') + " )^N " + (o.Unique.ToSystem ? "^Y*^N" : (o.Unique.ToPlayer ? "^R*^N" : " ")) + o.Name.PadRight(14) + "^BOwner: ^N" + o.Owner.PadRight(15) + "^BWeight: ^N" + o.Weight.ToString().PadRight(5) + "\r\n^BDescription: ^N" + o.Description + "\r\n";
                 }
             }
             sendToUser(headerLine("Objects: " + (message == "" ? "All" : message)) + "\r\n" + (output == "" ? "No objects found" : output) + "\r\n" + footerLine(), true, false, false);
