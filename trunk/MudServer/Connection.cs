@@ -4797,6 +4797,227 @@ namespace MudServer
             sendToUser(headerLine("Objects: " + (message == "" ? "All" : message)) + "\r\n" + (output == "" ? "No objects found" : output) + "\r\n" + footerLine(), true, false, false);
         }
 
+        private int doObjectCode(string objectName, string action)
+        {
+            // Return codes - 0 = found and ok, 1 = not in inventory, 2 = object deleted
+            playerObjects = loadObjects();
+            if (!myPlayer.InInventory(objectName))
+                return 1;
+            foreach (objects o in playerObjects)
+            {
+                if (o.Name.ToLower() == objectName.ToLower())
+                {
+                    if (o.Deleted)
+                        return 2;
+                    else
+                    {
+                        #region Select Action ...
+
+                        string code = "";
+                        switch (action.ToLower())
+                        {
+                            case "drop":
+                                code = o.Actions.Drop;
+                                break;
+                            case "eat":
+                                code = o.Actions.Eat;
+                                break;
+                            case "drink":
+                                code = o.Actions.Drink;
+                                break;
+                            case "examine":
+                                code = o.Actions.Examine;
+                                break;
+                            case "get":
+                                code = o.Actions.Get;
+                                break;
+                            case "give":
+                                code = o.Actions.Give;
+                                break;
+                            case "pick":
+                                code = o.Actions.Pick;
+                                break;
+                            case "play":
+                                code = o.Actions.Play;
+                                break;
+                            case "poke":
+                                code = o.Actions.Poke;
+                                break;
+                            case "pull":
+                                code = o.Actions.Pull;
+                                break;
+                            case "push":
+                                code = o.Actions.Push;
+                                break;
+                            case "shake":
+                                code = o.Actions.Shake;
+                                break;
+                            case "take":
+                                code = o.Actions.Take;
+                                break;
+                            case "throw":
+                                code = o.Actions.Throw;
+                                break;
+                            case "use":
+                                code = o.Actions.Use;
+                                break;
+                            case "wield":
+                                code = o.Actions.Wield;
+                                break;
+                        }
+
+                        #endregion
+
+                        if (code != "")
+                        {
+                            string[] split = code.Split(new char[] { ';' });
+
+                            #region Loop one - do the if statements
+
+                            for (int i = 0; i < split.Length; i++)
+                            {
+                                string tCode = "";
+                                switch (split[i].Substring(0, 4))
+                                {
+                                    case "%ipn": // If playerRank = newbie
+                                        tCode = (myPlayer.PlayerRank == (int)Player.Rank.Newbie ? split[i].Replace(split[i].Substring(0, 4), "") : "");
+                                        break;
+                                    case "%ipr": // If playerRank = resident
+                                        tCode = (myPlayer.PlayerRank == (int)Player.Rank.Member ? split[i].Replace(split[i].Substring(0, 4), "") : "");
+                                        break;
+                                    case "%ipg": // If playerRank = guide
+                                        tCode = (myPlayer.PlayerRank == (int)Player.Rank.Guide ? split[i].Replace(split[i].Substring(0, 4), "") : "");
+                                        break;
+                                    case "%ips": // If playerRank = staff
+                                        tCode = (myPlayer.PlayerRank == (int)Player.Rank.Staff ? split[i].Replace(split[i].Substring(0, 4), "") : "");
+                                        break;
+                                    case "%ipa": // If playerRank = admin
+                                        tCode = (myPlayer.PlayerRank >= (int)Player.Rank.Admin ? split[i].Replace(split[i].Substring(0, 4), "") : "");
+                                        break;
+                                    case "%ign": // If playerRank > newbie
+                                        tCode = (myPlayer.PlayerRank > (int)Player.Rank.Newbie ? split[i].Replace(split[i].Substring(0, 4), "") : "");
+                                        break;
+                                    case "%igr": // If playerRank > resident
+                                        tCode = (myPlayer.PlayerRank > (int)Player.Rank.Member ? split[i].Replace(split[i].Substring(0, 4), "") : "");
+                                        break;
+                                    case "%igg": // If playerRank > guide
+                                        tCode = (myPlayer.PlayerRank > (int)Player.Rank.Guide ? split[i].Replace(split[i].Substring(0, 4), "") : "");
+                                        break;
+                                    case "%igs": // If playerRank > staff
+                                        tCode = (myPlayer.PlayerRank > (int)Player.Rank.Staff ? split[i].Replace(split[i].Substring(0, 4), "") : "");
+                                        break;
+                                    case "%ilg": // If playerRank < guide
+                                        tCode = (myPlayer.PlayerRank < (int)Player.Rank.Guide ? split[i].Replace(split[i].Substring(0, 4), "") : "");
+                                        break;
+                                    case "%ils": // If playerRank < staff
+                                        tCode = (myPlayer.PlayerRank < (int)Player.Rank.Staff ? split[i].Replace(split[i].Substring(0, 4), "") : "");
+                                        break;
+                                    case "%ila": // If playerRank < admin
+                                        tCode = (myPlayer.PlayerRank < (int)Player.Rank.Admin ? split[i].Replace(split[i].Substring(0, 4), "") : "");
+                                        break;
+                                }
+                                split[i] = tCode.Trim();
+                            }
+
+                            #endregion
+                            #region Loop two - place in names etc
+
+                            for (int i = 0; i < split.Length; i++)
+                            {
+                                split[i] = split[i].Replace("%pnm", myPlayer.UserName); // Player name
+                                split[i] = split[i].Replace("%onm", o.Owner); // Owner name
+                                split[i] = split[i].Replace("%cnm", o.Creator); // Creator name
+                                split[i] = split[i].Replace("%obn", o.Name); // Object name
+
+                                split[i] = split[i].Replace("%psp", (myPlayer.Gender == 0 ? "it" : (myPlayer.Gender == 1 ? "he" : "she"))); // Player subject pronoun (he/she)
+                                split[i] = split[i].Replace("%psp", (myPlayer.Gender == 0 ? "it" : (myPlayer.Gender == 1 ? "him" : "her"))); // Player object pronoun (him/her)
+                                split[i] = split[i].Replace("%psp", (myPlayer.Gender == 0 ? "its" : (myPlayer.Gender == 1 ? "his" : "her"))); // Player attributive pronoun (his/her)
+                                split[i] = split[i].Replace("%psp", (myPlayer.Gender == 0 ? "its" : (myPlayer.Gender == 1 ? "his" : "hers"))); // Player possesove pronoun (his/hers)
+                            }
+
+                            #endregion
+                            #region Loop three - do the code!
+
+                            for (int i = 0; i < split.Length; i++)
+                            {
+                                if (split[i] != "")
+                                {
+                                    switch (split[i].Substring(0, 4))
+                                    {
+                                        case "%stp": // Send to player
+                                            sendToUser(split[i].Replace(split[i].Substring(0,4),""));
+                                            break;
+                                        case "%str": // Send to room
+                                            sendToRoom(split[i].Replace(split[i].Substring(0, 4), ""));
+                                            break;
+                                        case "%sta": // Send to all
+                                            if (o.Rank >= Player.Rank.Admin)
+                                                sendToAll(split[i].Replace(split[i].Substring(0, 4), ""));
+                                            break;
+                                        case "%trn": // Transport player
+                                            if (o.Rank >= Player.Rank.Admin)
+                                                movePlayer(split[i].Replace(split[i].Substring(0, 4), ""));
+                                            break;
+                                        case "%wib": // Wibble player
+                                            if (o.Rank >= Player.Rank.Admin)
+                                                myPlayer.Wibbled = true;
+                                            break;
+                                        case "%jal": // Jail player
+                                            if (o.Rank >= Player.Rank.Admin)
+                                                movePlayer("jail");
+                                            break;
+                                        case "%bmp": // Bump player
+                                            if (o.Rank >= Player.Rank.Admin)
+                                                socket.Close();
+                                            break;
+                                        case "%wld": // Wield
+                                            myPlayer.WieldInventory(o.Name);
+                                            break;
+                                    }
+                                }
+                            }
+                            #endregion
+                        }
+                    }
+                }
+            }
+            return 0;
+        }
+
+        public void cmdInventory(string message)
+        {
+            string output = "";
+            int totalWeight = 0;
+            List<Player.inventory> inventory = myPlayer.Inventory;
+            foreach (Player.inventory i in inventory)
+            {
+                objects inv = getObject(i.name);
+                if (inv.Name != null && !inv.Deleted)
+                {
+                    output += "^p[" + i.count.ToString().PadLeft(3, '0') + "]^N " + inv.Name + " ^a(" + inv.Weight.ToString() + " units each)^N\r\n";
+                    totalWeight += (i.count & inv.Weight);
+                }
+            }
+            if (output == "")
+                output = "You have no items\r\nYou can carry a total of " + myPlayer.MaxWeight.ToString() + " units of weight";
+            else
+                output = "^BQty  Item^N\r\n" + output + "\r\nYou are carrying a total of " + totalWeight.ToString() + " units of weight, and can carry " + (myPlayer.MaxWeight - totalWeight).ToString() + " more" ;
+
+            sendToUser(headerLine("Inventory") + "\r\n" + output + "\r\n" + footerLine());
+        }
+
+        private objects getObject(string objectName)
+        {
+            playerObjects = loadObjects();
+            objects ret = new objects();
+            foreach (objects o in playerObjects)
+            {
+                if (o.Name.ToLower() == objectName.ToLower())
+                    ret = o;
+            }
+            return ret;
+        }
+
         #endregion
 
         #region Messaging System
