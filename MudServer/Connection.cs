@@ -41,7 +41,47 @@ namespace MudServer
             public bool Deleted; // Is this message deleted
         }
 
-        private enum gender
+        public struct objects
+        {
+            public string       Name;
+            public string       Creator;
+            public string       Owner;
+            public Player.Rank  Rank;
+            public string       Contents;
+            public string       Description;
+            public int          Weight;
+            public gender       Gender;
+
+            public bool         Deleted;
+
+            public struct Unique
+            {
+                public bool     ToPlayer;               // Can a player have only one?
+                public bool     ToSystem;               // Can there be only one across the system?
+            }
+
+            public struct Actions
+            {
+                public string   Drop;
+                public string   Eat;
+                public string   Drink;
+                public string   Examine;
+                public string   Get;
+                public string   Give;
+                public string   Pick;
+                public string   Throw;
+                public string   Play;
+                public string   Push;
+                public string   Pull;
+                public string   Shake;
+                public string   Wield;
+                public string   Poke;
+                public string   Use;
+                public string   Take;
+            }
+        }
+
+        public enum gender
         {
             Unknown,
             Male,
@@ -77,6 +117,8 @@ namespace MudServer
         public List<message>        messages = new List<message>();
 
         public List<message>        mail = new List<message>();
+
+        public List<objects>        playerObjects = new List<objects>();
 
         public message              editMail = new message();
         public string               editText = "";
@@ -676,7 +718,7 @@ namespace MudServer
                             }
                         }
                     }
-                    if (!found)
+                    if (!found && new Regex("[^a-zA-Z0-9\n\r\t ]", RegexOptions.IgnoreCase).IsMatch(shortCMD))
                     {
                         foreach (commands c in cmds)
                         {
@@ -2311,7 +2353,7 @@ namespace MudServer
         public void cmdDoList(string message)
         {
             if (message == "")
-                sendToUser("Syntax: plist <newbies/staff/tester/players" + (myPlayer.PlayerRank >= (int)Player.Rank.Staff ? "/ip/gits/objects/rooms" : "") + ">");
+                sendToUser("Syntax: list <newbies/staff/tester/builder/players/objects" + (myPlayer.PlayerRank >= (int)Player.Rank.Staff ? "/ip/gits/rooms" : "") + ">");
             else
             {
                 string[] split = message.Split(new char[] { ' ' }, 2);
@@ -2357,6 +2399,14 @@ namespace MudServer
                             }
                             if (output != "") 
                                 output = output.Substring(2);
+                            break;
+                        case "r":
+                            found = true;
+                            cmdRoomList(split.Length > 1 ? split[1] : "");
+                            break;
+                        case "o":
+                            found = true;
+                            listObjects(split.Length > 1 ? split[1] : "");
                             break;
                     }       
                 }
@@ -2408,7 +2458,7 @@ namespace MudServer
                                 output = output.Substring(2);
                             break;
                         default:
-                            sendToUser("Syntax: list <newbies/staff/tester/builder/players" + (myPlayer.PlayerRank >= (int)Player.Rank.Staff ? "/ip/gits/objects/rooms" : "") + ">", true, false, false);
+                            sendToUser("Syntax: list <newbies/staff/tester/builder/players/objects" + (myPlayer.PlayerRank >= (int)Player.Rank.Staff ? "/ip/gits/rooms" : "") + ">", true, false, false);
                             break;
                     }
                 }
@@ -4325,7 +4375,10 @@ namespace MudServer
                 {
                     if (r.roomOwner.ToLower().StartsWith(message.ToLower()))
                     {
-                        output += r.systemName.PadRight(20) + r.shortName.PadRight(20) + r.fullName.PadRight(20) + r.roomOwner + "\r\n";
+                        output += (r.systemName.Length >= 20 ? r.systemName.Substring(0, 16) + "..." : r.systemName).PadRight(20)
+                        + (r.shortName.Length >= 20 ? r.shortName.Substring(0, 16) + "..." : r.shortName).PadRight(20)
+                        + (r.fullName.Length >= 20 ? r.fullName.Substring(0, 16) + "..." : r.fullName).PadRight(20)
+                        + (r.roomOwner.Length >= 20 ? r.roomOwner.Substring(0, 16) + "..." : r.roomOwner) + "\r\n";
                         roomCount++;
                     }
                 }
@@ -4436,6 +4489,40 @@ namespace MudServer
             }
         }
 
+        public void cmdBarge(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: barge <username>", true, false, false);
+            else
+            {
+                string[] target = matchPartial(message);
+                if (target.Length == 0)
+                    sendToUser("Player \"" + message + "\" not found", true, false, false);
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (!isOnline(target[0]))
+                    sendToUser("Player \"" + target[0] + "\" is not online", true, false, false);
+                else if (target[0] == myPlayer.UserName)
+                    sendToUser("Trying to barge in on yourself?", true, false, false);
+                else
+                {
+                    foreach (Connection c in connections)
+                    {
+                        if (c.myPlayer.UserName.ToLower() == target[0])
+                        {
+                            if (c.myPlayer.PlayerRank < myPlayer.PlayerRank)
+                            {
+                                movePlayer(c.myPlayer.UserRoom, false);
+                                sendToUser("You have barged in on " + c.myPlayer.UserName, true, false, false);
+                            }
+                            else
+                                sendToUser("I can't let you do that, Dave ....", true, false, false);
+                        }
+                    }
+                }
+            }
+        }
+
         public int roomCount()
         {
             roomList = loadRooms();
@@ -4446,6 +4533,31 @@ namespace MudServer
                     ret++;
             }
             return ret;
+        }
+
+        #endregion
+
+        #region Object stuff
+
+        public void cmdCreate(string message)
+        {
+
+        }
+
+        public void listObjects(string message)
+        {
+            playerObjects = loadObjects();
+            string output = "";
+            int place = 1;
+            foreach (objects o in playerObjects)
+            {
+                if (!o.Deleted)
+                {
+                    if (message == "" || o.Name.StartsWith(message))
+                        output += "^B(" + place++.ToString().PadRight(4) + ")^N " + o.Name.PadRight(15) + "^BOwner: ^N" + o.Owner.PadRight(15) + "^BWeight: ^N" + o.Weight.ToString().PadRight(5) + "^BDescription: ^N" + o.Description + "\r\n";
+                }
+            }
+            sendToUser(headerLine("Objects: " + (message == "" ? "All" : message)) + "\r\n" + (output == "" ? "No objects found" : output) + "\r\n" + footerLine(), true, false, false);
         }
 
         #endregion
@@ -4555,6 +4667,51 @@ namespace MudServer
             {
                 Connection.logError(ex.ToString(), "filesystem");
             }
+        }
+
+        public void saveObjects()
+        {
+            try
+            {
+                string path = @"objects" + Path.DirectorySeparatorChar;
+                string fname = "objects.xml";
+                string fpath = path + fname;
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+
+                XmlSerializer serial = new XmlSerializer(typeof(List<objects>));
+                TextWriter textWriter = new StreamWriter(@fpath.ToLower());
+                serial.Serialize(textWriter, playerObjects);
+                textWriter.Close();
+            }
+            catch (Exception ex)
+            {
+                Connection.logError(ex.ToString(), "filesystem");
+            }
+        }
+
+        public List<objects> loadObjects()
+        {
+            List<objects> load = new List<objects>();
+            string path = @"objects" + Path.DirectorySeparatorChar;
+            string fname = "objects.xml";
+            string fpath = path + fname;
+
+            if (Directory.Exists(path) && File.Exists(fpath))
+            {
+                try
+                {
+                    XmlSerializer deserial = new XmlSerializer(typeof(List<objects>));
+                    TextReader textReader = new StreamReader(@fpath);
+                    load = (List<objects>)deserial.Deserialize(textReader);
+                    textReader.Close();
+                }
+                catch (Exception e)
+                {
+                    Debug.Print(e.ToString());
+                }
+            }
+            return load;
         }
 
         public List<message> loadMessages()
