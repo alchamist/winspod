@@ -4801,7 +4801,7 @@ namespace MudServer
         {
             // Return codes - 0 = found and ok, 1 = not in inventory, 2 = object deleted, 3 = no code to run
             playerObjects = loadObjects();
-            if (!myPlayer.InInventory(objectName))
+            if (myPlayer.InInventory(objectName)==0)
                 return 1;
             foreach (objects o in playerObjects)
             {
@@ -4915,6 +4915,9 @@ namespace MudServer
                                     case "%ila": // If playerRank < admin
                                         tCode = (myPlayer.PlayerRank < (int)Player.Rank.Admin ? split[i].Replace(split[i].Substring(0, 4), "") : "");
                                         break;
+                                    default:
+                                        tCode = split[i];
+                                        break;
                                 }
                                 split[i] = tCode.Trim();
                             }
@@ -4930,9 +4933,9 @@ namespace MudServer
                                 split[i] = split[i].Replace("%obn", o.Name); // Object name
 
                                 split[i] = split[i].Replace("%psp", (myPlayer.Gender == 0 ? "it" : (myPlayer.Gender == 1 ? "he" : "she"))); // Player subject pronoun (he/she)
-                                split[i] = split[i].Replace("%psp", (myPlayer.Gender == 0 ? "it" : (myPlayer.Gender == 1 ? "him" : "her"))); // Player object pronoun (him/her)
-                                split[i] = split[i].Replace("%psp", (myPlayer.Gender == 0 ? "its" : (myPlayer.Gender == 1 ? "his" : "her"))); // Player attributive pronoun (his/her)
-                                split[i] = split[i].Replace("%psp", (myPlayer.Gender == 0 ? "its" : (myPlayer.Gender == 1 ? "his" : "hers"))); // Player possesove pronoun (his/hers)
+                                split[i] = split[i].Replace("%pop", (myPlayer.Gender == 0 ? "it" : (myPlayer.Gender == 1 ? "him" : "her"))); // Player object pronoun (him/her)
+                                split[i] = split[i].Replace("%pap", (myPlayer.Gender == 0 ? "its" : (myPlayer.Gender == 1 ? "his" : "her"))); // Player attributive pronoun (his/her)
+                                split[i] = split[i].Replace("%ppn", (myPlayer.Gender == 0 ? "its" : (myPlayer.Gender == 1 ? "his" : "hers"))); // Player possesove pronoun (his/hers)
                             }
 
                             #endregion
@@ -4945,18 +4948,18 @@ namespace MudServer
                                     switch (split[i].Substring(0, 4))
                                     {
                                         case "%stp": // Send to player
-                                            sendToUser(split[i].Replace(split[i].Substring(0, 4), ""));
+                                            sendToUser(split[i].Replace(split[i].Substring(0, 4), "").Trim());
                                             break;
                                         case "%str": // Send to room
-                                            sendToRoom(split[i].Replace(split[i].Substring(0, 4), ""));
+                                            sendToRoom(split[i].Replace(split[i].Substring(0, 4), "").Trim(),"");
                                             break;
                                         case "%sta": // Send to all
                                             if (o.Rank >= Player.Rank.Admin)
-                                                sendToAll(split[i].Replace(split[i].Substring(0, 4), ""));
+                                                sendToAll(split[i].Replace(split[i].Substring(0, 4), "").Trim());
                                             break;
                                         case "%trn": // Transport player
                                             if (o.Rank >= Player.Rank.Admin)
-                                                movePlayer(split[i].Replace(split[i].Substring(0, 4), ""));
+                                                movePlayer(split[i].Replace(split[i].Substring(0, 4), "").Trim());
                                             break;
                                         case "%wib": // Wibble player
                                             if (o.Rank >= Player.Rank.Admin)
@@ -4999,7 +5002,7 @@ namespace MudServer
                 if (inv.Name != null && !inv.Deleted)
                 {
                     output += "^p[" + i.count.ToString().PadLeft(3, '0') + "]^N " + inv.Name + " ^a(" + inv.Weight.ToString() + " units each)^N\r\n";
-                    totalWeight += (i.count & inv.Weight);
+                    totalWeight += (i.count * inv.Weight);
                 }
             }
             if (output == "")
@@ -5050,11 +5053,11 @@ namespace MudServer
                 {
                     if (getInventoryWeight() + get.Weight > myPlayer.MaxWeight)
                         sendToUser("Sorry, that is too heavy for you", true, false, false);
-                    else if (myPlayer.InInventory(get.Name) && get.Unique.ToPlayer)
+                    else if (myPlayer.InInventory(get.Name) > 0 && get.Unique.ToPlayer)
                         sendToUser("Sorry, you can only have one of those", true, false, false);
                     else
                     {
-                        bool add = myPlayer.InInventory(get.Name);
+                        bool add = myPlayer.InInventory(get.Name) > 0;
                         myPlayer.AddToInventory(get.Name);
 
                         if (get.Actions.Get == null || get.Actions.Get == "")
@@ -5066,6 +5069,32 @@ namespace MudServer
                                 sendToUser("Sorry - something seems to have gone wrong!", true, false, false);
                         }
                     }
+                }
+            }
+        }
+
+        public void cmdDrop(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: drop <object name>", true, false, false);
+            else
+            {
+                objects target = getObject(message);
+                if (target.Name == null || target.Name == "")
+                    sendToUser("Object \"" + message + "\" not found", true, false, false);
+                else if (myPlayer.InInventory(target.Name) == 0)
+                    sendToUser("You don't have " + (isVowel(target.Name.Substring(0, 1)) ? "an " : "a ") + target.Name);
+                else
+                {
+                    bool moreThanOne = myPlayer.InInventory(target.Name) > 1;
+
+                    if (target.Actions.Drop == null || target.Actions.Drop == "")
+                    {
+                        myPlayer.RemoveFromInventory(target.Name);
+                        sendToUser("You drop " + (moreThanOne ? "one of your " : "your ") + target.Name + (target.Name.ToLower().EndsWith("s") ? "" : (moreThanOne ? "s" : "")), true, false, false);
+                    }
+                    else
+                        doObjectCode(target.Name, "drop");
                 }
             }
         }
