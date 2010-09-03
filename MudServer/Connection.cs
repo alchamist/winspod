@@ -787,7 +787,8 @@ namespace MudServer
             {
                 try
                 {
-                    conn.Writer.Write(AnsiColour.Colorise(msg, !conn.myPlayer.DoColour));
+                    if (conn.myPlayer.CanHear(myPlayer.UserName))
+                        conn.Writer.Write(AnsiColour.Colorise(msg, !conn.myPlayer.DoColour));
                 }
                 catch (Exception ex)
                 {
@@ -834,7 +835,7 @@ namespace MudServer
         {
             foreach (Connection conn in connections)
             {
-                if (conn.myPlayer != null && conn.myPlayer.UserName.ToLower() == user.ToLower() && msg != null)
+                if (conn.myPlayer != null && conn.myPlayer.UserName.ToLower() == user.ToLower() && msg != null && conn.myPlayer.CanHear(myPlayer.UserName))
                 {
                     try
                     {
@@ -900,7 +901,7 @@ namespace MudServer
         {
             foreach (Connection conn in connections)
             {
-                if (conn.myPlayer != null && conn.myPlayer.UserName != sender && conn.myPlayer.UserRoom == room && !conn.myPlayer.InEditor)
+                if (conn.myPlayer != null && conn.myPlayer.UserName != sender && conn.myPlayer.UserRoom == room && !conn.myPlayer.InEditor && conn.myPlayer.CanHear(sender))
                 {
                     //sendToUser(msgToOthers, conn.myPlayer.UserName, newline, conn.myPlayer.DoColour, receiverPrompt, true);
                     conn.sendToUser(msgToOthers, newline, receiverPrompt, true);
@@ -921,7 +922,7 @@ namespace MudServer
         {
             foreach (Connection conn in connections)
             {
-                if (conn.myPlayer.PlayerRank >= rank && myPlayer.onStaffChannel((Player.Rank)rank) && !conn.myPlayer.InEditor)
+                if (conn.myPlayer.PlayerRank >= rank && myPlayer.onStaffChannel((Player.Rank)rank) && !conn.myPlayer.InEditor && conn.myPlayer.CanHear(myPlayer.UserName))
                 {
                     string col = null;
                     switch (rank)
@@ -4146,36 +4147,29 @@ namespace MudServer
                     }
                     if (!found)
                     {
-                        if (myPlayer.PlayerRank >= (int)Player.Rank.Admin)
+                        foreach (Room r in roomList)
                         {
-                            foreach (Room r in roomList)
+                            if (r.systemName.ToLower() == message.ToLower())
                             {
-                                if (r.systemName.ToLower() == message.ToLower())
+                                found = true;
+                                Player owner = null;
+                                if (!r.systemRoom)
                                 {
-                                    found = true;
-                                    Player owner = null;
-                                    if (!r.systemRoom)
-                                    {
-                                        owner = Player.LoadPlayer(r.roomOwner, 0);
-                                    }
-                                    if ((r.locks.FullLock || (r.locks.AdminLock && myPlayer.PlayerRank < (int)Player.Rank.Admin) || (r.locks.StaffLock && myPlayer.PlayerRank < (int)Player.Rank.Staff) || (r.locks.GuideLock && myPlayer.PlayerRank < (int)Player.Rank.Guide) || (!r.systemRoom && r.locks.FriendLock && owner != null && !owner.isFriend(myPlayer.UserName))) && myPlayer.PlayerRank < (int)Player.Rank.HCAdmin)
-                                    {
-                                        sendToUser("You try the door, but find it locked shut", true, false, false);
-                                    }
-                                    else
-                                    {
-                                        movePlayer(r.systemName);
-                                    }
+                                    owner = Player.LoadPlayer(r.roomOwner, 0);
+                                }
+                                if (((r.locks.FullLock || (r.locks.AdminLock && myPlayer.PlayerRank < (int)Player.Rank.Admin) || (r.locks.StaffLock && myPlayer.PlayerRank < (int)Player.Rank.Staff) || (r.locks.GuideLock && myPlayer.PlayerRank < (int)Player.Rank.Guide) || (!r.systemRoom && r.locks.FriendLock && owner != null && !owner.isFriend(myPlayer.UserName))) && myPlayer.PlayerRank < (int)Player.Rank.HCAdmin) && !owner.HasKey(myPlayer.UserName))
+                                {
+                                    sendToUser("You try the door, but find it locked shut", true, false, false);
+                                }
+                                else
+                                {
+                                    movePlayer(r.systemName);
                                 }
                             }
-                            if (!found)
-                            {
-                                sendToUser("No such room", true, false, false);
-                            }
                         }
-                        else
+                        if (!found)
                         {
-                            sendToUser("No such exit", true, false, false);
+                            sendToUser("No such room", true, false, false);
                         }
                     }
                 }
@@ -4282,6 +4276,11 @@ namespace MudServer
 
         public void movePlayer(string room, bool doLook)
         {
+            movePlayer(room, doLook, true);
+        }
+
+        public void movePlayer(string room, bool doLook, bool doEnterMsg)
+        {
             Room target = getRoom(room);
             if (target == null)
             {
@@ -4295,7 +4294,9 @@ namespace MudServer
                     sendToRoom(myPlayer.ColourUserName + " " + myPlayer.ExitMsg, "");
 
                 myPlayer.UserRoom = target.systemName;
-                sendToRoom(myPlayer.ColourUserName + " " + (target.enterMessage == "" ? myPlayer.EnterMsg : target.enterMessage), "", false, true);
+                if (doEnterMsg)
+                    sendToRoom(myPlayer.ColourUserName + " " + (target.enterMessage == "" ? myPlayer.EnterMsg : target.enterMessage), "", false, true);
+
                 myPlayer.SavePlayer();
                 if (doLook)
                     cmdLook("");
@@ -4763,6 +4764,48 @@ namespace MudServer
                             }
                             else
                                 sendToUser("I can't let you do that, Dave ....", true, false, false);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void cmdGrab(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: grab <username>", true, false, false);
+            else
+            {
+                string[] target = matchPartial(message);
+                if (target.Length == 0)
+                    sendToUser("Player \"" + message + "\" not found", true, false, false);
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (!isOnline(target[0]))
+                    sendToUser("Player \"" + target[0] + "\" is not online", true, false, false);
+                else if (target[0] == myPlayer.UserName)
+                    sendToUser("Trying to grab yourself?", true, false, false);
+                else
+                {
+                    foreach (Connection c in connections)
+                    {
+                        if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                        {
+                            if (c.myPlayer.CanGrabMe(myPlayer.UserName) || myPlayer.PlayerRank >= (int)Player.Rank.Admin)
+                            {
+                                if (c.myPlayer.UserRoom.ToLower() == myPlayer.UserRoom.ToLower())
+                                    sendToUser("You are already in the same room as " + c.myPlayer.ColourUserName, true, false, false);
+                                else
+                                {
+                                    sendToUser("You grab " + c.myPlayer.ColourUserName + " and drop them next to you", true, false, false);
+                                    c.sendToUser("\r\nAn etherial hand reaches down, lifts you up and drops you next to " + myPlayer.ColourUserName, true, true, false);
+                                    c.movePlayer(myPlayer.UserRoom, false, false);
+                                }
+                            }
+                            else
+                            {
+                                sendToUser("You can't seem to get a grasp on " + c.myPlayer.ColourUserName, true, false, false);
+                            }
                         }
                     }
                 }
@@ -5581,14 +5624,20 @@ namespace MudServer
                                 sendToUser("Sending a message to yourself, eh?", true, false, false);
                             else
                             {
-                                myPlayer.InMailEditor = true;
-                                sendToUser("Now entering mail editor. Type \".help\" for a list of editor commands", true, false, false);
-                                editMail = new message();
-                                editMail.From = myPlayer.UserName;
-                                editMail.To = target[0];
-                                editMail.Subject = split[1];
-                                editMail.Date = DateTime.Now;
-                                editMail.Read = false;
+                                Player temp = Player.LoadPlayer(target[0], 0);
+                                if (temp.CanMail(myPlayer.UserName))
+                                {
+                                    myPlayer.InMailEditor = true;
+                                    sendToUser("Now entering mail editor. Type \".help\" for a list of editor commands", true, false, false);
+                                    editMail = new message();
+                                    editMail.From = myPlayer.UserName;
+                                    editMail.To = target[0];
+                                    editMail.Subject = split[1];
+                                    editMail.Date = DateTime.Now;
+                                    editMail.Read = false;
+                                }
+                                else
+                                    sendToUser("Sorry, " + target[0] + " is currently blocking mail from you", true, false, false);
                             }
                         }
                         break;
