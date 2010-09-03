@@ -3396,8 +3396,8 @@ namespace MudServer
         {
             if (message == "")
             {
-                string output = headerLine("List") + "\r\n{bold}{blue}" 
-                    + "Name".PadRight(36)
+                string output = headerLine("List") + "\r\n{bold}{blue}"
+                    + "Name".PadRight(32)
                     + "Frd".PadRight(4)
                     + "Fnd".PadRight(4)
                     + "Inf".PadRight(4)
@@ -3407,15 +3407,17 @@ namespace MudServer
                     + "Bee".PadRight(4)
                     + "Blo".PadRight(4)
                     + "MBl".PadRight(4)
-                    + "Grb"
-                    +"{reset}\r\n";
+                    + "Grb".PadRight(4)
+                    + "Key"
+                    + "{reset}\r\n";
 
 
                 List<Player.playerList> myList = myPlayer.MyList;
                 myList.Sort(delegate(Player.playerList p1, Player.playerList p2) { return p1.name.CompareTo(p2.name); });
                 foreach (Player.playerList p in myList)
                 {
-                    output += p.name.PadRight(37)
+                    Player t = Player.LoadPlayer(p.name, 0);
+                    output += (t.UserName.PadRight(33)).Replace(t.UserName, t.ColourUserName)
                         + "{bold}{white}"
                         + (p.friend ? "Y |" : "N |").PadRight(4)
                         + (p.find ? "Y |" : "N |").PadRight(4)
@@ -3426,11 +3428,250 @@ namespace MudServer
                         + (p.beep ? "Y |" : "N |").PadRight(4)
                         + (p.block ? "Y |" : "N |").PadRight(4)
                         + (p.mailblock ? "Y |" : "N |").PadRight(4)
-                        + (p.grabme ? "Y" : "N")
+                        + (p.grabme ? "Y |" : "N |").PadRight(4)
+                        + (p.key ? "Y" : "N")
                         + "\r\n{reset}";
                 }
+                output += footerLine() + "\r\n";
+                Player.playerList pl = myPlayer.allPlayersList;
+                output += "All".PadRight(33)
+                    + "{bold}{white}"
+                    + (pl.friend ? "Y |" : "N |").PadRight(4)
+                    + (pl.find ? "Y |" : "N |").PadRight(4)
+                    + (pl.inform ? "Y |" : "N |").PadRight(4)
+                    + (pl.noisy ? "Y |" : "N |").PadRight(4)
+                    + (pl.ignore ? "Y |" : "N |").PadRight(4)
+                    + (pl.bar ? "Y |" : "N |").PadRight(4)
+                    + (pl.beep ? "Y |" : "N |").PadRight(4)
+                    + (pl.block ? "Y |" : "N |").PadRight(4)
+                    + (pl.mailblock ? "Y |" : "N |").PadRight(4)
+                    + (pl.grabme ? "Y |" : "N |").PadRight(4)
+                    + (pl.key ? "Y" : "N")
+                    + "\r\n{reset}";
+                pl = myPlayer.allFriendsList;
+                output += "Friends".PadRight(33)
+                    + "{bold}{white}"
+                    + (pl.friend ? "Y |" : "N |").PadRight(4)
+                    + (pl.find ? "Y |" : "N |").PadRight(4)
+                    + (pl.inform ? "Y |" : "N |").PadRight(4)
+                    + (pl.noisy ? "Y |" : "N |").PadRight(4)
+                    + (pl.ignore ? "Y |" : "N |").PadRight(4)
+                    + (pl.bar ? "Y |" : "N |").PadRight(4)
+                    + (pl.beep ? "Y |" : "N |").PadRight(4)
+                    + (pl.block ? "Y |" : "N |").PadRight(4)
+                    + (pl.mailblock ? "Y |" : "N |").PadRight(4)
+                    + (pl.grabme ? "Y |" : "N |").PadRight(4)
+                    + (pl.key ? "Y" : "N")
+                    + "\r\n{reset}";
+                pl = myPlayer.allStaffList;
+                output += "Staff".PadRight(33)
+                    + "{bold}{white}"
+                    + (pl.friend ? "Y |" : "N |").PadRight(4)
+                    + (pl.find ? "Y |" : "N |").PadRight(4)
+                    + (pl.inform ? "Y |" : "N |").PadRight(4)
+                    + (pl.noisy ? "Y |" : "N |").PadRight(4)
+                    + (pl.ignore ? "Y |" : "N |").PadRight(4)
+                    + (pl.bar ? "Y |" : "N |").PadRight(4)
+                    + (pl.beep ? "Y |" : "N |").PadRight(4)
+                    + (pl.block ? "Y |" : "N |").PadRight(4)
+                    + (pl.mailblock ? "Y |" : "N |").PadRight(4)
+                    + (pl.grabme ? "Y |" : "N |").PadRight(4)
+                    + (pl.key ? "Y" : "N")
+                    + "\r\n{reset}";
                 output += footerLine();
                 sendToUser(output, true, false, false);
+            }
+            else
+            {
+                string[] split = message.Split(new char[] { ' ' }, 2);
+                if (split.Length < 2)
+                    sendToUser("syntax: list <playername/all/staff/friends> <find/inform/noisy/ignore/bar/beep/block/mblock/grab/key>", true, false, false);
+                else
+                {
+                    if (split[0].ToLower() == "all")
+                    {
+                        switch (split[1].ToLower())
+                        {
+                            case "find":
+                                myPlayer.allPlayersList.find = !myPlayer.allPlayersList.find;
+                                sendToUser("You " + (myPlayer.allPlayersList.find ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "inform":
+                                myPlayer.allPlayersList.inform = !myPlayer.allPlayersList.inform;
+                                sendToUser("You " + (myPlayer.allPlayersList.inform ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "noisy":
+                                myPlayer.allPlayersList.noisy = !myPlayer.allPlayersList.noisy;
+                                sendToUser("You " + (myPlayer.allPlayersList.noisy ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "ignore":
+                                myPlayer.allPlayersList.ignore = !myPlayer.allPlayersList.ignore;
+                                sendToUser("You " + (myPlayer.allPlayersList.ignore ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "bar":
+                                myPlayer.allPlayersList.bar = !myPlayer.allPlayersList.bar;
+                                sendToUser("You " + (myPlayer.allPlayersList.bar ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "beep":
+                                myPlayer.allPlayersList.beep = !myPlayer.allPlayersList.beep;
+                                sendToUser("You " + (myPlayer.allPlayersList.beep ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "block":
+                                myPlayer.allPlayersList.block = !myPlayer.allPlayersList.block;
+                                sendToUser("You " + (myPlayer.allPlayersList.block ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "mblock":
+                                myPlayer.allPlayersList.mailblock = !myPlayer.allPlayersList.mailblock;
+                                sendToUser("You " + (myPlayer.allPlayersList.mailblock ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "grab":
+                                myPlayer.allPlayersList.grabme = !myPlayer.allPlayersList.grabme;
+                                sendToUser("You " + (myPlayer.allPlayersList.grabme ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "key":
+                                myPlayer.allPlayersList.key = !myPlayer.allPlayersList.key;
+                                sendToUser("You " + (myPlayer.allPlayersList.key ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            default:
+                                sendToUser("syntax: list <playername/all/staff/friends> <find/inform/noisy/ignore/bar/beep/block/mblock/grab/key>", true, false, false);
+                                break;
+                        }
+                    }
+                    else if (split[0].ToLower() == "friends")
+                    {
+                        switch (split[1].ToLower())
+                        {
+                            case "find":
+                                myPlayer.allFriendsList.find = !myPlayer.allFriendsList.find;
+                                sendToUser("You " + (myPlayer.allFriendsList.find ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "inform":
+                                myPlayer.allFriendsList.inform = !myPlayer.allFriendsList.inform;
+                                sendToUser("You " + (myPlayer.allFriendsList.inform ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "noisy":
+                                myPlayer.allFriendsList.noisy = !myPlayer.allFriendsList.noisy;
+                                sendToUser("You " + (myPlayer.allFriendsList.noisy ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "ignore":
+                                myPlayer.allFriendsList.ignore = !myPlayer.allFriendsList.ignore;
+                                sendToUser("You " + (myPlayer.allFriendsList.ignore ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "bar":
+                                myPlayer.allFriendsList.bar = !myPlayer.allFriendsList.bar;
+                                sendToUser("You " + (myPlayer.allFriendsList.bar ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "beep":
+                                myPlayer.allFriendsList.beep = !myPlayer.allFriendsList.beep;
+                                sendToUser("You " + (myPlayer.allFriendsList.beep ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "block":
+                                myPlayer.allFriendsList.block = !myPlayer.allFriendsList.block;
+                                sendToUser("You " + (myPlayer.allFriendsList.block ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "mblock":
+                                myPlayer.allFriendsList.mailblock = !myPlayer.allFriendsList.mailblock;
+                                sendToUser("You " + (myPlayer.allFriendsList.mailblock ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "grab":
+                                myPlayer.allFriendsList.grabme = !myPlayer.allFriendsList.grabme;
+                                sendToUser("You " + (myPlayer.allFriendsList.grabme ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "key":
+                                myPlayer.allFriendsList.key = !myPlayer.allFriendsList.key;
+                                sendToUser("You " + (myPlayer.allFriendsList.key ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            default:
+                                sendToUser("syntax: list <playername/all/staff/friends> <find/inform/noisy/ignore/bar/beep/block/mblock/grab/key>", true, false, false);
+                                break;
+                        }
+                    }
+                    else if (split[0].ToLower() == "staff")
+                    {
+                        switch (split[1].ToLower())
+                        {
+                            case "find":
+                                myPlayer.allStaffList.find = !myPlayer.allStaffList.find;
+                                sendToUser("You " + (myPlayer.allStaffList.find ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "inform":
+                                myPlayer.allStaffList.inform = !myPlayer.allStaffList.inform;
+                                sendToUser("You " + (myPlayer.allStaffList.inform ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "noisy":
+                                myPlayer.allStaffList.noisy = !myPlayer.allStaffList.noisy;
+                                sendToUser("You " + (myPlayer.allStaffList.noisy ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "ignore":
+                                myPlayer.allStaffList.ignore = !myPlayer.allStaffList.ignore;
+                                sendToUser("You " + (myPlayer.allStaffList.ignore ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "bar":
+                                myPlayer.allStaffList.bar = !myPlayer.allStaffList.bar;
+                                sendToUser("You " + (myPlayer.allStaffList.bar ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "beep":
+                                myPlayer.allStaffList.beep = !myPlayer.allStaffList.beep;
+                                sendToUser("You " + (myPlayer.allStaffList.beep ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "block":
+                                myPlayer.allStaffList.block = !myPlayer.allStaffList.block;
+                                sendToUser("You " + (myPlayer.allStaffList.block ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "mblock":
+                                myPlayer.allStaffList.mailblock = !myPlayer.allStaffList.mailblock;
+                                sendToUser("You " + (myPlayer.allStaffList.mailblock ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "grab":
+                                myPlayer.allStaffList.grabme = !myPlayer.allStaffList.grabme;
+                                sendToUser("You " + (myPlayer.allStaffList.grabme ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            case "key":
+                                myPlayer.allStaffList.key = !myPlayer.allStaffList.key;
+                                sendToUser("You " + (myPlayer.allStaffList.key ? "set" : "remove") + " the " + split[1].ToLower() + " flag for all players", true, false, false);
+                                break;
+                            default:
+                                sendToUser("syntax: list <playername/all/staff/friends> <find/inform/noisy/ignore/bar/beep/block/mblock/grab/key>", true, false, false);
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        string[] target = matchPartial(split[0]);
+                        if (target.Length == 0)
+                            sendToUser("Player \"" + split[0] + "\" not found", true, false, false);
+                        else if (target.Length > 1)
+                            sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                        else if (target[0].ToLower() == myPlayer.UserName.ToLower())
+                            sendToUser("You cannot add yourself to the list!", true, false, false);
+                        else
+                        {
+                            int result;
+                            switch (split[1].ToLower())
+                            {
+                                case "find":
+                                case "inform":
+                                case "noisy":
+                                case "ignore":
+                                case "bar":
+                                case "beep":
+                                case "block":
+                                case "mblock":
+                                case "grab":
+                                case "key":
+                                    result = myPlayer.UpdateList(target[0], split[1].ToLower());
+                                    if (result == -1)
+                                        sendToUser("Sorry, something has gone wrong ... ", true, false, false);
+                                    else
+                                        sendToUser("You " + (result == 0 ? "remove" : "set") + " the " + split[1] + " flag for " + target[0], true, false, false);
+                                    break;
+                                default:
+                                    sendToUser("syntax: list <playername/all/staff/friends> <find/inform/noisy/ignore/bar/beep/block/mblock/grab>", true, false, false);
+                                    break;
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -3826,9 +4067,9 @@ namespace MudServer
                 {
                     foreach (Connection c in connections)
                     {
-                        if (c.myPlayer.UserName.ToLower() == target[0])
+                        if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
                         {
-                            sendToUser(c.myPlayer.ColourUserName + " is " + (c.myPlayer.Hidden ? "hiding" : "in " + getRoomFullName(c.myPlayer.UserRoom)), true, false, false);
+                            sendToUser(c.myPlayer.ColourUserName + " is " + (c.myPlayer.Hidden && !c.myPlayer.CanFindMe(myPlayer.UserName) ? "hiding" : (c.myPlayer.Hidden && c.myPlayer.CanFindMe(myPlayer.UserName) ? "hiding " : "" ) + "in " + getRoomFullName(c.myPlayer.UserRoom)), true, false, false);
                         }
                     }
                 }
@@ -3840,10 +4081,12 @@ namespace MudServer
                 {
                     if (c.myPlayer.UserName == myPlayer.UserName)
                         output += "You are " + (myPlayer.Hidden || myPlayer.Invisible ? "hiding " : "") + "in " + getRoomFullName(myPlayer.UserRoom) + "\r\n";
-                    else if (!c.myPlayer.Invisible && (!c.myPlayer.Hidden || myPlayer.PlayerRank >= (int)Player.Rank.Admin))
+                    else if (!c.myPlayer.Invisible && (!c.myPlayer.Hidden || myPlayer.PlayerRank >= (int)Player.Rank.Admin) || c.myPlayer.CanFindMe(myPlayer.UserName))
                         output += c.myPlayer.ColourUserName + " is in " + getRoomFullName(c.myPlayer.UserRoom) + (c.myPlayer.Hidden ? " (hidden)" : "") + "\r\n";
                     else if (!c.myPlayer.Invisible)
                         output += c.myPlayer.ColourUserName + " is hiding\r\n";
+                    else
+                        output += c.myPlayer.ColourUserName + " doesn't seem to be online right now\r\n";
                 }
                 sendToUser("{bold}{cyan}---[{red}Where{cyan}]".PadRight(103, '-') + "{reset}\r\n" + (output == "" ? "Strange, there's no one here ... not even you!" : output + "{bold}{cyan}" + "".PadRight(80, '-') + "{reset}"), true, false, false);
             }
@@ -3977,12 +4220,12 @@ namespace MudServer
                     {
                         if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
                         {
-                            if (c.myPlayer.Hidden)
+                            if (c.myPlayer.Hidden && !c.myPlayer.CanFindMe(myPlayer.UserName))
                                 sendToUser("Try as you might, you cannot seem to find " + target[0] + " anywhere!", true, false, false);
                             else
                             {
                                 Room targetRoom = Room.LoadRoom(c.myPlayer.UserRoom);
-                                if (targetRoom.locks.FullLock || (targetRoom.locks.AdminLock && myPlayer.PlayerRank < (int)Player.Rank.Admin) || (targetRoom.locks.StaffLock && myPlayer.PlayerRank < (int)Player.Rank.Staff) || (targetRoom.locks.GuideLock && myPlayer.PlayerRank < (int)Player.Rank.Guide) || (targetRoom.locks.FriendLock && !c.myPlayer.isFriend(myPlayer.UserName)))
+                                if ((targetRoom.locks.FullLock || (targetRoom.locks.AdminLock && myPlayer.PlayerRank < (int)Player.Rank.Admin) || (targetRoom.locks.StaffLock && myPlayer.PlayerRank < (int)Player.Rank.Staff) || (targetRoom.locks.GuideLock && myPlayer.PlayerRank < (int)Player.Rank.Guide) || (targetRoom.locks.FriendLock && !c.myPlayer.isFriend(myPlayer.UserName))) && !c.myPlayer.HasKey(myPlayer.UserName))
                                 {
                                     sendToUser("You try the door, but find it locked shut", true, false, false);
                                 }
@@ -5090,11 +5333,15 @@ namespace MudServer
 
                     if (target.Actions.Drop == null || target.Actions.Drop == "")
                     {
-                        myPlayer.RemoveFromInventory(target.Name);
                         sendToUser("You drop " + (moreThanOne ? "one of your " : "your ") + target.Name + (target.Name.ToLower().EndsWith("s") ? "" : (moreThanOne ? "s" : "")), true, false, false);
+                        myPlayer.RemoveFromInventory(target.Name);
                     }
                     else
+                    {
+                        if (target.Rank < Player.Rank.Admin)
+                            myPlayer.RemoveFromInventory(target.Name);
                         doObjectCode(target.Name, "drop");
+                    }
                 }
             }
         }
