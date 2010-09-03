@@ -1137,7 +1137,7 @@ namespace MudServer
         {
             foreach (playerList p in myList)
             {
-                if (p.name.ToLower() == username && p.key)
+                if (p.name.ToLower() == username.ToLower() && p.key)
                     return true;
             }
             return false;
@@ -1145,10 +1145,71 @@ namespace MudServer
 
         public bool CanFindMe(string username)
         {
+            Player targ = LoadPlayer(username, 0);
+            if (allStaffList.find && targ.PlayerRank >= (int)Rank.Guide)
+                return true;
+            else if (allPlayersList.find || (allFriendsList.find && isFriend(username)))
+                return true;
             foreach (playerList p in myList)
             {
-                if (p.name.ToLower() == username && p.find)
+                if (p.name.ToLower() == username.ToLower() && p.find)
                     return true;
+            }
+            return false;
+        }
+
+        public bool CanHear(string username)
+        {
+            Player targ = LoadPlayer(username,0);
+            if (targ.PlayerRank > PlayerRank && targ.PlayerRank > (int)Rank.Guide)
+                return true;
+            else if (allPlayersList.block || ((allFriendsList.block || allFriendsList.ignore) && isFriend(username)))
+                return false;
+            else
+            {
+                foreach (playerList p in myList)
+                {
+                    if (p.name.ToLower() == username.ToLower() && (p.block || p.ignore))
+                        return false;
+                }
+            }
+            return true;
+        }
+
+        public bool CanMail(string username)
+        {
+            Player targ = LoadPlayer(username, 0);
+            if (targ.PlayerRank > PlayerRank && targ.PlayerRank > (int)Rank.Guide)
+                return true;
+            else if (allPlayersList.mailblock || (allFriendsList.mailblock && isFriend(username)))
+                return false;
+            else
+            {
+                foreach (playerList p in myList)
+                {
+                    if (p.name.ToLower() == username.ToLower() && p.mailblock)
+                        return false;
+                }
+            }
+            return true;
+        }
+
+        public bool CanGrabMe(string username)
+        {
+            Player targ = LoadPlayer(username, 0);
+            if (targ.PlayerRank > PlayerRank && targ.PlayerRank > (int)Rank.Guide)
+                return true;
+            else if (hidden && !CanFindMe(username))
+                return false;
+            else if (allPlayersList.grabme || (allFriendsList.grabme && isFriend(username)))
+                return true;
+            else
+            {
+                foreach (playerList p in myList)
+                {
+                    if (p.name.ToLower() == username.ToLower() && p.grabme)
+                        return true;
+                }
             }
             return false;
         }

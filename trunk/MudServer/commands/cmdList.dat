@@ -78,6 +78,7 @@
 "gender","cmdGender",1,"player"
 "get","cmdGet",1,"player"
 "git","cmdGit",3,"staff"
+"grab","cmdGrab",1,"room"
 "grant","cmdGrant",4,"admin"
 "he","cmdHE",5,"hcadmin"
 "hs","cmdHS",5,"hcadmin"
