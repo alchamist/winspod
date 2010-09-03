@@ -1,4 +1,5 @@
 #summary Winspod II Wiki Homepage
+#labels Featured
 
 = Introduction =
 
