@@ -54,6 +54,7 @@ namespace MudServer
             public bool beep;
             public bool block;
             public bool mailblock;
+            public bool key;
         }
 
         public struct inventory
@@ -173,9 +174,9 @@ namespace MudServer
 
         private List<playerList> myList = new List<playerList>();           // Friends/Inform/Bar/etc list;
         private int         myListMaxSize = 20;                             // How many people can we have on the list?
-        private playerList  allFriendsList = new playerList();              // Settings for all friends
-        private playerList  allStaffList = new playerList();                // Settings for all staff
-        private playerList  allPlayersList = new playerList();               // Settings for everyone
+        public  playerList  allFriendsList = new playerList();              // Settings for all friends
+        public  playerList  allStaffList = new playerList();                // Settings for all staff
+        public  playerList  allPlayersList = new playerList();              // Settings for everyone
 
         private List<alias> aliasList = new List<alias>();                  // Alias commands
 
@@ -872,11 +873,92 @@ namespace MudServer
             return ret;
         }
 
+        public int UpdateList(string username, string flag)
+        {
+            playerList target = new playerList();
+            bool update = false;
+            foreach(playerList p in myList)
+            {
+                if (p.name.ToLower() == username.ToLower())
+                {
+                    target = p;
+                    update = true;
+                }
+            }
+            if (!update)
+                target.name = username;
+
+            int ret = -1;
+            switch (flag)
+            {
+                case "bar":
+                    target.bar = !target.bar;
+                    ret = target.bar ? 1 : 0;
+                    break;
+                case "beep":
+                    target.beep = !target.beep;
+                    ret = target.beep ? 1 : 0;
+                    break;
+                case "block":
+                    target.block = !target.block;
+                    ret = target.block ? 1 : 0;
+                    break;
+                case "find":
+                    target.find = !target.find;
+                    ret = target.find ? 1 : 0;
+                    break;
+                case "friend":
+                    target.friend = !target.friend;
+                    ret = target.friend ? 1 : 0;
+                    break;
+                case "grab":
+                    target.grabme = !target.grabme;
+                    ret = target.grabme ? 1 : 0;
+                    break;
+                case "ignore":
+                    target.ignore = !target.ignore;
+                    ret = target.ignore ? 1 : 0;
+                    break;
+                case "inform":
+                    target.inform = !target.inform;
+                    ret = target.inform ? 1 : 0;
+                    break;
+                case "mblock":
+                    target.mailblock = !target.mailblock;
+                    ret = target.mailblock ? 1 : 0;
+                    break;
+                case "noisy":
+                    target.noisy = !target.noisy;
+                    ret = target.noisy ? 1 : 0;
+                    break;
+                case "key":
+                    target.key = !target.key;
+                    ret = target.key ? 1 : 0;
+                    break;
+            }
+            if (ret != -1)
+            {
+                if (update)
+                {
+                    for (int i = 0; i < myList.Count; i++)
+                    {
+                        if (myList[i].name == target.name)
+                            myList[i] = target;
+                    }
+                }
+                else
+                    myList.Add(target);
+
+                CleanMyList();
+            }
+            return ret;
+        }
+
         public void CleanMyList()
         {
             for (int i = 0; i < myList.Count; i++)
             {
-                if (!myList[i].bar && !myList[i].beep && !myList[i].block && !myList[i].find && !myList[i].friend && !myList[i].grabme && !myList[i].ignore && !myList[i].inform && !myList[i].mailblock && !myList[i].noisy)
+                if (!myList[i].bar && !myList[i].beep && !myList[i].block && !myList[i].find && !myList[i].friend && !myList[i].grabme && !myList[i].ignore && !myList[i].inform && !myList[i].mailblock && !myList[i].noisy && !myList[i].key)
                 {
                     myList.RemoveAt(i);
                 }
@@ -1051,6 +1133,25 @@ namespace MudServer
             }
         }
 
+        public bool HasKey(string username)
+        {
+            foreach (playerList p in myList)
+            {
+                if (p.name.ToLower() == username && p.key)
+                    return true;
+            }
+            return false;
+        }
+
+        public bool CanFindMe(string username)
+        {
+            foreach (playerList p in myList)
+            {
+                if (p.name.ToLower() == username && p.find)
+                    return true;
+            }
+            return false;
+        }
 
         #region Alias Stuff
 
