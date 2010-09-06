@@ -201,6 +201,13 @@ namespace MudServer
                 }
 
             }
+
+            for (int i = connections.Count - 1; i >= 0; i--)
+            {
+                Connection c = (Connection)connections[i];
+                if (!c.socket.Connected)
+                    connections.RemoveAt(i);
+            }
         }
 
         #region Socket stuff
@@ -231,7 +238,16 @@ namespace MudServer
                     }
                     string line = null;
                     if (socket.Connected)
-                        line = Reader.ReadLine();
+                    {
+                        try
+                        {
+                            line = Reader.ReadLine();
+                        }
+                        catch(Exception e)
+                        {
+                            logError(e.ToString(), "socket");
+                        }
+                    }
                     else
                         OnDisconnect();
                     if (line == null)
@@ -362,16 +378,17 @@ namespace MudServer
                                 {
                                     if (myPlayer.NewPlayer)
                                     {
-                                        bool reconnect = false;
-                                        foreach (Connection conn in connections)
-                                        {
-                                            if (conn.myPlayer != null && conn.myPlayer.UserName != null && conn.myPlayer.UserName.ToLower() == line.Trim() && conn != this)
-                                            {
-                                                myPlayer = conn.myPlayer;
-                                                conn.Disconnect();
-                                                reconnect = true;
-                                            }
-                                        }
+                                        //bool reconnect = false;
+                                        //foreach (Connection conn in connections)
+                                        //{
+                                        //    if (conn.myPlayer != null && conn.myPlayer.UserName != null && conn.myPlayer.UserName.ToLower() == line.ToLower().Trim() && conn != this)
+                                        //    {
+                                        //        myPlayer = conn.myPlayer;
+                                        //        conn.Disconnect();
+                                        //        conn.socket.Close();
+                                        //        reconnect = true;
+                                        //    }
+                                        //}
 
                                         //myState = 2;
                                         myState = 9;
@@ -381,8 +398,8 @@ namespace MudServer
                                         myPlayer.LastActive = DateTime.Now;
                                         //doPrompt();
 
-                                        if (!reconnect)
-                                        {
+                                        //if (!reconnect)
+                                        //{
                                             myState = 2;
                                             string welcome = AnsiColour.Colorise(loadTextFile(@"files" + Path.DirectorySeparatorChar + "welcome.txt") + "{reset}");
                                             if (welcome != "")
@@ -392,24 +409,41 @@ namespace MudServer
                                             foreach (Connection c in connections)
                                             {
                                                 // Newbie notification ...
-                                                if (c.myPlayer.PlayerRank >= (int)Player.Rank.Guide && c.myPlayer.OnDuty)
+                                                if (c.socket.Connected && c.myPlayer != null && c.myPlayer.PlayerRank >= (int)Player.Rank.Guide && c.myPlayer.OnDuty)
                                                     sendToUser("{bold}{green}[Newbie alert]{reset} " + myPlayer.UserName + " has just connected" + (c.myPlayer.PlayerRank >= (int)Player.Rank.Admin ? " from ip " + myPlayer.CurrentIP : ""), c.myPlayer.UserName, true, c.myPlayer.DoColour, false, false);
                                             }
                                             //sendToUser("New player!!", true, true, false);
                                             //sendToRoom(myPlayer.ColourUserName + " " + myPlayer.LogonMsg, "");
-                                        }
-                                        else
-                                        {
-                                            sendToRoom(myPlayer.ColourUserName + " " + "briefly phases out and back into existance");
-                                        }
+                                        //}
+                                        //else
+                                        //{
+                                        //    sendToRoom(myPlayer.ColourUserName + " " + "briefly phases out and back into existance");
+                                        //}
 
                                         Writer.Flush();
                                     }
 
                                     else
                                     {
-                                        sendEchoOff();
-                                        sendToUser("{bold}Please enter your password: {reset}", myPlayer.UserName, true, myPlayer.DoColour, false, false);
+                                        //bool reconnect = false;
+                                        foreach (Connection conn in connections)
+                                        {
+                                            if (conn.myPlayer != null && conn.myPlayer.UserName != null && conn.myPlayer.UserName.ToLower() == line.ToLower().Trim() && conn != this)
+                                            {
+                                                myPlayer = conn.myPlayer;
+                                                //conn.Disconnect();
+                                                //conn.socket.Close();
+                                                //reconnect = true;
+                                            }
+                                        }
+                                        //if (reconnect)
+                                        //    sendToRoom(myPlayer.ColourUserName + " " + "briefly phases out and back into existance","");
+
+                                        //sendEchoOff();
+                                        //sendToUser("{bold}Please enter your password: {reset}", myPlayer.UserName, true, myPlayer.DoColour, false, false);
+
+                                        socket.Send(echoOff);
+                                        Writer.Write(AnsiColour.Colorise("{bold}Please enter your password: {reset}"));
                                         myState = 9;
                                     }
                                 }
@@ -558,7 +592,7 @@ namespace MudServer
                     sendToRoom(myPlayer.UserName + " has just been granted residency by " + myPlayer.ResBy);
                     foreach (Connection c in connections)
                     {
-                        if (c.myPlayer.UserName.ToLower() == myPlayer.ResBy.ToLower())
+                        if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName.ToLower() == myPlayer.ResBy.ToLower())
                         {
                             c.myPlayer.ResCount++;
                             c.myPlayer.SavePlayer();
@@ -591,14 +625,16 @@ namespace MudServer
                         bool reconnect = false;
                         foreach (Connection conn in connections)
                         {
-                            if (conn.myPlayer != null && conn.myPlayer.UserName != null && conn.myPlayer.UserName.ToLower() == line.Trim() && conn != this)
+                            if (conn.myPlayer != null && conn.myPlayer.UserName != null && conn.myPlayer.UserName.ToLower() == myPlayer.UserName.ToLower() && conn != this)
                             {
                                 myPlayer = conn.myPlayer;
-                                conn.Disconnect();
+                                conn.socket.Close();
+                                //conn.Disconnect();
                                 reconnect = true;
                             }
                         }
 
+                        myState = 10;
                         if (!reconnect)
                         {
                             Console.WriteLine("[" + DateTime.Now.ToShortTimeString() + "] Login: " + myPlayer.UserName);
@@ -610,7 +646,6 @@ namespace MudServer
                             sendToUser("\r\nLast login " + myPlayer.LastLogon.ToShortDateString() + " from " + myPlayer.LastIP, true, false, false);
                             doWarnings();
 
-                            myState = 10;
                             doLAlias();
 
                             sendToRoom(myPlayer.UserName + " " + myPlayer.EnterMsg, "", myPlayer.UserRoom, myPlayer.UserName);
@@ -618,7 +653,9 @@ namespace MudServer
                             myPlayer.SavePlayer();
                         }
                         else
-                            sendToRoom(myPlayer.ColourUserName + " " + "briefly phases out and back into existance");
+                        {
+                            sendToRoom(myPlayer.ColourUserName + " " + "briefly phases out and back into existance", "\r\n", false, true);
+                        }
 
                         myPlayer.CurrentIP = connPoint;
                         myPlayer.CurrentLogon = DateTime.Now;
@@ -629,7 +666,9 @@ namespace MudServer
                 }
                 else
                 {
-                    sendToUser("{bold}{red}Password incorrect{white}\r\nPlease enter your password: {reset}", myPlayer.UserName, true, myPlayer.DoColour, false, false);
+                    string message = AnsiColour.Colorise("\r\n{bold}{red}Password incorrect{white}\r\nPlease enter your password: {reset}");
+                    Writer.WriteLine(message);
+                    //sendToUser("{bold}{red}Password incorrect{white}\r\nPlease enter your password: {reset}", myPlayer.UserName, true, myPlayer.DoColour, false, false);
                 }
             }
             else if (myState == 10)
@@ -709,7 +748,7 @@ namespace MudServer
                             catch (Exception e)
                             {
                                 logError("Error parsing command " + c.cmdText + ": " + e.ToString(), "Command");
-                                sendToUser("Sorry, there has been an error", true);
+                                sendToUser("Sorry, there has been an error", true, false, false);
                             }
                             finally
                             {
@@ -740,7 +779,7 @@ namespace MudServer
                                 catch (Exception e)
                                 {
                                     logError("Error parsing command " + c.cmdText + ": " + e.ToString(), "Command");
-                                    sendToUser("Sorry, there has been an error", true);
+                                    sendToUser("Sorry, there has been an error", true, false, false);
                                 }
                                 finally
                                 {
@@ -785,14 +824,17 @@ namespace MudServer
         {
             foreach (Connection conn in connections)
             {
-                try
+                if (conn.socket.Connected && conn.myPlayer != null)
                 {
-                    if (conn.myPlayer.CanHear(myPlayer.UserName))
-                        conn.Writer.Write(AnsiColour.Colorise(msg, !conn.myPlayer.DoColour));
-                }
-                catch (Exception ex)
-                {
-                    logError(ex.ToString(), "Socket write");
+                    try
+                    {
+                        if (conn.myPlayer.CanHear(myPlayer.UserName))
+                            conn.Writer.Write(AnsiColour.Colorise(msg, !conn.myPlayer.DoColour));
+                    }
+                    catch (Exception ex)
+                    {
+                        logError(ex.ToString(), "Socket write");
+                    }
                 }
             }
         }
@@ -922,7 +964,7 @@ namespace MudServer
         {
             foreach (Connection conn in connections)
             {
-                if (conn.myPlayer.PlayerRank >= rank && myPlayer.onStaffChannel((Player.Rank)rank) && !conn.myPlayer.InEditor && conn.myPlayer.CanHear(myPlayer.UserName))
+                if (conn.socket.Connected && conn.myPlayer != null && conn.myPlayer.PlayerRank >= rank && myPlayer.onStaffChannel((Player.Rank)rank) && !conn.myPlayer.InEditor && conn.myPlayer.CanHear(myPlayer.UserName))
                 {
                     string col = null;
                     switch (rank)
@@ -958,7 +1000,7 @@ namespace MudServer
             {
                 foreach (Connection c in connections)
                 {
-                    if (chan.OnChannel(c.myPlayer.UserName) && !c.myPlayer.ClubChannelMute && !c.myPlayer.InEditor)
+                    if (c.socket.Connected && c.myPlayer != null && chan.OnChannel(c.myPlayer.UserName) && !c.myPlayer.ClubChannelMute && !c.myPlayer.InEditor)
                     {
                         sendToUser(chan.FormatMessage(message), true, c.myPlayer.UserName != myPlayer.UserName, nohistory);
                     }
@@ -1230,17 +1272,26 @@ namespace MudServer
 
         public void cmdSay(string message)
         {
-            sendToRoom(myPlayer.ColourUserName + " " + sayWord(message, false) + " \"" + wibbleText(message, false) + "{reset}\"", "You " + sayWord(message, true) + " \"" + wibbleText(message, false) + "{reset}\"", myPlayer.UserRoom, myPlayer.UserName, true, false, true);
+            if (message == "")
+                sendToUser("Syntax: say <message>", true, false, false);
+            else
+                sendToRoom(myPlayer.ColourUserName + " " + sayWord(message, false) + " \"" + wibbleText(message, false) + "{reset}\"", "You " + sayWord(message, true) + " \"" + wibbleText(message, false) + "{reset}\"", myPlayer.UserRoom, myPlayer.UserName, true, false, true);
         }
 
         public void cmdThink(string message)
         {
-            sendToRoom(myPlayer.ColourUserName + " thinks . o O ( " + wibbleText(message, false) + " {reset})", "You think . o O ( " + wibbleText(message, false) + " {reset})", false, true);
+            if (message == "")
+                sendToUser("Syntax: think <message>", true, false, false);
+            else
+                sendToRoom(myPlayer.ColourUserName + " thinks . o O ( " + wibbleText(message, false) + " {reset})", "You think . o O ( " + wibbleText(message, false) + " {reset})", false, true);
         }
 
         public void cmdSing(string message)
         {
-            sendToRoom(myPlayer.ColourUserName + " sings o/~ " + wibbleText(message, false) + " {reset}o/~", "You sing o/~ " + wibbleText(message, false) + " {reset}o/~", false, true);
+            if (message == "")
+                sendToUser("Syntax: sing <lyrics>", true, false, false);
+            else
+                sendToRoom(myPlayer.ColourUserName + " sings o/~ " + wibbleText(message, false) + " {reset}o/~", "You sing o/~ " + wibbleText(message, false) + " {reset}o/~", false, true);
         }
 
         public void cmdTell(string message)
@@ -1390,9 +1441,14 @@ namespace MudServer
 
         public void cmdEmote(string message)
         {
-            if (!message.StartsWith("'"))
-                message = " " + message;
-            sendToRoom(myPlayer.UserName + wibbleText(message, true), "You emote: " + myPlayer.UserName + wibbleText(message, true), false, true);
+            if (message == "")
+                sendToUser("Syntax: emote <action>", true, false, false);
+            else
+            {
+                if (!message.StartsWith("'"))
+                    message = " " + message;
+                sendToRoom(myPlayer.UserName + wibbleText(message, true), "You emote: " + myPlayer.UserName + wibbleText(message, true), false, true);
+            }
         }
 
         public void cmdEcho(string message)
@@ -1403,7 +1459,7 @@ namespace MudServer
             {
                 foreach (Connection c in connections)
                 {
-                    if (!c.myPlayer.InEditor)
+                    if (c.socket.Connected && c.myPlayer != null && !c.myPlayer.InEditor)
                     {
                         if (myPlayer.PlayerRank >= (int)Player.Rank.Admin || !c.myPlayer.SeeEcho)
                         {
@@ -1428,23 +1484,28 @@ namespace MudServer
 
         public void cmdShout(string message)
         {
-            if (myPlayer != null)
+            if (message == "")
+                sendToUser("Syntax: shout <message>", true, false, false);
+            else
             {
-                if (myPlayer.CanShout)
+                if (myPlayer != null)
                 {
-                    foreach (Connection c in connections)
+                    if (myPlayer.CanShout)
                     {
-                        if (c.myPlayer != null && c.myPlayer.UserName != myPlayer.UserName)
+                        foreach (Connection c in connections)
                         {
-                            if (c.myPlayer.HearShouts && !c.myPlayer.InEditor)
-                                sendToUser(myPlayer.ColourUserName + " shouts \"" + wibbleText(message, false) + "{reset}\"", c.myPlayer.UserName);
+                            if (c.myPlayer != null && c.myPlayer.UserName != myPlayer.UserName)
+                            {
+                                if (c.myPlayer.HearShouts && !c.myPlayer.InEditor)
+                                    sendToUser(myPlayer.ColourUserName + " shouts \"" + wibbleText(message, false) + "{reset}\"", c.myPlayer.UserName);
+                            }
                         }
+                        sendToUser("You shout \"" + wibbleText(message, false) + "{reset}\"");
                     }
-                    sendToUser("You shout \"" + wibbleText(message, false) + "{reset}\"");
-                }
-                else
-                {
-                    sendToUser("You find that your throat is sore and you cannot shout");
+                    else
+                    {
+                        sendToUser("You find that your throat is sore and you cannot shout");
+                    }
                 }
             }
         }
@@ -1458,7 +1519,7 @@ namespace MudServer
                 int count = 0;
                 foreach (Connection c in connections)
                 {
-                    if (myPlayer.isFriend(c.myPlayer.UserName))
+                    if (c.socket.Connected && c.myPlayer != null && myPlayer.isFriend(c.myPlayer.UserName))
                     {
                         count++;
                         if (!c.myPlayer.InEditor)
@@ -1481,7 +1542,7 @@ namespace MudServer
                 int count = 0;
                 foreach (Connection c in connections)
                 {
-                    if (myPlayer.isFriend(c.myPlayer.UserName))
+                    if (c.socket.Connected && c.myPlayer != null && myPlayer.isFriend(c.myPlayer.UserName))
                     {
                         count++;
                         if (!c.myPlayer.InEditor)
@@ -1521,12 +1582,15 @@ namespace MudServer
                         int count = 0;
                         foreach (Connection c in connections)
                         {
-                            if (c.myPlayer.UserName != myPlayer.UserName && (temp.isFriend(c.myPlayer.UserName) || c.myPlayer.UserName == temp.UserName))
+                            if (c.socket.Connected && c.myPlayer != null)
                             {
-                                count++;
-                                if (!c.myPlayer.InEditor)
+                                if (c.myPlayer.UserName != myPlayer.UserName && (temp.isFriend(c.myPlayer.UserName) || c.myPlayer.UserName == temp.UserName))
                                 {
-                                    c.sendToUser("\r\n{bold}{green}(To " + (c.myPlayer.UserName == temp.UserName ? "your" : temp.UserName + "'s") + " friends) " + myPlayer.UserName + " " + sayWord(split[1], false) + " \"" + split[1] + "\"", true, true, true);
+                                    count++;
+                                    if (!c.myPlayer.InEditor)
+                                    {
+                                        c.sendToUser("\r\n{bold}{green}(To " + (c.myPlayer.UserName == temp.UserName ? "your" : temp.UserName + "'s") + " friends) " + myPlayer.UserName + " " + sayWord(split[1], false) + " \"" + split[1] + "\"", true, true, true);
+                                    }
                                 }
                             }
                         }
@@ -1565,12 +1629,15 @@ namespace MudServer
                         int count = 0;
                         foreach (Connection c in connections)
                         {
-                            if (c.myPlayer.UserName != myPlayer.UserName && (temp.isFriend(c.myPlayer.UserName) || c.myPlayer.UserName == temp.UserName))
+                            if (c.socket.Connected && c.myPlayer != null)
                             {
-                                count++;
-                                if (!c.myPlayer.InEditor)
+                                if (c.myPlayer.UserName != myPlayer.UserName && (temp.isFriend(c.myPlayer.UserName) || c.myPlayer.UserName == temp.UserName))
                                 {
-                                    c.sendToUser("\r\n{bold}{green}(To " + (c.myPlayer.UserName == temp.UserName ? "your" : temp.UserName + "'s") + " friends) " + myPlayer.UserName + (split[1].Substring(0, 1) == "'" ? "" : " ") + split[1], true, true, true);
+                                    count++;
+                                    if (!c.myPlayer.InEditor)
+                                    {
+                                        c.sendToUser("\r\n{bold}{green}(To " + (c.myPlayer.UserName == temp.UserName ? "your" : temp.UserName + "'s") + " friends) " + myPlayer.UserName + (split[1].Substring(0, 1) == "'" ? "" : " ") + split[1], true, true, true);
+                                    }
                                 }
                             }
                         }
@@ -1849,7 +1916,7 @@ namespace MudServer
                     bool found = false;
                     foreach (Connection c in connections)
                     {
-                        if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                        if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName.ToLower() == target[0].ToLower())
                         {
                             found = true;
                             if (c.myPlayer.PlayerRank > myPlayer.PlayerRank)
@@ -2047,7 +2114,7 @@ namespace MudServer
                     amount = amount * 3600; // get it into hours
                     foreach (Connection c in connections)
                     {
-                        if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                        if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName.ToLower() == target[0].ToLower())
                         {
                             //c.myPlayer.TotalOnlineTime = increment ? c.myPlayer.TotalOnlineTime + (amount * 3600) : c.myPlayer.TotalOnlineTime - (amount * 3600);
                             sendToUser("Pre: " + c.myPlayer.TotalOnlineTime.ToString());
@@ -2344,7 +2411,7 @@ namespace MudServer
                 {
                     foreach (Connection c in connections)
                     {
-                        if (c.myPlayer.UserName.ToLower() == target[0])
+                        if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName.ToLower() == target[0])
                         {
                             sendToUser("You force " + target[0] + " to do " + split[1], true, false);
                             c.ProcessLine(split[1]);
@@ -2376,7 +2443,7 @@ namespace MudServer
                             title = "IP Addresses";
                             foreach (Connection c in connections)
                             {
-                                if (!c.myPlayer.Invisible)
+                                if (c.socket.Connected && c.myPlayer != null && !c.myPlayer.Invisible)
                                     output += "\r\n" + c.myPlayer.ColourUserName.PadRight(40 + (c.myPlayer.ColourUserName.Length - c.myPlayer.UserName.Length), ' ') + ": " + c.myPlayer.CurrentIP;
                             }
                             if (output != "")
@@ -2422,7 +2489,7 @@ namespace MudServer
                             title = "Newbies";
                             foreach (Connection c in connections)
                             {
-                                if (c.myPlayer.NewPlayer)
+                                if (c.socket.Connected && c.myPlayer != null && c.myPlayer.NewPlayer)
                                     output += ", " + c.myPlayer.ColourUserName;
                             }
                             if (output != "") 
@@ -2484,7 +2551,8 @@ namespace MudServer
             {
                 foreach (Connection c in connections)
                 {
-                    sendToUser("{bold}{cyan}{bell}>>> {blink}" + myPlayer.UserName + " announces \"" + message.Substring(1).Trim() + "\"{reset}{bold}{cyan} <<{reset}", c.myPlayer.UserName, true, c.myPlayer.DoColour, !(c.myPlayer.UserName==myPlayer.UserName), true);
+                    if (c.socket.Connected && c.myPlayer != null)
+                        sendToUser("{bold}{cyan}{bell}>>> {blink}" + myPlayer.UserName + " announces \"" + message.Substring(1).Trim() + "\"{reset}{bold}{cyan} <<{reset}", c.myPlayer.UserName, true, c.myPlayer.DoColour, !(c.myPlayer.UserName==myPlayer.UserName), true);
                 }
             }
             else
@@ -2498,8 +2566,11 @@ namespace MudServer
                 string output = "";
                 foreach (Connection c in connections)
                 {
-                    if (c.myPlayer.Wibbled)
-                        output += c.myPlayer.UserName + " {bold}{blue}(wibbled by " + c.myPlayer.WibbledBy + "){reset}\r\n";
+                    if (c.socket.Connected && c.myPlayer != null)
+                    {
+                        if (c.myPlayer.Wibbled)
+                            output += c.myPlayer.UserName + " {bold}{blue}(wibbled by " + c.myPlayer.WibbledBy + "){reset}\r\n";
+                    }
                 }
                 if (output == "")
                     sendToUser("No wibbled players on-line", true, false, false);
@@ -2526,7 +2597,7 @@ namespace MudServer
                 {
                     foreach (Connection c in connections)
                     {
-                        if (c.myPlayer.UserName.ToLower() == target[0])
+                        if (c.socket.Connected && c.myPlayer!= null && c.myPlayer.UserName.ToLower() == target[0])
                         {
                             if (myPlayer.PlayerRank < c.myPlayer.PlayerRank)
                             {
@@ -2554,7 +2625,8 @@ namespace MudServer
             {
                 foreach (Connection c in connections)
                 {
-                    c.myPlayer.SavePlayer();
+                    if (c.socket.Connected && c.myPlayer != null)
+                        c.myPlayer.SavePlayer();
                 }
                 sendToUser("All active players saved", true, false, false);
             }
@@ -2683,10 +2755,13 @@ namespace MudServer
                     {
                         foreach (Connection c in connections)
                         {
-                            if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                            if (c.socket.Connected && c.myPlayer != null)
                             {
-                                t = c.myPlayer;
-                                online = true;
+                                if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                                {
+                                    t = c.myPlayer;
+                                    online = true;
+                                }
                             }
                         }
                     }
@@ -2780,7 +2855,7 @@ namespace MudServer
                             // If they are online, update their profile
                             foreach (Connection c in connections)
                             {
-                                if (c.myPlayer.UserName == t.UserName)
+                                if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName == t.UserName)
                                 {
                                     c.myPlayer = t;
                                     c.myPlayer.SavePlayer();
@@ -2828,7 +2903,7 @@ namespace MudServer
                 {
                     foreach (Connection c in connections)
                     {
-                        if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                        if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName.ToLower() == target[0].ToLower())
                         {
                             if (c.myPlayer.PlayerRank < (int)Player.Rank.Guide)
                                 sendToUser(c.myPlayer.UserName + " isn't on the staff!", true, false, false);
@@ -2867,7 +2942,7 @@ namespace MudServer
                 {
                     foreach (Connection c in connections)
                     {
-                        if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                        if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName.ToLower() == target[0].ToLower())
                         {
                             if (c.myPlayer.PlayerRank > (int)Player.Rank.Newbie)
                             {
@@ -2907,7 +2982,7 @@ namespace MudServer
                     bool found = false;
                     foreach (Connection c in connections)
                     {
-                        if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                        if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName.ToLower() == target[0].ToLower())
                         {
                             if (c.myPlayer.PlayerRank >= myPlayer.PlayerRank)
                                 sendToUser("Trying to abuse a fellow staff member, eh?");
@@ -2947,7 +3022,7 @@ namespace MudServer
                     bool found = false;
                     foreach (Connection c in connections)
                     {
-                        if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                        if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName.ToLower() == target[0].ToLower())
                         {
                             if (c.myPlayer.PlayerRank >= myPlayer.PlayerRank)
                                 sendToUser("Trying to abuse a fellow staff member, eh?");
@@ -2987,7 +3062,7 @@ namespace MudServer
                     bool found = false;
                     foreach (Connection c in connections)
                     {
-                        if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                        if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName.ToLower() == target[0].ToLower())
                         {
                             if (c.myPlayer.PlayerRank >= myPlayer.PlayerRank)
                                 sendToUser("Trying to abuse a fellow staff member, eh?");
@@ -3187,7 +3262,7 @@ namespace MudServer
                     {
                         foreach (Connection c in connections)
                         {
-                            if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                            if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName.ToLower() == target[0].ToLower())
                             {
                                 // Set rank temporarially to 0 to prevent the Player class destructor saving the old file
                                 c.myPlayer = rename;
@@ -3227,7 +3302,7 @@ namespace MudServer
                     {
                         foreach (Connection c in connections)
                         {
-                            if (c.myPlayer.UserName == target[0])
+                            if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName == target[0])
                             {
                                 sendToUser(tag == "" ? "You remove " + c.myPlayer.UserName + "'s inform tag" : "You set " + c.myPlayer.UserName + "'s inform tag to: " + tag, true, false, false);
                                 if (!c.myPlayer.InEditor)
@@ -3287,7 +3362,7 @@ namespace MudServer
                         {
                             foreach (Connection c in connections)
                             {
-                                if (c.myPlayer.UserName == target[0])
+                                if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName == target[0])
                                 {
                                     c.myPlayer.UserName = split[1];
                                     c.myPlayer.SavePlayer();
@@ -3847,6 +3922,41 @@ namespace MudServer
             }
         }
 
+        public void cmdBump(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: bump <player name>", true, false, false);
+            else
+            {
+                string[] target = matchPartial(message);
+
+                if (target.Length == 0)
+                    sendToUser("No such user \"" + message.Substring(0, message.IndexOf(" ")) + "\"");
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (target[0].ToLower() == myPlayer.UserName.ToLower())
+                    sendToUser("Trying to bump yourself?!", true, false, false);
+                else if (!isOnline(target[0]))
+                {
+                    sendToUser("User \"" + target[0] + "\" is not online", true, false, false);
+                }
+                else
+                {
+                    foreach (Connection c in connections)
+                    {
+                        if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                        {
+                            sendToStaff("[" + AppSettings.Default.AdminName + "] " + c.myPlayer.UserName + " has just been bumped by " + myPlayer.UserName, (int)Player.Rank.Admin, true);
+                            c.myPlayer.SavePlayer();
+                            c.socket.Close();
+                            c.OnDisconnect();
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
         #region Alias stuff
 
         public string aliasText(string preText)
@@ -4068,7 +4178,7 @@ namespace MudServer
                 {
                     foreach (Connection c in connections)
                     {
-                        if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                        if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName.ToLower() == target[0].ToLower())
                         {
                             sendToUser(c.myPlayer.ColourUserName + " is " + (c.myPlayer.Hidden && !c.myPlayer.CanFindMe(myPlayer.UserName) ? "hiding" : (c.myPlayer.Hidden && c.myPlayer.CanFindMe(myPlayer.UserName) ? "hiding " : "" ) + "in " + getRoomFullName(c.myPlayer.UserRoom)), true, false, false);
                         }
@@ -4080,14 +4190,17 @@ namespace MudServer
                 string output = "";
                 foreach (Connection c in connections)
                 {
-                    if (c.myPlayer.UserName == myPlayer.UserName)
-                        output += "You are " + (myPlayer.Hidden || myPlayer.Invisible ? "hiding " : "") + "in " + getRoomFullName(myPlayer.UserRoom) + "\r\n";
-                    else if (!c.myPlayer.Invisible && (!c.myPlayer.Hidden || myPlayer.PlayerRank >= (int)Player.Rank.Admin) || c.myPlayer.CanFindMe(myPlayer.UserName))
-                        output += c.myPlayer.ColourUserName + " is in " + getRoomFullName(c.myPlayer.UserRoom) + (c.myPlayer.Hidden ? " (hidden)" : "") + "\r\n";
-                    else if (!c.myPlayer.Invisible)
-                        output += c.myPlayer.ColourUserName + " is hiding\r\n";
-                    else
-                        output += c.myPlayer.ColourUserName + " doesn't seem to be online right now\r\n";
+                    if (c.socket.Connected && c.myPlayer != null)
+                    {
+                        if (c.myPlayer.UserName == myPlayer.UserName)
+                            output += "You are " + (myPlayer.Hidden || myPlayer.Invisible ? "hiding " : "") + "in " + getRoomFullName(myPlayer.UserRoom) + "\r\n";
+                        else if (!c.myPlayer.Invisible && (!c.myPlayer.Hidden || myPlayer.PlayerRank >= (int)Player.Rank.Admin) || c.myPlayer.CanFindMe(myPlayer.UserName))
+                            output += c.myPlayer.ColourUserName + " is in " + getRoomFullName(c.myPlayer.UserRoom) + (c.myPlayer.Hidden ? " (hidden)" : "") + "\r\n";
+                        else if (!c.myPlayer.Invisible)
+                            output += c.myPlayer.ColourUserName + " is hiding\r\n";
+                        else
+                            output += c.myPlayer.ColourUserName + " doesn't seem to be online right now\r\n";
+                    }
                 }
                 sendToUser("{bold}{cyan}---[{red}Where{cyan}]".PadRight(103, '-') + "{reset}\r\n" + (output == "" ? "Strange, there's no one here ... not even you!" : output + "{bold}{cyan}" + "".PadRight(80, '-') + "{reset}"), true, false, false);
             }
@@ -4212,20 +4325,23 @@ namespace MudServer
                 {
                     foreach (Connection c in connections)
                     {
-                        if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                        if (c.socket.Connected && c.myPlayer != null)
                         {
-                            if (c.myPlayer.Hidden && !c.myPlayer.CanFindMe(myPlayer.UserName))
-                                sendToUser("Try as you might, you cannot seem to find " + target[0] + " anywhere!", true, false, false);
-                            else
+                            if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
                             {
-                                Room targetRoom = Room.LoadRoom(c.myPlayer.UserRoom);
-                                if ((targetRoom.locks.FullLock || (targetRoom.locks.AdminLock && myPlayer.PlayerRank < (int)Player.Rank.Admin) || (targetRoom.locks.StaffLock && myPlayer.PlayerRank < (int)Player.Rank.Staff) || (targetRoom.locks.GuideLock && myPlayer.PlayerRank < (int)Player.Rank.Guide) || (targetRoom.locks.FriendLock && !c.myPlayer.isFriend(myPlayer.UserName))) && !c.myPlayer.HasKey(myPlayer.UserName))
-                                {
-                                    sendToUser("You try the door, but find it locked shut", true, false, false);
-                                }
+                                if (c.myPlayer.Hidden && !c.myPlayer.CanFindMe(myPlayer.UserName))
+                                    sendToUser("Try as you might, you cannot seem to find " + target[0] + " anywhere!", true, false, false);
                                 else
                                 {
-                                    movePlayer(c.myPlayer.UserRoom);
+                                    Room targetRoom = Room.LoadRoom(c.myPlayer.UserRoom);
+                                    if ((targetRoom.locks.FullLock || (targetRoom.locks.AdminLock && myPlayer.PlayerRank < (int)Player.Rank.Admin) || (targetRoom.locks.StaffLock && myPlayer.PlayerRank < (int)Player.Rank.Staff) || (targetRoom.locks.GuideLock && myPlayer.PlayerRank < (int)Player.Rank.Guide) || (targetRoom.locks.FriendLock && !c.myPlayer.isFriend(myPlayer.UserName))) && !c.myPlayer.HasKey(myPlayer.UserName))
+                                    {
+                                        sendToUser("You try the door, but find it locked shut", true, false, false);
+                                    }
+                                    else
+                                    {
+                                        movePlayer(c.myPlayer.UserRoom);
+                                    }
                                 }
                             }
                         }
@@ -4260,7 +4376,7 @@ namespace MudServer
             string output = "";
             foreach (Connection c in connections)
             {
-                if (c.myPlayer.UserName != myPlayer.UserName && c.myPlayer.UserRoom == myPlayer.UserRoom)
+                if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName != myPlayer.UserName && c.myPlayer.UserRoom == myPlayer.UserRoom)
                     output += ", " + c.myPlayer.ColourUserName;
             }
             if (output == "")
@@ -4755,7 +4871,7 @@ namespace MudServer
                 {
                     foreach (Connection c in connections)
                     {
-                        if (c.myPlayer.UserName.ToLower() == target[0])
+                        if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName.ToLower() == target[0])
                         {
                             if (c.myPlayer.PlayerRank < myPlayer.PlayerRank)
                             {
@@ -4789,7 +4905,7 @@ namespace MudServer
                 {
                     foreach (Connection c in connections)
                     {
-                        if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                        if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName.ToLower() == target[0].ToLower())
                         {
                             if (c.myPlayer.CanGrabMe(myPlayer.UserName) || myPlayer.PlayerRank >= (int)Player.Rank.Admin)
                             {
@@ -5952,13 +6068,13 @@ namespace MudServer
                     bool found = false;
                     foreach (Connection c in connections)
                     {
-                        if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                        if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName.ToLower() == target[0].ToLower())
                         {
                             found = true;
                             sendToUser("{bold}{red}{bell} YYou have just been slapped by " + myPlayer.ColourUserName + "{bold}{red}!{reset}", c.myPlayer.UserName, true, c.myPlayer.DoColour, true, true);
                             foreach (Connection conn in connections)
                             {
-                                if (conn.myPlayer.UserName != c.myPlayer.UserName)
+                                if (conn.socket.Connected && conn.myPlayer != null && conn.myPlayer.UserName != c.myPlayer.UserName)
                                 {
                                     sendToUser("{bold}{red}" + c.myPlayer.UserName + " has just been slapped by " + myPlayer.ColourUserName + "{bold}{red}!{reset}", conn.myPlayer.UserName, true, conn.myPlayer.DoColour, !(conn.myPlayer.UserName == myPlayer.UserName), true);
                                 }
@@ -5993,7 +6109,7 @@ namespace MudServer
                 {
                     foreach (Connection c in connections)
                     {
-                        if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                        if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName.ToLower() == target[0].ToLower())
                         {
                             switch (split[1].Substring(0, 1).ToLower())
                             {
@@ -6060,7 +6176,7 @@ namespace MudServer
                     {
                         foreach (Connection c in connections)
                         {
-                            if (c.myPlayer.UserName == target[0])
+                            if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName == target[0])
                             {
                                 if (c.myPlayer.WarnedCount++ >= 5 && !c.myPlayer.AutoGit && c.myPlayer.PlayerRank < (int)Player.Rank.Admin)
                                 {
@@ -6121,7 +6237,7 @@ namespace MudServer
                     {
                         foreach (Connection c in connections)
                         {
-                            if (c.myPlayer.UserName == target[0])
+                            if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName == target[0])
                             {
                                 if (!c.myPlayer.AutoGit)
                                     sendToUser(c.myPlayer.UserName + " isn't auto-gitted", true, false, false);
@@ -6169,7 +6285,7 @@ namespace MudServer
                     {
                         foreach (Connection c in connections)
                         {
-                            if (c.myPlayer.UserName == target[0])
+                            if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName == target[0])
                             {
                                 if (c.myPlayer.PlayerRank >= (int)Player.Rank.Admin)
                                 {
@@ -6956,7 +7072,7 @@ namespace MudServer
                     {
                         foreach (Connection conn in connections)
                         {
-                            if (conn.myPlayer.UserName.ToLower() == c.Owner.ToLower() && !conn.myPlayer.ClubChannelMute)
+                            if (conn.socket.Connected && conn.myPlayer != null && conn.myPlayer.UserName.ToLower() == c.Owner.ToLower() && !conn.myPlayer.ClubChannelMute)
                                 users += ", " + conn.myPlayer.ColourUserName;
                         }
                     }
@@ -6964,7 +7080,7 @@ namespace MudServer
                     {
                         foreach (Connection conn in connections)
                         {
-                            if (conn.myPlayer.UserName.ToLower() == user.ToLower() && !conn.myPlayer.ClubChannelMute)
+                            if (conn.socket.Connected && conn.myPlayer != null && conn.myPlayer.UserName.ToLower() == user.ToLower() && !conn.myPlayer.ClubChannelMute)
                                 users += ", " + conn.myPlayer.ColourUserName;
                         }
                     }
@@ -7174,7 +7290,7 @@ namespace MudServer
             {
                 foreach (Connection c in connections)
                 {
-                    if (c.myPlayer.UserName == user)
+                    if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName == user)
                     {
                         sendToUser(c.myPlayer.InEditor ? "> " :  c.myPlayer.Prompt.Replace("%t", DateTime.Now.ToShortTimeString()).Replace("%d", DateTime.Now.ToShortDateString()), c.myPlayer.UserName, false, c.myPlayer.DoColour, false, false);
                     }
@@ -7212,7 +7328,7 @@ namespace MudServer
 
             foreach (Connection c in connections)
             {
-                if (c.myPlayer != null && pNames.IndexOf(c.myPlayer.UserName) < 0 && c.myPlayer.UserName.ToLower().StartsWith(name.ToLower()))
+                if (c.socket.Connected && c.myPlayer != null && c.myPlayer != null && pNames.IndexOf(c.myPlayer.UserName) < 0 && c.myPlayer.UserName.ToLower().StartsWith(name.ToLower()))
                     pNames.Add(c.myPlayer.UserName);
             }
 
@@ -7224,7 +7340,7 @@ namespace MudServer
             bool found = false;
             foreach (Connection c in connections)
             {
-                if (c.myPlayer.UserName.ToLower() == username.ToLower())
+                if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName.ToLower() == username.ToLower())
                     found = true;
             }
             return found;
@@ -7402,7 +7518,8 @@ namespace MudServer
             {
                 foreach (Connection c in connections)
                 {
-                    c.Writer.Flush();
+                    if (c.socket.Connected)
+                        c.Writer.Flush();
                 }
             }
         }
