@@ -161,6 +161,7 @@
 "sm","cmdSM",3,"staff"
 "save","cmdSave",1,"player"
 "say","cmdSay",0,"comms"
+"scare","cmdScare",4,"admin"
 "set","cmdSet",1,"player"
 "shake","cmdShake",1,"player"
 "shout","cmdShout",0,"comms"

@@ -81,7 +81,7 @@ namespace MudServer
         private DateTime    lastActive;                                     // Time/Date of their last activity
         private int         longestLogin = 0;                               // Longest login time in seconds
         private int         totalOnlineTime;                                // Total time online in seconds;
-        private double      averageLogin;                                   // Average login time
+        //private double      averageLogin;                                   // Average login time
         private string      lastAddress;                                    // The last IP address they logged on from
         private string      currentAddress;                                 // The current IP address they are logged on from
         private privs       systemprivs;                                    // The user privs

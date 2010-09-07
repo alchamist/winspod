@@ -239,15 +239,15 @@ namespace MudServer
                         }
                     }
                     string line = null;
-                    if (socket.Connected)
+                    if (socket.Connected && Reader.BaseStream.CanRead)
                     {
                         try
                         {
                             line = Reader.ReadLine();
                         }
-                        catch(Exception e)
+                        catch//(Exception e)
                         {
-                            logError(e.ToString(), "socket");
+                            //logError(e.ToString(), "socket");
                         }
                     }
                     else
@@ -297,6 +297,9 @@ namespace MudServer
 
         void OnDisconnect()
         {
+            if (myPlayer != null)
+                logConnection(myPlayer.UserName, myPlayer.CurrentIP, DateTime.Now);
+
             myPlayer = null;
             Console.WriteLine("[" + DateTime.Now.ToShortTimeString() + "] Disconnect: " + connPoint);
             connections.Remove(this);
@@ -1034,6 +1037,49 @@ namespace MudServer
                 logError("Unable to load file " + path + " - file does not exist", "File I/O");
                 return "";
             }
+        }
+
+        private List<string> loadConnectionFile()
+        {
+            string path = @"logs" + Path.DirectorySeparatorChar + "connections.log";
+            List<string> ret = new List<string>();
+            if (File.Exists(path))
+            {
+                TextReader textRead = new StreamReader(path);
+                string line = "";
+                while ((line = textRead.ReadLine()) != null)
+                {
+                    ret.Add(line);
+                }
+                textRead.Close();
+            }
+            else
+            {
+                logError("Unable to load file " + path + " - file does not exist", "File I/O");
+            }
+            return ret;
+        }
+
+        private void logConnection(string name, string ip, DateTime time)
+        {
+            //string path = @"logs" + Path.DirectorySeparatorChar + "connections.log";
+
+            string path = (@"logs" + Path.DirectorySeparatorChar);
+            try
+            {
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+
+                StreamWriter sw = new StreamWriter(path + "connections.log", true);
+                sw.WriteLine("[" + time.ToString() + "] " + name + " |(" + ip + ")");
+                sw.Flush();
+                sw.Close();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[" + DateTime.Now.ToShortTimeString() + "] Error writing to connections log: " + e.ToString());
+            }
+
         }
 
         private void loadCommands()
@@ -3965,6 +4011,174 @@ namespace MudServer
             }
         }
 
+        public void cmdKick(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: kick <player name> [reason]", true, false, false);
+            else
+            {
+                string[] split = message.Split(new char[] {' '},2);
+                string[] target;
+                string reason = "";
+                if (split.Length == 1)
+                {
+                    target = matchPartial(message);
+                    reason = "";
+                }
+                else
+                {
+                    target = matchPartial(split[0]);
+                    reason = split[1];
+                }
+
+
+                if (target.Length == 0)
+                    sendToUser("No such user \"" + message.Substring(0, message.IndexOf(" ")) + "\"");
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (target[0].ToLower() == myPlayer.UserName.ToLower())
+                    sendToUser("Trying to kick yourself?!", true, false, false);
+                else if (!isOnline(target[0]))
+                {
+                    sendToUser("User \"" + target[0] + "\" is not online", true, false, false);
+                }
+                else
+                {
+                    foreach (Connection c in connections)
+                    {
+                        if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                        {
+                            if (c.myPlayer.PlayerRank > myPlayer.PlayerRank)
+                            {
+                                sendToUser("Trying to kick a higher rank eh? I think not fluffy puppy!", true, false, false);
+                                c.sendToUser("^R" + myPlayer.UserName + " just tried to kick you ... ^N", true, false, false);
+                                return;
+                            }
+                            else
+                            {
+                                sendToStaff("[" + AppSettings.Default.StaffName.ToUpper() + "] " + c.myPlayer.UserName + " has just been kicked by " + myPlayer.UserName + (reason == "" ? "" : "( " + reason + " )"), (int)Player.Rank.Staff, true);
+                                if (reason == "")
+                                    c.sendToUser("You must have upset someone as you have just been kicked!", true, false, false);
+                                else
+                                    c.sendToUser("You have been kicked: " + reason, true, false, false);
+                                c.Writer.Flush();
+
+                                c.myPlayer.KickedCount++;
+                                c.myPlayer.SavePlayer();
+                                c.socket.Close();
+                                c.OnDisconnect();
+
+                                logToFile("[Bump] Player \"" + target[0] + "\" has just been bumped by " + myPlayer.UserName, "admin");
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public void cmdScare(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: scare <player name>", true, false, false);
+            else
+            {
+
+                string[] target = matchPartial(message);
+
+                if (target.Length == 0)
+                    sendToUser("No such user \"" + message.Substring(0, message.IndexOf(" ")) + "\"");
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (target[0].ToLower() == myPlayer.UserName.ToLower())
+                    sendToUser("Trying to scare yourself?!", true, false, false);
+                else if (!isOnline(target[0]))
+                {
+                    sendToUser("User \"" + target[0] + "\" is not online", true, false, false);
+                }
+                else
+                {
+                    foreach (Connection c in connections)
+                    {
+                        if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                        {
+                            if (c.myPlayer.PlayerRank > myPlayer.PlayerRank)
+                            {
+                                sendToUser("Trying to scare a higher rank eh? I think not fluffy puppy!", true, false, false);
+                                c.sendToUser("^R" + myPlayer.UserName + " just tried to scare you ... ^N", true, false, false);
+                                return;
+                            }
+                            else
+                            {
+                                string scarefile = AnsiColour.Colorise(loadTextFile(@"files" + Path.DirectorySeparatorChar + "scare.txt"));
+                                sendToStaff("[" + AppSettings.Default.AdminName.ToUpper() + "] " + c.myPlayer.UserName + " has just been scared by " + myPlayer.UserName, (int)Player.Rank.Admin, true);
+                                c.sendToUser(scarefile, true, false, false);
+                                c.Writer.Flush();
+
+                                c.myPlayer.SavePlayer();
+                                c.socket.Close();
+                                c.OnDisconnect();
+
+                                logToFile("[Scare] Player \"" + target[0] + "\" has just been scared by " + myPlayer.UserName, "admin");
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public void cmdKill(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: kill <player name>", true, false, false);
+            else
+            {
+
+                string[] target = matchPartial(message);
+
+                if (target.Length == 0)
+                    sendToUser("No such user \"" + message.Substring(0, message.IndexOf(" ")) + "\"");
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (target[0].ToLower() == myPlayer.UserName.ToLower())
+                    sendToUser("Trying to scare yourself?!", true, false, false);
+                else
+                {
+                    if (isOnline(target[0]))
+                    {
+                        foreach (Connection c in connections)
+                        {
+                            if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                            {
+                                if (c.myPlayer.PlayerRank > myPlayer.PlayerRank)
+                                {
+                                    sendToUser("Trying to kill a higher rank eh? I think not fluffy puppy!", true, false, false);
+                                    c.sendToUser("^R" + myPlayer.UserName + " just tried to kill you ... ^N", true, false, false);
+                                    return;
+                                }
+                                else
+                                {
+                                    string scarefile = AnsiColour.Colorise(loadTextFile(@"files" + Path.DirectorySeparatorChar + "kill.txt"));
+                                    sendToStaff("[NUKE] " + c.myPlayer.UserName + " has just been killed by " + myPlayer.UserName, (int)Player.Rank.Admin, true);
+                                    c.sendToUser(scarefile, true, false, false);
+                                    c.Writer.Flush();
+
+                                    c.socket.Close();
+                                    c.OnDisconnect();
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
+                    // Now need to kill the user file
+                    Player.RemovePlayerFile(target[0]);
+                    logToFile("[Nuke] Player \"" + target[0] + "\" has just been killed by " + myPlayer.UserName, "admin");
+                }
+            }
+        }
+
         public void cmdIdleHistory(string message)
         {
             if (message == "")
@@ -4041,6 +4255,43 @@ namespace MudServer
                 }
             }
         }
+
+        public void cmdLast(string message)
+        {
+            List<string> last = loadConnectionFile();
+            string output = "";
+            if (last.Count == 0)
+                output = "No previous connections logged\r\n";
+            else
+            {
+                int limit = 0;
+                if (last.Count > 20)
+                    limit = last.Count - 20;
+                int count = 0;
+                int outcount = 1;
+                foreach (string s in last)
+                {
+                    if (count++ >= limit)
+                    {
+                        output += "^B(" + outcount++.ToString().PadLeft(2, '0') + ")^N^g ";
+                        if (myPlayer.PlayerRank < (int)Player.Rank.Admin)
+                             output += s.Remove(s.IndexOf("|")) + "^N\r\n";
+                        else
+                            output += s.Replace("|","") + "^N\r\n";
+                    }
+                }
+            }
+            sendToUser(headerLine("Last") + "\r\n" + output + footerLine(), true, false, false);
+        }
+
+        public void cmdHChime(string message)
+        {
+            myPlayer.HourlyChime = !myPlayer.HourlyChime;
+            sendToUser("You turn hourly chime notifications " + (myPlayer.HourlyChime ? "on" : "off"),true, false, false);
+            myPlayer.SavePlayer();
+        }
+
+
 
         #region Alias stuff
 
