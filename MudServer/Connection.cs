@@ -54,6 +54,8 @@ namespace MudServer
 
             public bool         Deleted;
 
+            public bool         CanDropOnFloor;         // If dropped, can this item be left on the floor?
+
             public unique       Unique;
             public actions      Actions;
 
@@ -82,6 +84,7 @@ namespace MudServer
                 public string   Use;
                 public string   Take;
             }
+
         }
 
         public enum gender
@@ -4702,6 +4705,16 @@ namespace MudServer
                 int center = (40 - (int)(currentRoom.fullName.Length / 2))+currentRoom.fullName.Length;
                 sendToUser("{bold}{cyan}".PadRight(92, '-') + "{reset}\r\n" + currentRoom.fullName.PadLeft(center, ' ') + "\r\n" + "{bold}{cyan}".PadRight(92, '-') + "{reset}\r\n" + currentRoom.description + "\r\n{bold}{cyan}".PadRight(94, '-') + "{reset}\r\n", true, false, false);
                 doWhoRoom();
+
+                List<Room.roomObjects> contents = currentRoom.roomContents;
+                string objects = "";
+                foreach (Room.roomObjects o in contents)
+                {
+                    if (o.name != "")
+                        objects += o.count.ToString() + " " + o.name + (o.count > 1 ? (o.name.ToLower().EndsWith("s") ? "" : "s") : "") + "\r\n";
+                }
+                if (objects != "")
+                    sendToUser("\r\n\r\nThe following objects are here:\r\n" + objects);
             }
             else
                 sendToUser("Strange, you don't seem to be anywhere!", true, false, false);
@@ -5419,6 +5432,10 @@ namespace MudServer
                                 temp.Unique.ToSystem = !temp.Unique.ToPlayer;
                                 sendToUser("You " + (temp.Unique.ToSystem ? "set" : "remove") + " the Unique for whole system flag for object \"" + temp.Name + "\"", true, false, false);
                                 break;
+                            case "candrop":
+                                temp.CanDropOnFloor = !temp.CanDropOnFloor;
+                                sendToUser("You " + (temp.CanDropOnFloor ? "set" : "remove") + " the \"Can drop on floor\" flag for object \"" + temp.Name + "\"", true, false, false);
+                                break;
                             default:
                                 sendToUser("Syntax: edobj <object name> <command part> <action>", true, false, false);
                                 break;
@@ -5714,6 +5731,11 @@ namespace MudServer
                                         case "%wld": // Wield
                                             myPlayer.WieldInventory(o.Name);
                                             break;
+                                        case "%drp": // Drop item on floor
+                                            if (o.CanDropOnFloor)
+                                                dropOnFloor(o.Name);
+                                            break;
+
                                     }
                                 }
                             }
@@ -5727,6 +5749,33 @@ namespace MudServer
                 }
             }
             return 0;
+        }
+
+        public void dropOnFloor(string itemName)
+        {
+            myPlayer.RemoveFromInventory(itemName);
+            foreach (Room r in roomList)
+            {
+                if (r.systemName.ToLower() == myPlayer.UserRoom.ToLower())
+                {
+                    r.addObject(itemName);
+                    return;
+                }
+            }
+        }
+
+        public void getFromFloor(string itemName)
+        {
+            myPlayer.RemoveFromInventory(itemName);
+            foreach (Room r in roomList)
+            {
+                if (r.systemName.ToLower() == myPlayer.UserRoom.ToLower())
+                {
+                    r.removeObject(itemName);
+                    r.SaveRoom();
+                    return;
+                }
+            }
         }
 
         public void cmdInventory(string message)
@@ -5811,6 +5860,46 @@ namespace MudServer
             }
         }
 
+        public void cmdTake(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: take <object name>", true, false, false);
+            else
+            {
+                objects get = getObject(message);
+                Room currentRoom = getRoom(myPlayer.UserRoom);
+
+                if (get.Name == null || get.Name == "")
+                    sendToUser("Object \"" + message + "\" not found", true, false, false);
+                else if (currentRoom.isObjectInRoom(get.Name) == 0)
+                    sendToUser("You cannot see " + (isVowel(get.Name.Substring(0, 1)) ? "an " : "a ") + get.Name + " here");
+                else
+                {
+                    if (getInventoryWeight() + get.Weight > myPlayer.MaxWeight)
+                        sendToUser("Sorry, that is too heavy for you", true, false, false);
+                    else if (myPlayer.InInventory(get.Name) > 0 && get.Unique.ToPlayer)
+                        sendToUser("Sorry, you can only have one of those", true, false, false);
+                    else
+                    {
+                        bool add = myPlayer.InInventory(get.Name) > 0;
+                        getFromFloor(get.Name);
+
+                        myPlayer.AddToInventory(get.Name);
+                        
+
+                        if (get.Actions.Get == null || get.Actions.Get == "")
+                            sendToUser("You take " + (add ? "another " : (isVowel(get.Name.Substring(0, 1)) ? "an " : "a ")) + get.Name, true, false, false);
+                        else
+                        {
+                            int status = doObjectCode(get.Name, "get");
+                            if (status == 1 || status == 2)
+                                sendToUser("Sorry - something seems to have gone wrong!", true, false, false);
+                        }
+                    }
+                }
+            }
+        }
+
         public void cmdDrop(string message)
         {
             if (message == "")
@@ -5829,13 +5918,363 @@ namespace MudServer
                     if (target.Actions.Drop == null || target.Actions.Drop == "")
                     {
                         sendToUser("You drop " + (moreThanOne ? "one of your " : "your ") + target.Name + (target.Name.ToLower().EndsWith("s") ? "" : (moreThanOne ? "s" : "")), true, false, false);
-                        myPlayer.RemoveFromInventory(target.Name);
+                        //
+                        if (target.CanDropOnFloor)
+                            dropOnFloor(target.Name);
+                        else
+                            myPlayer.RemoveFromInventory(target.Name);
                     }
                     else
                     {
                         if (target.Rank < Player.Rank.Admin)
                             myPlayer.RemoveFromInventory(target.Name);
                         doObjectCode(target.Name, "drop");
+                    }
+                }
+            }
+        }
+
+        public void cmdClearRoom(string message)
+        {
+            foreach (Room r in roomList)
+            {
+                if (r.systemName.ToLower() == myPlayer.UserRoom.ToLower())
+                {
+                    r.removeAllObjects();
+                    sendToUser("You remove all objects from the floor of the room", true, false, false);
+                    logToFile(myPlayer.UserName + " clears up the objects in " + r.fullName, "admin");
+                    return;
+                }
+            }
+        }
+
+        public void cmdPlay(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: play <object name>", true, false, false);
+            else
+            {
+                objects target = getObject(message);
+                if (target.Name == null || target.Name == "")
+                    sendToUser("Object \"" + message + "\" not found", true, false, false);
+                else if (myPlayer.InInventory(target.Name) == 0)
+                    sendToUser("You don't have " + (isVowel(target.Name.Substring(0, 1)) ? "an " : "a ") + target.Name);
+                else
+                {
+                    bool moreThanOne = myPlayer.InInventory(target.Name) > 1;
+
+                    if (target.Actions.Play == null || target.Actions.Play == "")
+                    {
+                        sendToUser("You play with your " + target.Name, true, false, false);
+                    }
+                    else
+                    {
+                        doObjectCode(target.Name, "play");
+                    }
+                }
+            }
+        }
+
+        public void cmdEat(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: eat <object name>", true, false, false);
+            else
+            {
+                objects target = getObject(message);
+                if (target.Name == null || target.Name == "")
+                    sendToUser("Object \"" + message + "\" not found", true, false, false);
+                else if (myPlayer.InInventory(target.Name) == 0)
+                    sendToUser("You don't have " + (isVowel(target.Name.Substring(0, 1)) ? "an " : "a ") + target.Name);
+                else
+                {
+                    bool moreThanOne = myPlayer.InInventory(target.Name) > 1;
+
+                    if (target.Actions.Eat == null || target.Actions.Eat == "")
+                    {
+                        sendToUser("You find the " + target.Name + " inedible", true, false, false);
+                    }
+                    else
+                    {
+                        doObjectCode(target.Name, "eat");
+                    }
+                }
+            }
+        }
+
+        public void cmdDrink(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: drink <object name>", true, false, false);
+            else
+            {
+                objects target = getObject(message);
+                if (target.Name == null || target.Name == "")
+                    sendToUser("Object \"" + message + "\" not found", true, false, false);
+                else if (myPlayer.InInventory(target.Name) == 0)
+                    sendToUser("You don't have " + (isVowel(target.Name.Substring(0, 1)) ? "an " : "a ") + target.Name);
+                else
+                {
+                    bool moreThanOne = myPlayer.InInventory(target.Name) > 1;
+
+                    if (target.Actions.Drink == null || target.Actions.Drink == "")
+                    {
+                        sendToUser("You nearly choke to death trying to drink the " + target.Name, true, false, false);
+                    }
+                    else
+                    {
+                        doObjectCode(target.Name, "drink");
+                    }
+                }
+            }
+        }
+
+        public void cmdPick(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: pick <object name>", true, false, false);
+            else
+            {
+                objects target = getObject(message);
+                if (target.Name == null || target.Name == "")
+                    sendToUser("Object \"" + message + "\" not found", true, false, false);
+                else if (myPlayer.InInventory(target.Name) == 0)
+                    sendToUser("You don't have " + (isVowel(target.Name.Substring(0, 1)) ? "an " : "a ") + target.Name);
+                else
+                {
+                    bool moreThanOne = myPlayer.InInventory(target.Name) > 1;
+
+                    if (target.Actions.Pick == null || target.Actions.Pick == "")
+                    {
+                        sendToUser("Nothing happens as you pick your " + target.Name, true, false, false);
+                    }
+                    else
+                    {
+                        doObjectCode(target.Name, "pick");
+                    }
+                }
+            }
+        }
+
+        public void cmdThrow(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: throw <object name>", true, false, false);
+            else
+            {
+                objects target = getObject(message);
+                if (target.Name == null || target.Name == "")
+                    sendToUser("Object \"" + message + "\" not found", true, false, false);
+                else if (myPlayer.InInventory(target.Name) == 0)
+                    sendToUser("You don't have " + (isVowel(target.Name.Substring(0, 1)) ? "an " : "a ") + target.Name);
+                else
+                {
+                    bool moreThanOne = myPlayer.InInventory(target.Name) > 1;
+
+                    if (target.Actions.Throw == null || target.Actions.Throw == "")
+                    {
+                        sendToUser("Nothing happens as you throw your " + target.Name, true, false, false);
+                    }
+                    else
+                    {
+                        doObjectCode(target.Name, "throw");
+                    }
+                }
+            }
+        }
+
+        public void cmdPush(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: push <object name>", true, false, false);
+            else
+            {
+                objects target = getObject(message);
+                if (target.Name == null || target.Name == "")
+                    sendToUser("Object \"" + message + "\" not found", true, false, false);
+                else if (myPlayer.InInventory(target.Name) == 0)
+                    sendToUser("You don't have " + (isVowel(target.Name.Substring(0, 1)) ? "an " : "a ") + target.Name);
+                else
+                {
+                    bool moreThanOne = myPlayer.InInventory(target.Name) > 1;
+
+                    if (target.Actions.Push == null || target.Actions.Push == "")
+                    {
+                        sendToUser("Nothing happens as you push your " + target.Name, true, false, false);
+                    }
+                    else
+                    {
+                        doObjectCode(target.Name, "push");
+                    }
+                }
+            }
+        }
+
+        public void cmdPull(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: pull <object name>", true, false, false);
+            else
+            {
+                objects target = getObject(message);
+                if (target.Name == null || target.Name == "")
+                    sendToUser("Object \"" + message + "\" not found", true, false, false);
+                else if (myPlayer.InInventory(target.Name) == 0)
+                    sendToUser("You don't have " + (isVowel(target.Name.Substring(0, 1)) ? "an " : "a ") + target.Name);
+                else
+                {
+                    bool moreThanOne = myPlayer.InInventory(target.Name) > 1;
+
+                    if (target.Actions.Pull == null || target.Actions.Pull == "")
+                    {
+                        sendToUser("Nothing happens as you push your " + target.Name, true, false, false);
+                    }
+                    else
+                    {
+                        doObjectCode(target.Name, "pull");
+                    }
+                }
+            }
+        }
+
+        public void cmdShake(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: shake <object name>", true, false, false);
+            else
+            {
+                objects target = getObject(message);
+                if (target.Name == null || target.Name == "")
+                    sendToUser("Object \"" + message + "\" not found", true, false, false);
+                else if (myPlayer.InInventory(target.Name) == 0)
+                    sendToUser("You don't have " + (isVowel(target.Name.Substring(0, 1)) ? "an " : "a ") + target.Name);
+                else
+                {
+                    bool moreThanOne = myPlayer.InInventory(target.Name) > 1;
+
+                    if (target.Actions.Shake == null || target.Actions.Shake == "")
+                    {
+                        sendToUser("Nothing happens as you shake your " + target.Name, true, false, false);
+                    }
+                    else
+                    {
+                        doObjectCode(target.Name, "shake");
+                    }
+                }
+            }
+        }
+
+        public void cmdPoke(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: poke <object name>", true, false, false);
+            else
+            {
+                objects target = getObject(message);
+                if (target.Name == null || target.Name == "")
+                    sendToUser("Object \"" + message + "\" not found", true, false, false);
+                else if (myPlayer.InInventory(target.Name) == 0)
+                    sendToUser("You don't have " + (isVowel(target.Name.Substring(0, 1)) ? "an " : "a ") + target.Name);
+                else
+                {
+                    bool moreThanOne = myPlayer.InInventory(target.Name) > 1;
+
+                    if (target.Actions.Poke == null || target.Actions.Poke == "")
+                    {
+                        sendToUser("Nothing happens as you poke your " + target.Name, true, false, false);
+                    }
+                    else
+                    {
+                        doObjectCode(target.Name, "poke");
+                    }
+                }
+            }
+        }
+
+        public void cmdUse(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: use <object name>", true, false, false);
+            else
+            {
+                objects target = getObject(message);
+                if (target.Name == null || target.Name == "")
+                    sendToUser("Object \"" + message + "\" not found", true, false, false);
+                else if (myPlayer.InInventory(target.Name) == 0)
+                    sendToUser("You don't have " + (isVowel(target.Name.Substring(0, 1)) ? "an " : "a ") + target.Name);
+                else
+                {
+                    bool moreThanOne = myPlayer.InInventory(target.Name) > 1;
+
+                    if (target.Actions.Use == null || target.Actions.Use == "")
+                    {
+                        sendToUser("You cannot seem to find a way to use your " + target.Name, true, false, false);
+                    }
+                    else
+                    {
+                        doObjectCode(target.Name, "use");
+                    }
+                }
+            }
+        }
+
+        public void cmdWield(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: wield <object name>", true, false, false);
+            else
+            {
+                objects target = getObject(message);
+                if (target.Name == null || target.Name == "")
+                    sendToUser("Object \"" + message + "\" not found", true, false, false);
+                else if (myPlayer.InInventory(target.Name) == 0)
+                    sendToUser("You don't have " + (isVowel(target.Name.Substring(0, 1)) ? "an " : "a ") + target.Name);
+                else
+                {
+                    bool moreThanOne = myPlayer.InInventory(target.Name) > 1;
+
+                    if (target.Actions.Wield == null || target.Actions.Wield == "")
+                    {
+                        sendToUser("You cannot seem to find a way to wield your " + target.Name, true, false, false);
+                    }
+                    else
+                    {
+                        myPlayer.WieldInventory(target.Name);
+                        if (myPlayer.IsWielded(target.Name))
+                        {
+                            doObjectCode(target.Name, "wield");
+                        }
+                        else
+                        {
+                            sendToUser("You stop wielding your " + target.Name, true, false, false);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void cmdObjExamine(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: examine <object name>", true, false, false);
+            else
+            {
+                objects target = getObject(message);
+                if (target.Name == null || target.Name == "")
+                    sendToUser("Object \"" + message + "\" not found", true, false, false);
+                else if (myPlayer.InInventory(target.Name) == 0)
+                    sendToUser("You don't have " + (isVowel(target.Name.Substring(0, 1)) ? "an " : "a ") + target.Name);
+                else
+                {
+                    bool moreThanOne = myPlayer.InInventory(target.Name) > 1;
+
+                    if (target.Actions.Examine == null || target.Actions.Examine == "")
+                    {
+                        sendToUser("You see nothing special", true, false, false);
+                    }
+                    else
+                    {
+                        doObjectCode(target.Name, "examine");
                     }
                 }
             }
