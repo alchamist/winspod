@@ -1133,6 +1133,19 @@ namespace MudServer
             }
         }
 
+        public bool IsWielded(string objectName)
+        {
+            for (int i = 0; i < inventoryList.Count; i++)
+            {
+                inventory temp = inventoryList[i];
+                if (temp.name.ToLower() == objectName.ToLower())
+                {
+                    return temp.wielded;
+                }
+            }
+            return false;
+        }
+
         public bool HasKey(string username)
         {
             foreach (playerList p in myList)

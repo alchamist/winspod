@@ -52,6 +52,12 @@ namespace MudServer
             public DateTime         nextFire; // Timestamp the message will be fired next
         }
 
+        public struct roomObjects
+        {
+            public string           name;   // Name of the object in the room
+            public int              count;  // How many of the object is there?
+        }
+
         
         public string               systemName;
         public string               shortName;
@@ -63,6 +69,7 @@ namespace MudServer
         public roomLocks            locks;
         public string               roomOwner = null;
         public roomMessages         roomMessage;
+        public List<roomObjects>    roomContents = new List<roomObjects>(); // List of objects in a room
 
         public Room()
         {
@@ -167,6 +174,66 @@ namespace MudServer
                 }
             }
             return ret;
+        }
+
+        public void addObject(string name)
+        {
+            roomObjects temp = new roomObjects();
+
+            for (int i = 0; i < roomContents.Count; i++)
+            {
+                if (roomContents[i].name.ToLower() == name.ToLower())
+                {
+                    temp = roomContents[i];
+                    temp.count++;
+                    roomContents[i] = temp;
+                    SaveRoom();
+                    return;
+                }
+            }
+
+            temp.name = name;
+            temp.count = 1;
+            roomContents.Add(temp);
+            SaveRoom();
+        }
+
+        public void removeObject(string name)
+        {
+            for (int i = roomContents.Count-1; i >= 0; i--)
+            {
+                if (roomContents[i].name.ToLower() == name.ToLower())
+                {
+                    if (roomContents[i].count == 1)
+                        roomContents.RemoveAt(i);
+                    else
+                    {
+                        roomObjects temp = roomContents[i];
+                        temp.count--;
+                        roomContents[i] = temp;
+                        SaveRoom();
+                        return;
+                    }
+                }
+            }
+        }
+
+        public void removeAllObjects()
+        {
+            this.roomContents = new List<roomObjects>();
+            SaveRoom();
+        }
+
+        public int isObjectInRoom(string name)
+        {
+            foreach (roomObjects r in roomContents)
+            {
+                if (r.name.ToLower() == name.ToLower())
+                {
+                    return r.count;
+                }
+            }
+            return 0;
         }
     }
 }
