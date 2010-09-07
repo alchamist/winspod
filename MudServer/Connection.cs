@@ -126,6 +126,8 @@ namespace MudServer
         public message              editMail = new message();
         public string               editText = "";
 
+        public List<DateTime>       idleHistory = new List<DateTime>(0);
+
         
         public Connection(Socket socket, int conNum)
         {
@@ -754,7 +756,10 @@ namespace MudServer
                             {
                                 found = true;
                                 if (!adminIdle)
+                                {
                                     myPlayer.LastActive = DateTime.Now;
+                                    idleHistory.Add(DateTime.Now);
+                                }
                                 if (!noAlias)
                                     doPrompt();
                             }
@@ -785,7 +790,10 @@ namespace MudServer
                                 {
                                     found = true;
                                     if (!adminIdle)
+                                    {
                                         myPlayer.LastActive = DateTime.Now;
+                                        idleHistory.Add(DateTime.Now);
+                                    }
                                     if (!noAlias)
                                         doPrompt();
                                 }
@@ -3950,6 +3958,83 @@ namespace MudServer
                             c.myPlayer.SavePlayer();
                             c.socket.Close();
                             c.OnDisconnect();
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        public void cmdIdleHistory(string message)
+        {
+            if (message == "")
+            {
+                string output = "";
+                if (idleHistory.Count == 0)
+                    output = "No idlehistory yet\r\n";
+                else
+                {
+                    int count = 0;
+                    int outcount = 1;
+                    string time = "";
+                    DateTime last = idleHistory[0];
+                    foreach (DateTime d in idleHistory)
+                    {
+                        if (count++ > 3 )
+                        {
+                            time = formatTime(TimeSpan.FromSeconds((d - last).Seconds));
+                            output += ("^B(" + outcount++.ToString() + ")^N ").PadRight(10) + (time == "" ? "0 seconds" : time) + "\r\n";
+                            last = d;
+                        }
+                    }
+                    time = formatTime(TimeSpan.FromSeconds((DateTime.Now - last).Seconds));
+                    output += ("^B(" + outcount++.ToString() + ")^N ").PadRight(10) + (time == "" ? "0 seconds" : time) + "\r\n";
+                    
+                }
+                sendToUser(headerLine("IdleHistory for " + myPlayer.UserName) + "\r\n" + (output == "" ? "No idlehistory yet\r\n" : output) + footerLine(), true, false, false);
+                return;
+            }
+            else
+            {
+                string[] target = matchPartial(message);
+
+                if (target.Length == 0)
+                    sendToUser("No such user \"" + message.Substring(0, message.IndexOf(" ")) + "\"");
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (!isOnline(target[0]))
+                {
+                    sendToUser("User \"" + target[0] + "\" is not online", true, false, false);
+                }
+                else
+                {
+                    foreach (Connection c in connections)
+                    {
+                        if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                        {
+                            string output = "";
+                            if (c.idleHistory.Count == 0)
+                                output = "No idlehistory yet\r\n";
+                            else
+                            {
+                                int count = 0;
+                                int outcount = 1;
+                                string time = "";
+                                DateTime last = c.idleHistory[0];
+                                foreach (DateTime d in c.idleHistory)
+                                {
+                                    if (count++ > 3)
+                                    {
+                                        time = formatTime(TimeSpan.FromSeconds((d - last).Seconds));
+                                        output += ("^B(" + outcount++.ToString() + ")^N ").PadRight(10) + (time == "" ? "0 seconds" : time) + "\r\n";
+                                        last = d;
+                                    }
+                                }
+                                time = formatTime(TimeSpan.FromSeconds((DateTime.Now - last).Seconds));
+                                output += ("^B(" + outcount++.ToString() + ")^N ").PadRight(10) + (time == "" ? "0 seconds" : time) + "\r\n";
+
+                            }
+                            sendToUser(headerLine("IdleHistory for " + c.myPlayer.UserName) + "\r\n" + (output == "" ? "No idlehistory yet\r\n" : output) + footerLine(), true, false, false);
                             return;
                         }
                     }
