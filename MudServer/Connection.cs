@@ -129,7 +129,12 @@ namespace MudServer
         public message              editMail = new message();
         public string               editText = "";
 
+        public string               pwChange = "";
+
         public List<DateTime>       idleHistory = new List<DateTime>(0);
+
+        public List<IPAddress>      IPBanList = new List<IPAddress>();
+        public List<string>         NameBanList = new List<string>();
 
         
         public Connection(Socket socket, int conNum)
@@ -213,6 +218,49 @@ namespace MudServer
                 if (!c.socket.Connected)
                     connections.RemoveAt(i);
             }
+
+            if (Server.shutdownSecs > -1 && myPlayer != null)
+            {
+                if (Server.shutdownSecs == 3600)
+                    sendToUser("^RWarning: ^N&t will shut down in one hour!", true, false, false);
+                else if (Server.shutdownSecs == 1800)
+                    sendToUser("^RWarning: ^N&t will shut down in 30 minutes!", true, false, false);
+                else if (Server.shutdownSecs == 900)
+                    sendToUser("^RWarning: ^N&t will shut down in 15 minutes!", true, false, false);
+                else if (Server.shutdownSecs == 600)
+                    sendToUser("^RWarning: ^N&t will shut down in 10 minutes!", true, false, false);
+                else if (Server.shutdownSecs == 300)
+                    sendToUser("^RWarning: ^N&t will shut down in 5 minutes!", true, false, false);
+                else if (Server.shutdownSecs == 60)
+                    sendToUser("^RWarning: ^N&t will shut down in 1 minute!", true, false, false);
+                else if (Server.shutdownSecs == 30)
+                    sendToUser("^RWarning: ^N&t will shut down in 30 seconds!", true, false, false);
+                else if (Server.shutdownSecs == 10)
+                    sendToUser("^RWarning: ^N&t will shut down in 10 ...!", true, false, false);
+                else if (Server.shutdownSecs == 9)
+                    sendToUser("^RWarning: ^N&t will shut down in 9 ...!", true, false, false);
+                else if (Server.shutdownSecs == 8)
+                    sendToUser("^RWarning: ^N&t will shut down in 8 ...!", true, false, false);
+                else if (Server.shutdownSecs == 7)
+                    sendToUser("^RWarning: ^N&t will shut down in 7 ...!", true, false, false);
+                else if (Server.shutdownSecs == 6)
+                    sendToUser("^RWarning: ^N&t will shut down in 6 ...!", true, false, false);
+                else if (Server.shutdownSecs == 5)
+                    sendToUser("^RWarning: ^N&t will shut down in 5 ...!", true, false, false);
+                else if (Server.shutdownSecs == 4)
+                    sendToUser("^RWarning: ^N&t will shut down in 4 ...!", true, false, false);
+                else if (Server.shutdownSecs == 3)
+                    sendToUser("^RWarning: ^N&t will shut down in 3 ...!", true, false, false);
+                else if (Server.shutdownSecs == 2)
+                    sendToUser("^RWarning: ^N&t will shut down in 2 ...!", true, false, false);
+                else if (Server.shutdownSecs == 1)
+                    sendToUser("^RWarning: ^N&t will shut down in 1 ...!", true, false, false);
+                else if (Server.shutdownSecs == 0)
+                {
+                    sendToUser("^RWarning: ^N&t is shutting down now ...!", true, false, false);
+                }
+
+            }
         }
 
         #region Socket stuff
@@ -280,6 +328,19 @@ namespace MudServer
             connPoint = this.socket.RemoteEndPoint.ToString();
             connPoint = connPoint.Substring(0, connPoint.IndexOf(":"));
 
+            IPAddress test = null;
+
+            if (IPAddress.TryParse(connPoint, out test))
+            {
+                if (IpIsBanned(test))
+                {
+                    Writer.WriteLine("Sorry, this IP address has been banned from the system");
+                    Writer.Flush();
+                    socket.Close();
+                    return;
+                }
+            }
+
             Version vrs = Assembly.GetExecutingAssembly().GetName().Version;
             string greeting = AnsiColour.Colorise(loadTextFile(@"files" + Path.DirectorySeparatorChar + "greeting.txt") + "{reset}");
             Writer.WriteLine(AnsiColour.Colorise("{bold}{white}\nWinspod II v" + vrs.Major + "." + vrs.Minor + " Build: " + vrs.Build + " Revision: " + vrs.Revision + "{reset}"));
@@ -332,6 +393,11 @@ namespace MudServer
 
             if (myState == 1)
             {
+                if (NameIsBanned(line))
+                {
+                    Writer.Write(AnsiColour.Colorise("^HSorry, that name is not allowed on this system. Please try again: ^N"));
+                    return;
+                }
                 //username supplied .. 
                 //
                 // Check to see if they have just done a "who"
@@ -643,6 +709,7 @@ namespace MudServer
                         }
 
                         myState = 10;
+                        Server.playerCount++;
                         if (!reconnect)
                         {
                             Console.WriteLine("[" + DateTime.Now.ToShortTimeString() + "] Login: " + myPlayer.UserName);
@@ -761,12 +828,13 @@ namespace MudServer
                             finally
                             {
                                 found = true;
+                                Server.cmdUse(c.cmdText);
                                 if (!adminIdle)
                                 {
                                     myPlayer.LastActive = DateTime.Now;
                                     idleHistory.Add(DateTime.Now);
                                 }
-                                if (!noAlias)
+                                if (!noAlias && myState == 10)
                                     doPrompt();
                             }
                         }
@@ -795,12 +863,13 @@ namespace MudServer
                                 finally
                                 {
                                     found = true;
+                                    Server.cmdUse(c.cmdText);
                                     if (!adminIdle)
                                     {
                                         myPlayer.LastActive = DateTime.Now;
                                         idleHistory.Add(DateTime.Now);
                                     }
-                                    if (!noAlias)
+                                    if (!noAlias && myState == 10)
                                         doPrompt();
                                 }
                             }
@@ -820,6 +889,60 @@ namespace MudServer
                 {
                     doPrompt(myPlayer.UserName);
                 }
+            }
+            else if (myState == 11)
+            {
+                // user is changing password, and has entered their existing password. Need to check it's correct and ask them to enter a new one
+                if (myPlayer.checkPassword(line))
+                {
+                    myState = 12;
+                    sendToUser("\r\nPlease enter your new password: ", false, false, false);
+                }
+                else
+                {
+                    myState = 10;
+                    sendEchoOn();
+                    sendToUser("\r\nIncorrect password. Update aborted", true, false, false);
+                    doPrompt();
+                }
+            }
+            else if (myState == 12)
+            {
+                // user is changing password, and has entered the first one. Need to check it's valid, store it and ask them to confirm
+                string pword = line.Trim();
+                if (pword == "")
+                {
+                    sendEchoOn();
+                    sendToUser("\r\nBlank passwords not allowed. Aborting", true, false, false);
+                    myState = 10;
+                    doPrompt();
+                }
+                else
+                {
+                    pwChange = pword;
+                    sendToUser("\r\nPlease re-enter your new password: ", false, false, false);
+                    myState = 13;
+                }
+            }
+            else if (myState == 13)
+            {
+                // user is changing password, and has re-entered the password. Need to check they match
+                if (line.Trim() == pwChange)
+                {
+                    // Passwords match - update user
+                    myPlayer.Password = pwChange;
+                    myPlayer.SavePlayer();
+                    sendToUser("\r\nPassword successfully updated", true, false, false);
+                }
+                else
+                {
+                    // Passwords do not match - abort update
+                    sendToUser("\r\nPasswords do not match. Update aborted", true, false, false);
+                }
+                sendEchoOn();
+                pwChange = "";
+                myState = 10;
+                doPrompt();
             }
         } 
 
@@ -1099,6 +1222,11 @@ namespace MudServer
                     while ((line = sr.ReadLine()) != null)
                     {
                         string[] fields = splitRX.Split(line.Replace("\"", ""));
+                        if (fields.Length == 5 && fields[0] == "" && fields[1] == "")
+                        {
+                            string[] temp = fields;
+                            fields = new string[]{",",temp[2],temp[3],temp[4]};
+                        }
                         if (fields.Length == 4)
                         {
                             commands cmd;
@@ -1254,7 +1382,10 @@ namespace MudServer
                     {
                         fileList += ", " + f.Name.Replace(f.Extension, "");
                     }
-                    sendToUser("Available logs: " + fileList.Substring(2), true, false, false);
+                    if (fileList == "")
+                        sendToUser("No logs available to view", true, false, false);
+                    else
+                        sendToUser("Available logs: " + fileList.Substring(2), true, false, false);
                 }
                 else
                 {
@@ -1313,6 +1444,73 @@ namespace MudServer
                             f.Delete();
                             found = true;
                             sendToUser("Log file \"" + f.Name.Replace(f.Extension, "") + "\" deleted", true, false, false);
+                        }
+                    }
+                    if (!found)
+                        sendToUser("Log file \"" + message + "\" not found!", true, false, false);
+                }
+            }
+        }
+
+        public void cmdAlog(string message)
+        {
+            // Routine to append logs to main and then delete
+            string path = (@"logs" + Path.DirectorySeparatorChar);
+            string append = (@"old" + Path.DirectorySeparatorChar);
+
+            if (message == "")
+                sendToUser("Syntax: alog <all/log file>", true, false, false);
+            else if (message.ToLower() == "all")
+            {
+                if (Directory.Exists(path))
+                {
+                    DirectoryInfo di = new DirectoryInfo(path);
+                    FileInfo[] fi = di.GetFiles();
+                    foreach (FileInfo f in fi)
+                    {
+                        if (!Directory.Exists(append))
+                            Directory.CreateDirectory(append);
+
+                        StreamReader s = new StreamReader(path + f.Name);
+                        StreamWriter w = new StreamWriter(append + "append.log", true);
+                        string log = "";
+                        while ((log = s.ReadLine()) != null)
+                        {
+                            w.WriteLine("[" + f.Name + "] " + log);
+                        }
+                        s.Close();
+                        w.Close();
+                        f.Delete();
+                    }
+                    sendToUser("All logs files backed up", true, false, false);
+                }
+            }
+            else
+            {
+                if (Directory.Exists(path))
+                {
+                    DirectoryInfo di = new DirectoryInfo(path);
+                    FileInfo[] fi = di.GetFiles();
+                    bool found = false;
+                    foreach (FileInfo f in fi)
+                    {
+                        if (f.Name.Replace(f.Extension, "").ToLower() == message.ToLower())
+                        {
+                            if (!Directory.Exists(append))
+                                Directory.CreateDirectory(append);
+
+                            StreamReader s = new StreamReader(path + f.Name);
+                            StreamWriter w = new StreamWriter(append + "append.log", true);
+                            string log = "";
+                            while ((log = s.ReadLine()) != null)
+                            {
+                                w.WriteLine("[" + f.Name + "] " + log);
+                            }
+                            s.Close();
+                            w.Close();
+                            f.Delete();
+                            found = true;
+                            sendToUser("Log file \"" + f.Name.Replace(f.Extension, "") + "\" backed up", true, false, false);
                         }
                     }
                     if (!found)
@@ -1383,7 +1581,7 @@ namespace MudServer
                                 else
                                 {
                                     sendToUser("You " + tellWord(text) + c.myPlayer.UserName + " \"" + wibbleText(text, false) + "{reset}\"", true, false);
-                                    sendToUser(">>" + myPlayer.ColourUserName + " " + tellWord(text, false) + "\"" + wibbleText(text, false) + "{reset}\"", c.myPlayer.UserName, true, c.myPlayer.DoColour, false, true);
+                                    c.sendToUser("\r\n^Y>>" + myPlayer.ColourUserName + " ^Y" + tellWord(text, false) + "\"" + wibbleText(text, false) + "^Y\"{reset}", true, true, true);
                                     found = true;
                                 }
                             }
@@ -1432,7 +1630,7 @@ namespace MudServer
                                         text = " " + text;
 
                                     sendToUser("You emote \"" + myPlayer.ColourUserName + wibbleText(text, true) + "{reset}\" to " + c.myPlayer.ColourUserName, true, false, true);
-                                    sendToUser(">>" + myPlayer.ColourUserName + "{bold}{yellow}" + wibbleText(text, true) + "{reset}", matches[0], true, c.myPlayer.DoColour, false, true);
+                                    c.sendToUser("\r\n^Y>>" + myPlayer.ColourUserName + "^Y" + wibbleText(text, true) + "{reset}", true, true, true);
                                 }
                                 found = true;
                             }
@@ -1477,13 +1675,57 @@ namespace MudServer
                                     sendToUser(c.myPlayer.ColourUserName + " is editing at the moment and can't be disturbed", true, false, false);
                                 else
                                 {
-                                    if (!text.StartsWith("'"))
-                                        text = " " + text;
-
                                     sendToUser("You sing o/~ " + wibbleText(text, true) + " {reset}o/~ to " + c.myPlayer.ColourUserName, true, false);
-                                    sendToUser(">>" + myPlayer.ColourUserName + " sings o/~" + wibbleText(text, true) + " {reset}o/~ to you", matches[0], true, c.myPlayer.DoColour, false, true);
+                                    c.sendToUser("\r\n^Y>>" + myPlayer.ColourUserName + " ^Ysings o/~ " + wibbleText(text, true) + " ^Yo/~ to you{reset}", true, true, true);
                                 }
                                 
+                                found = true;
+                            }
+                        }
+                        if (found == false)
+                        {
+                            sendToUser("User \"" + matches[0] + "\" is not online at the moment", true, false, false);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void cmdRThink(string message)
+        {
+            if (message.IndexOf(" ") < 0)
+                sendToUser("Syntax: \"rthink <playername> <message>", true, false, false);
+            else
+            {
+                string target = message.Substring(0, message.IndexOf(" ")).Trim();
+                string text = message.Substring(message.IndexOf(" ")).Trim();
+
+                if (target.Length < 2)
+                    sendToUser("Please supply at least 2 letters of the target username", true, false, false);
+                else
+                {
+                    string[] matches = matchPartial(target);
+                    if (matches.Length == 0)
+                        sendToUser("Target \"" + target + "\" not found", true, false, false);
+                    else if (matches.Length > 1)
+                        sendToUser("Multiple matches found: " + matches.ToString() + " - Please use more letters", true, false, false);
+                    else if (matches[0] == myPlayer.UserName)
+                        sendToUser("Trying to think to yourself, eh?", true, false, false);
+                    else
+                    {
+                        bool found = false;
+                        foreach (Connection c in connections)
+                        {
+                            if (c.myPlayer != null && c.myPlayer.UserName == matches[0] && !c.myPlayer.Invisible)
+                            {
+                                if (c.myPlayer.InEditor)
+                                    sendToUser(c.myPlayer.ColourUserName + " is editing at the moment and can't be disturbed", true, false, false);
+                                else
+                                {
+                                    sendToUser("You think . o O ( " + wibbleText(text, true) + " {reset}) to " + c.myPlayer.ColourUserName, true, false);
+                                    c.sendToUser("\r\n^Y>>" + myPlayer.ColourUserName + " ^Ythinks . o O ( " + wibbleText(text, true) + " ^Y) to you{reset}", true, true, true);
+                                }
+
                                 found = true;
                             }
                         }
@@ -1511,7 +1753,7 @@ namespace MudServer
         public void cmdEcho(string message)
         {
             if (message == "")
-                sendToUser("Syntax: echo <message>");
+                sendToUser("Syntax: echo <message>", true, false, false);
             else
             {
                 foreach (Connection c in connections)
@@ -2150,7 +2392,7 @@ namespace MudServer
         public void cmdEdtime(string message)
         {
             if (message == "" || message.IndexOf(" ") < 0 || (message.IndexOf("+") < 0 && message.IndexOf("-") < 0))
-                sendToUser("Syntax: Edtime <player> <+/-> <hours>");
+                sendToUser("Syntax: Edtime <player> <+/-> <hours>", true, false, false);
             else
             {
                 string[] target = matchPartial(message.Substring(0, message.IndexOf(" ")));
@@ -2481,7 +2723,7 @@ namespace MudServer
         public void cmdDoList(string message)
         {
             if (message == "")
-                sendToUser("Syntax: list <newbies/staff/tester/builder/players/objects" + (myPlayer.PlayerRank >= (int)Player.Rank.Staff ? "/ip/gits/rooms" : "") + ">");
+                sendToUser("Syntax: list <newbies/staff/tester/builder/players/objects" + (myPlayer.PlayerRank >= (int)Player.Rank.Staff ? "/ip/gits/rooms" : "") + ">", true, false, false);
             else
             {
                 string[] split = message.Split(new char[] { ' ' }, 2);
@@ -2931,7 +3173,7 @@ namespace MudServer
         public void cmdRemove(string message)
         {
             if (message == "")
-                sendToUser("Syntax: remove <player>");
+                sendToUser("Syntax: remove <player>", true, false, false);
             else
             {
                 string[] target = matchPartial(message);
@@ -3231,7 +3473,7 @@ namespace MudServer
         public void cmdRename(string message)
         {
             if (message == "" || message.IndexOf(" ") == -1)
-                sendToUser("Syntax: rename <player> <new name>");
+                sendToUser("Syntax: rename <player> <new name>", true, false, false);
             else
             {
                 string[] split = message.Split(new char[] { ' ' }, 2);
@@ -3335,7 +3577,7 @@ namespace MudServer
         public void cmdITag(string message)
         {
             if (message == "")
-                sendToUser("Syntax: itag <player> <inform tag>");
+                sendToUser("Syntax: itag <player> <inform tag>", true, false, false);
             else
             {
                 string[] target = (message.IndexOf(" ") > -1 ? matchPartial(message.Split(new char[] { ' ' }, 2)[0]) : matchPartial(message));
@@ -3447,7 +3689,7 @@ namespace MudServer
             {
                 myPlayer.LogonMsg = message;
                 myPlayer.SavePlayer();
-                sendToUser("You set your logon message to: " + myPlayer.ColourUserName + " " + message);
+                sendToUser("You set your logon message to: " + myPlayer.ColourUserName + " " + message, true, false, false);
             }
         }
 
@@ -3465,7 +3707,7 @@ namespace MudServer
             {
                 myPlayer.LogoffMsg = message;
                 myPlayer.SavePlayer();
-                sendToUser("You set your logoff message to: " + myPlayer.ColourUserName + " " + message);
+                sendToUser("You set your logoff message to: " + myPlayer.ColourUserName + " " + message, true, false, false);
             }
         }
 
@@ -3483,7 +3725,7 @@ namespace MudServer
             {
                 myPlayer.EnterMsg = message;
                 myPlayer.SavePlayer();
-                sendToUser("You set your enter message to: " + myPlayer.ColourUserName + " " + message);
+                sendToUser("You set your enter message to: " + myPlayer.ColourUserName + " " + message, true, false, false);
             }
         }
 
@@ -3501,7 +3743,7 @@ namespace MudServer
             {
                 myPlayer.ExitMsg = message;
                 myPlayer.SavePlayer();
-                sendToUser("You set your exit message to: " + myPlayer.ColourUserName + " " + message);
+                sendToUser("You set your exit message to: " + myPlayer.ColourUserName + " " + message, true, false, false);
             }
         }
 
@@ -3876,7 +4118,7 @@ namespace MudServer
                 else
                 {
                     Player targ = Player.LoadPlayer(target[0],0);
-                    sendToUser(headerLine("Description: " + targ.UserName) + "\r\n" + targ.Description + "\r\n" + footerLine());
+                    sendToUser(headerLine("Description: " + targ.UserName) + "\r\n" + targ.Description + "\r\n" + footerLine(), true, false, false);
                 }
             }
         }
@@ -4294,7 +4536,200 @@ namespace MudServer
             myPlayer.SavePlayer();
         }
 
+        public void cmdPassword(string message)
+        {
+            string[] split = message.Split(new char[] { ' ' });
+            if (myPlayer.PlayerRank >= (int)Player.Rank.Admin && message != "" && split.Length > 1)
+            {
+                string[] target = matchPartial(split[0]);
+                if (target.Length == 0)
+                    sendToUser("No such user \"" + split[0] + "\"");
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (target[0].ToLower() == myPlayer.UserName.ToLower())
+                    sendToUser("Please use the password command without a name to reset your password", true, false, false);
+                else
+                {
+                    Player targ = Player.LoadPlayer(target[0], 0);
+                    targ.Password = split[1];
+                    targ.SavePlayer();
+                    sendToUser("Password updated for player \"" + targ.ColourUserName + "\"", true, false, false);
+                }
+            }
+            else if (myPlayer.PlayerRank >= (int)Player.Rank.Admin && split.Length < 2)
+                sendToUser("Syntax: password <playername> <new password>", true, false, false);
+            else
+            {
+                myState = 11;
+                sendEchoOff();
+                sendToUser("Please enter your current password: ", false, false, false);
+            }
+        }
 
+        public void cmdStats(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: stats <all/player/command>", true, false, false);
+            else
+            {
+                string output = "";
+
+                roomList = loadRooms();
+
+                switch (message.ToLower())
+                {
+                    case "all":
+                        PerformanceCounter pc = new PerformanceCounter("Memory", "Available Bytes");
+                        long freeMemory = Convert.ToInt64(pc.NextValue());
+
+                        Process proc = Process.GetCurrentProcess();
+                        long memused = proc.PrivateMemorySize64;
+
+                        output += centerText(AppSettings.Default.TalkerName + " has been up for " + formatTime(DateTime.Now - Server.startTime) + "\r\n");
+                        output += centerText("There " + (Server.playerCount == 1 ? "has " : "have ") + "been " + Server.playerCount + " player" + (Server.playerCount == 1 ? "" : "s") + " connected in that time") + "\r\n";
+                        output += centerText("There are " + cmds.Count.ToString() + " player commands and " + roomList.Count.ToString() + " system room" + (roomCount() > 1 ? "s" : "")) + "\r\n";
+                        output += centerText("There are currently " + mail.Count.ToString() + " mail item" + (mail.Count == 1 ? "" : "s") + " on the server") + "\r\n";
+                        output += centerText("The local time for " + AppSettings.Default.TalkerName + " is " + DateTime.Now.ToShortTimeString()) + "\r\n";
+                        output += centerText(AppSettings.Default.TalkerName + " has " + (freeMemory / 1048576).ToString() + "Mb free memory, and is using " + (memused / 1048576).ToString() + "Mb") + "\r\n";
+                        sendToUser(headerLine("Stats: " + message.ToLower()) + "\r\n" + output + footerLine(), true, false, false);
+                        break;
+                    case "player":
+                        List<Player> playerList = getPlayers();
+                        output += centerText(AppSettings.Default.TalkerName + " has " + playerList.Count.ToString() + " resident" + (playerList.Count == 1 ? "" : "s")) + "\r\n";
+                        output += centerText(AppSettings.Default.TalkerName + " has been up for " + formatTime(DateTime.Now - Server.startTime) + "\r\n");
+                        output += centerText("There " + (Server.playerCount == 1 ? "has " : "have ") + "been " + Server.playerCount + " player" + (Server.playerCount == 1 ? "" : "s") + " connected in that time") + "\r\n";
+                        int pph = (int)(Server.playerCount / (DateTime.Now - Server.startTime).TotalHours);
+                        output += centerText("At an average of " + pph.ToString() + " players per hour") + "\r\n";
+                        sendToUser(headerLine("Stats: " + message.ToLower()) + "\r\n" + output + footerLine(), true, false, false);
+                        break;
+                    case "command":
+                        int tabCount = 0;
+                        int cmdTotalCount = 0;
+                        foreach (commands c in cmds)
+                        {
+                            string temp = c.cmdText + ": " + Server.cmdUseCount(c.cmdText);
+                            cmdTotalCount += Server.cmdUseCount(c.cmdText);
+
+                            output += temp.PadLeft(20);
+                            if (++tabCount % 3 == 0)
+                                output += "\r\n";
+                                
+                        }
+                        output += "\r\n" + centerText(AppSettings.Default.TalkerName + " has been up for " + formatTime(DateTime.Now - Server.startTime) + "\r\n");
+                        output += centerText(cmdTotalCount.ToString() + " commands used at an average of " + ((int)(cmdTotalCount / (DateTime.Now - Server.startTime).TotalMinutes)).ToString() + " commands per minute") + "\r\n";
+                        sendToUser(headerLine("Stats: " + message.ToLower()) + "\r\n" + output + footerLine(), true, false, false);
+                        break;
+                    default:
+                        sendToUser("Syntax: stats <all/player/command>", true, false, false);
+                        break;
+                }
+            }
+        }
+
+        public string centerText(string text)
+        {
+            return text.PadLeft((40 + (text.Length / 2)), ' '); 
+        }
+
+        public void cmdIpBan(string message)
+        {
+            IPAddress ban = null;
+
+            if (message == "" || !IPAddress.TryParse(message, out ban))
+                sendToUser("Syntax: ipban <ip address>", true, false, false);
+            else
+            {
+                IPBanList = loadIPBans();
+                foreach (IPAddress i in IPBanList)
+                {
+                    if (i == ban)
+                    {
+                        sendToUser("IP Address " + ban.ToString() + " already in ban list", true, false, false);
+                        return;
+                    }
+                }
+                IPBanList.Add(ban);
+                saveIPBans();
+                sendToUser("IP Address " + ban.ToString() + " added to ban list", true, false, false);
+            }
+        }
+
+        public void cmdIpUnBan(string message)
+        {
+            IPAddress ban = null;
+
+            if (message == "" || !IPAddress.TryParse(message, out ban))
+                sendToUser("Syntax: ipunban <ip address>", true, false, false);
+            else
+            {
+                IPBanList = loadIPBans();
+                for (int i = IPBanList.Count - 1; i >= 0; i--)
+                {
+                    if (IPBanList[i].Address == ban.Address)
+                    {
+                        IPBanList.RemoveAt(i);
+                        sendToUser("IP Address " + ban.ToString() + " removed from ban list", true, false, false);
+                        saveIPBans();
+                        return;
+                    }
+                }
+                sendToUser("IP Address " + ban.ToString() + " not in ban list", true, false, false);
+            }
+        }
+
+        public void cmdNameBan(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: nban <name to ban>", true, false, false);
+            else if (NameIsBanned(message))
+                sendToUser("\"" + message + "\" is already in the ban list", true, false, false);
+            else
+            {
+                NameBanList.Add(message);
+                saveNameBans();
+                sendToUser("Name \"" + message + "\" added to the ban list", true, false, false);
+            }
+        }
+
+        public void cmdNameUnBan(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: nunban <name to unban>", true, false, false);
+            else if (!NameIsBanned(message))
+                sendToUser("Name \"" + message + "\" is not in the ban list", true, false, false);
+            else
+            {
+                NameBanList = loadNameBans();
+                for (int i = NameBanList.Count - 1; i >= 0; i--)
+                {
+                    if (NameBanList[i].ToLower() == message.ToLower())
+                    {
+                        NameBanList.RemoveAt(i);
+                        saveNameBans();
+                        sendToUser("Name \"" + message + "\" removed from the ban list", true, false, false);
+                        return;
+                    }
+                }
+                sendToUser("Strange .. you shouldn't be here ...", true, false, false);
+            }
+        }
+
+        public bool IpIsBanned(IPAddress check)
+        {
+            IPBanList = loadIPBans();
+            return (IPBanList.IndexOf(check) > -1);
+        }
+
+        public bool NameIsBanned(string check)
+        {
+            NameBanList = loadNameBans();
+            foreach (string n in NameBanList)
+            {
+                if (n.ToLower() == check.ToLower())
+                    return true;
+            }
+            return false;
+        }
 
         #region Alias stuff
 
@@ -4764,7 +5199,10 @@ namespace MudServer
 
                 myPlayer.SavePlayer();
                 if (doLook)
+                {
+                    sendToUser("\r\n", true, false, false);
                     cmdLook("");
+                }
             }
         }
 
@@ -4992,7 +5430,7 @@ namespace MudServer
         public void cmdRoomLink(string message)
         {
             if (message == "" || message.IndexOf(" ") == -1 || !(message.ToLower().StartsWith("add") || message.ToLower().StartsWith("del")))
-                sendToUser("Syntax: roomlink <add/del> <room system name>");
+                sendToUser("Syntax: roomlink <add/del> <room system name>", true, false, false);
             else
             {
                 Room currentRoom = getRoom(myPlayer.UserRoom);
@@ -5287,6 +5725,48 @@ namespace MudServer
                     ret++;
             }
             return ret;
+        }
+
+        public void cmdTrans(string message)
+        {
+            string[] split = message.Split(new char[]{' '});
+            if (message == "" || split.Length != 2)
+                sendToUser("Syntax: trans <player> <room>", true, false, false);
+            else
+            {
+                string[] target = matchPartial(split[0]);
+                if (target.Length == 0)
+                    sendToUser("Player \"" + message + "\" not found", true, false, false);
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (!isOnline(target[0]))
+                    sendToUser("Player \"" + target[0] + "\" is not online", true, false, false);
+                else
+                {
+                    Room targRoom = getRoom(split[1]);
+                    if (targRoom != null)
+                    {
+                        foreach (Connection c in connections)
+                        {
+                            if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                            {
+                                if (c.myPlayer.UserRoom.ToLower() == targRoom.systemName.ToLower())
+                                    sendToUser((c.myPlayer.UserName == myPlayer.UserName ? "You are " : c.myPlayer.UserName + " is ") + "already there!", true, false, false);
+                                else
+                                {
+                                    c.movePlayer(targRoom.systemName);
+                                    sendToUser("As you wish ...", true, false, false);
+                                }
+                                return;
+                            }
+                        }
+                        sendToUser("Strange - something wierd has happened!", true, false, false);
+                    }
+                    else
+                        sendToUser("Room \"" + split[1] + "\" not found", true, false, false);
+                }
+            }
+
         }
 
         #endregion
@@ -5800,6 +6280,39 @@ namespace MudServer
             sendToUser(headerLine("Inventory") + "\r\n" + output + "\r\n" + footerLine());
         }
 
+        public void cmdEdWeight(string message)
+        {
+            string[] split = message.Split(new char[] { ' ' });
+            int weightChange = 0;
+            if (message == "" || split.Length != 2 || !int.TryParse(split[1], out weightChange))
+                sendToUser("Syntax: edweight <player> <+/- units>", true, false, false);
+            else
+            {
+                string[] target = matchPartial(split[0]);
+                if (target.Length == 0)
+                    sendToUser("Player \"" + message + "\" not found", true, false, false);
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (!isOnline(target[0]))
+                    sendToUser("Player \"" + target[0] + "\" is not online", true, false, false);
+                else
+                {
+                    foreach (Connection c in connections)
+                    {
+                        if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                        {
+                            c.myPlayer.MaxWeight += weightChange;
+                            sendToUser("You change " + c.myPlayer.UserName + "'s Max weight to " + c.myPlayer.MaxWeight + " units", true, false, false);
+                            c.sendToUser(myPlayer.ColourUserName + " has changed the maximum weight you can carry to " + c.myPlayer.MaxWeight + " units", true, false, false);
+                            c.myPlayer.SavePlayer();
+                            return;
+                        }
+                    }
+                    sendToUser("Strange - something seems to have gone wrong ...", true, false, false);
+                }
+            }
+        }
+
         private objects getObject(string objectName)
         {
             playerObjects = loadObjects();
@@ -6295,7 +6808,7 @@ namespace MudServer
             messages = loadMessages();
 
             if (message == "" || message.IndexOf(" ") == -1)
-                sendToUser("Syntax: message <player" + (myPlayer.PlayerRank >= (int)Player.Rank.Admin ? "/all/allstaff/admin/staff/guide" : "") + "> <message>");
+                sendToUser("Syntax: message <player" + (myPlayer.PlayerRank >= (int)Player.Rank.Admin ? "/all/allstaff/admin/staff/guide" : "") + "> <message>", true, false, false);
             else
             {
                 string[] split = message.Split(new char[] { ' ' }, 2);
@@ -6464,6 +6977,110 @@ namespace MudServer
             return load;
         }
 
+        public List<IPAddress> loadIPBans()
+        {
+            List<string> load = new List<string>();
+            string path = @"banish" + Path.DirectorySeparatorChar;
+            string fname = "ipban.xml";
+            string fpath = path + fname;
+
+            if (Directory.Exists(path) && File.Exists(fpath))
+            {
+                try
+                {
+                    XmlSerializer deserial = new XmlSerializer(typeof(List<string>));
+                    TextReader textReader = new StreamReader(@fpath);
+                    load = (List<string>)deserial.Deserialize(textReader);
+                    textReader.Close();
+                }
+                catch (Exception e)
+                {
+                    Debug.Print(e.ToString());
+                }
+            }
+            List<IPAddress> ret = new List<IPAddress>();
+            foreach (string s in load)
+            {
+                IPAddress test = null;
+                if (IPAddress.TryParse(s, out test))
+                    ret.Add(test);
+            }
+            return ret;
+        }
+
+        public void saveIPBans()
+        {
+            try
+            {
+                List<string> output = new List<string>();
+                foreach (IPAddress i in IPBanList)
+                {
+                    output.Add(i.ToString());
+                }
+                string path = @"banish" + Path.DirectorySeparatorChar;
+                string fname = "ipban.xml";
+                string fpath = path + fname;
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+
+                XmlSerializer serial = new XmlSerializer(typeof(List<string>));
+                TextWriter textWriter = new StreamWriter(@fpath.ToLower());
+                serial.Serialize(textWriter, output);
+                textWriter.Close();
+            }
+            catch (Exception ex)
+            {
+                Connection.logError(ex.ToString(), "filesystem");
+            }
+        }
+
+        public List<string> loadNameBans()
+        {
+            List<string> load = new List<string>();
+            string path = @"banish" + Path.DirectorySeparatorChar;
+            string fname = "nameban.xml";
+            string fpath = path + fname;
+
+            if (Directory.Exists(path) && File.Exists(fpath))
+            {
+                try
+                {
+                    XmlSerializer deserial = new XmlSerializer(typeof(List<string>));
+                    TextReader textReader = new StreamReader(@fpath);
+                    load = (List<string>)deserial.Deserialize(textReader);
+                    textReader.Close();
+                }
+                catch (Exception e)
+                {
+                    Debug.Print(e.ToString());
+                }
+            }
+            
+            return load;
+        }
+
+        public void saveNameBans()
+        {
+            try
+            {
+                string path = @"banish" + Path.DirectorySeparatorChar;
+                string fname = "nameban.xml";
+                string fpath = path + fname;
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+
+                XmlSerializer serial = new XmlSerializer(typeof(List<string>));
+                TextWriter textWriter = new StreamWriter(@fpath.ToLower());
+                serial.Serialize(textWriter, NameBanList);
+                textWriter.Close();
+            }
+            catch (Exception ex)
+            {
+                Connection.logError(ex.ToString(), "filesystem");
+            }
+        }
+
+
         #endregion
 
         #region Mail System
@@ -6473,7 +7090,7 @@ namespace MudServer
             mail = loadMails();
             // Monster mailing system
             if (message == "")
-                sendToUser("Syntax: mail <list/read/send/reply/del>");
+                sendToUser("Syntax: mail <list/read/send/reply/del>", true, false, false);
             else
             {
                 string action = (message.IndexOf(" ") > -1 ? (message.Split(new char[] {' '},2))[0] : message);
@@ -6502,7 +7119,7 @@ namespace MudServer
                         break;
                     case "send":
                         if (body == "" || body.IndexOf(" ") == -1)
-                            sendToUser("Syntax: mail send <player> <subject>");
+                            sendToUser("Syntax: mail send <player> <subject>", true, false, false);
                         else
                         {
                             string[] split = body.Split(new char[] { ' ' }, 2);
@@ -6588,7 +7205,7 @@ namespace MudServer
                         }
                         break;
                     default:
-                        sendToUser("Syntax: mail <list/read/send/reply/del>");
+                        sendToUser("Syntax: mail <list/read/send/reply/del>", true, false, false);
                         break;
 
                 }
@@ -6918,7 +7535,7 @@ namespace MudServer
         public void cmdWarn(string message)
         {
             if (message == "" || (message.ToLower() == "list" && myPlayer.PlayerRank < (int)Player.Rank.Admin) || (message.ToLower() != "list" && message.IndexOf(" ") == -1))
-                sendToUser("Syntax: warn <player> <warning>");
+                sendToUser("Syntax: warn <player> <warning>", true, false, false);
             else if (message.ToLower() == "list" && myPlayer.PlayerRank >= (int)Player.Rank.Admin)
             {
                 string output = "";
@@ -7131,6 +7748,53 @@ namespace MudServer
                 saveMessages();
                 sendToUser("{bold}{cyan}---[{red}Warnings{cyan}]".PadRight(103, '-') + "\r\n" + output + "\r\n{bold}{cyan}".PadRight(94, '-') + "{reset}", true, false, false);
             }
+        }
+
+        #endregion
+
+        #region HC Admin commands
+
+        public void cmdShutdown(string message)
+        {
+            int secs = 0;
+            if (message == "")
+                sendToUser((Server.shutdownSecs > -1 ? "System set to shutdown at " + DateTime.Now.AddSeconds(Server.shutdownSecs).ToString() : "System shutdown not set"), true, false, false);
+            else if (message.ToString() == "abort")
+            {
+                Server.shutdownSecs = -1;
+                sendToUser("Server shutdown aborted", true, false, false);
+            }
+            else if (!int.TryParse(message, out secs))
+                sendToUser("Syntax: shutdown <abort/time in seconds>", true, false, false);
+            else
+            {
+                logToFile("System set to shut down in " + message + " seconds by " + myPlayer.UserName, "admin");
+                foreach (Connection c in connections)
+                {
+                    if (c.socket.Connected && c.myPlayer != null)
+                    {
+                        c.myPlayer.SavePlayer();
+                        c.Writer.Write(AnsiColour.Colorise("\r\n" + myPlayer.ColourUserName + " ^Rhas set the system to shutdown in " + formatTime(new TimeSpan(0, 0, secs)) + "!\r\n", c.myPlayer.DoColour));
+                        c.Writer.Flush();
+                    }
+                }
+                Server.Shutdown(secs);
+            }
+        }
+
+        public void cmdRestart(string message)
+        {
+            logToFile("System restarted by " + myPlayer.UserName, "admin");
+            foreach (Connection c in connections)
+            {
+                if (c.socket.Connected && c.myPlayer != null)
+                {
+                    c.Writer.Write(AnsiColour.Colorise("^RSYSTEM IS RESTARTING - BACK IN A JIFFY!\r\n", c.myPlayer.DoColour));
+                    c.Writer.Flush();
+                    c.socket.Close();
+                }
+            }
+            Server.Restart();
         }
 
         #endregion
@@ -7562,7 +8226,7 @@ namespace MudServer
         public void cmdCCinfo(string message)
         {
             if (message == "")
-                sendToUser("Syntax: ccinfo <channel>");
+                sendToUser("Syntax: ccinfo <channel>", true, false, false);
             else
             {
                 ClubChannel info = ClubChannel.LoadChannel(message);
@@ -7868,7 +8532,7 @@ namespace MudServer
         public void cmdCCSay(string message)
         {
             if (message == "" || message.IndexOf(" ") == -1)
-                sendToUser("Syntax: cu <channel> <message>");
+                sendToUser("Syntax: cu <channel> <message>", true, false, false);
             else
             {
                 string[] split = message.Split(new char[] { ' ' }, 2);
@@ -7889,7 +8553,7 @@ namespace MudServer
         public void cmdCCThink(string message)
         {
             if (message == "" || message.IndexOf(" ") == -1)
-                sendToUser("Syntax: ct <channel> <message>");
+                sendToUser("Syntax: ct <channel> <message>", true, false, false);
             else
             {
                 string[] split = message.Split(new char[] { ' ' }, 2);
@@ -7910,7 +8574,7 @@ namespace MudServer
         public void cmdCCSing(string message)
         {
             if (message == "" || message.IndexOf(" ") == -1)
-                sendToUser("Syntax: cs <channel> <message>");
+                sendToUser("Syntax: cs <channel> <message>", true, false, false);
             else
             {
                 string[] split = message.Split(new char[] { ' ' }, 2);
@@ -7931,7 +8595,7 @@ namespace MudServer
         public void cmdCCEmote(string message)
         {
             if (message == "" || message.IndexOf(" ") == -1)
-                sendToUser("Syntax: ce <channel> <message>");
+                sendToUser("Syntax: ce <channel> <message>", true, false, false);
             else
             {
                 string[] split = message.Split(new char[] { ' ' }, 2);
