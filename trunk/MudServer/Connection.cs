@@ -1161,7 +1161,9 @@ namespace MudServer
             if (File.Exists(path))
             {
                 TextReader textReader = new StreamReader(path);
-                return (textReader.ReadToEnd());
+                string output = textReader.ReadToEnd();
+                textReader.Close();
+                return output;
             }
             else
             {
@@ -1172,7 +1174,7 @@ namespace MudServer
 
         private List<string> loadConnectionFile()
         {
-            string path = @"logs" + Path.DirectorySeparatorChar + "connections.log";
+            string path = @"connections" + Path.DirectorySeparatorChar + "connections.log";
             List<string> ret = new List<string>();
             if (File.Exists(path))
             {
@@ -1183,6 +1185,7 @@ namespace MudServer
                     ret.Add(line);
                 }
                 textRead.Close();
+                textRead.Dispose();
             }
             else
             {
@@ -1195,7 +1198,7 @@ namespace MudServer
         {
             //string path = @"logs" + Path.DirectorySeparatorChar + "connections.log";
 
-            string path = (@"logs" + Path.DirectorySeparatorChar);
+            string path = (@"connections" + Path.DirectorySeparatorChar);
             try
             {
                 if (!Directory.Exists(path))
@@ -1482,9 +1485,13 @@ namespace MudServer
                         while ((log = s.ReadLine()) != null)
                         {
                             w.WriteLine("[" + f.Name + "] " + log);
+                            w.Flush();
                         }
                         s.Close();
+                        s.Dispose();
                         w.Close();
+                        w.Dispose();
+
                         f.Delete();
                     }
                     sendToUser("All logs files backed up", true, false, false);
