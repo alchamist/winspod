@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Nct <channel> <thought>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Sends the thought <thought> to Club channel <channel>
+
+^RRestrictions:^N
+
+You must be on the channel to use this command

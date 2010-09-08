@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Nccinfo <channel name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+This command shows information about the named channel
+
+^RRestrictions:^N
+
+None

@@ -1,0 +1,11 @@
+﻿3
+^YSyntax: ^Nagit <player>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Removes the [AUTOGIT] tag from a player. the [AUTOGIT] Tag is applied to any user who has been kicked more than 5 times from the system.
+
+^RRestrictions:^N
+
+None

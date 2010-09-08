@@ -1,0 +1,11 @@
+﻿4
+^YSyntax: ^Nbarge <player>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+This command will immediately move you to the room that the player specified is in, ignoring all room locks.
+
+^RRestrictions:^N
+
+None
