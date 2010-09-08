@@ -1,0 +1,11 @@
+﻿4
+^YSyntax: ^Nas <lyrics>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Sings on the admin channel.
+
+^RRestrictions:^N
+
+None

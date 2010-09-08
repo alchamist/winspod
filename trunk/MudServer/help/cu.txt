@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Ncu <channel> <message>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Sends the message <message> to Club channel <channel>
+
+^RRestrictions:^N
+
+You must be on the channel to use this command

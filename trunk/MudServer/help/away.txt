@@ -1,0 +1,11 @@
+0
+^YSyntax: ^NAway
+^YAliases: ^NNone
+
+^PEffect:^N
+
+This command marks you as being "away", which shows up in the idle list. This also will auto-reply to any messages sent to you while you are marked as away
+
+^RRestrictions:^N
+
+None

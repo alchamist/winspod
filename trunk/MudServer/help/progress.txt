@@ -64,3 +64,4 @@ r48 - more object code, including dropping items on floor where CanDropOnFloor f
 
 ^PWednesday 8th September 2010^N
 r49 - all commands except news system and games now added. various bug fixes included.
+r50 - added inform code
