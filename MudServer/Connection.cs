@@ -361,12 +361,15 @@ namespace MudServer
 
         void OnDisconnect()
         {
+            doInform(false);
+
             if (myPlayer != null)
                 logConnection(myPlayer.UserName, myPlayer.CurrentIP, DateTime.Now);
 
             myPlayer = null;
             Console.WriteLine("[" + DateTime.Now.ToShortTimeString() + "] Disconnect: " + connPoint);
             connections.Remove(this);
+
         }
 
         public void Disconnect()
@@ -726,6 +729,8 @@ namespace MudServer
                             sendToRoom(myPlayer.UserName + " " + myPlayer.EnterMsg, "", myPlayer.UserRoom, myPlayer.UserName);
                             myPlayer.LoginCount++;
                             myPlayer.SavePlayer();
+
+                            doInform(true);
                         }
                         else
                         {
@@ -4434,12 +4439,15 @@ namespace MudServer
                 else
                 {
                     int count = 0;
+                    int start = 0;
+                    if (idleHistory.Count > 10)
+                        start = idleHistory.Count - 9;
                     int outcount = 1;
                     string time = "";
-                    DateTime last = idleHistory[0];
+                    DateTime last = idleHistory[start];
                     foreach (DateTime d in idleHistory)
                     {
-                        if (count++ > 3 )
+                        if (count++ > 3 && count > start)
                         {
                             time = formatTime(TimeSpan.FromSeconds((d - last).Seconds));
                             output += ("^B(" + outcount++.ToString() + ")^N ").PadRight(10) + (time == "" ? "0 seconds" : time) + "\r\n";
@@ -4477,12 +4485,17 @@ namespace MudServer
                             else
                             {
                                 int count = 0;
+                                int start = 0;
+                                if (idleHistory.Count > 10)
+                                    start = idleHistory.Count - 9;
+                                if (c.idleHistory.Count > 10)
+                                    count = c.idleHistory.Count - 10;
                                 int outcount = 1;
                                 string time = "";
-                                DateTime last = c.idleHistory[0];
+                                DateTime last = c.idleHistory[start];
                                 foreach (DateTime d in c.idleHistory)
                                 {
-                                    if (count++ > 3)
+                                    if (count++ > 3 && count > start)
                                     {
                                         time = formatTime(TimeSpan.FromSeconds((d - last).Seconds));
                                         output += ("^B(" + outcount++.ToString() + ")^N ").PadRight(10) + (time == "" ? "0 seconds" : time) + "\r\n";
@@ -4665,7 +4678,7 @@ namespace MudServer
                 IPBanList = loadIPBans();
                 for (int i = IPBanList.Count - 1; i >= 0; i--)
                 {
-                    if (IPBanList[i].Address == ban.Address)
+                    if (IPBanList[i].Equals(ban))
                     {
                         IPBanList.RemoveAt(i);
                         sendToUser("IP Address " + ban.ToString() + " removed from ban list", true, false, false);
@@ -7747,6 +7760,27 @@ namespace MudServer
             {
                 saveMessages();
                 sendToUser("{bold}{cyan}---[{red}Warnings{cyan}]".PadRight(103, '-') + "\r\n" + output + "\r\n{bold}{cyan}".PadRight(94, '-') + "{reset}", true, false, false);
+            }
+        }
+
+        public void doInform(bool login)
+        {
+            foreach (Connection c in connections)
+            {
+                if (myPlayer!=null && c.myPlayer.UserName != myPlayer.UserName && c.myPlayer != null)
+                {
+                    if (c.myPlayer.InformFor(myPlayer.UserName))
+                    {
+                        string informString = "\r\n^G[Inform] " + myPlayer.ColourUserName + "^G has just logged " + (login ? "in" : "out") + " [" + rankName(myPlayer.PlayerRank) + "^G]";
+                        informString += (myPlayer.InformTag == "" ? "" : " [" + myPlayer.InformTag + "^G]");
+                        if (c.myPlayer.PlayerRank >= (int)Player.Rank.Staff)
+                        {
+                            informString += (myPlayer.AutoGit ? " [AutoGit]" : "");
+                            informString += (myPlayer.Git ? " [Git]" : "");
+                        }
+                        c.sendToUser(informString, true, false, false);
+                    }
+                }
             }
         }
 

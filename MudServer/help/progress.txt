@@ -1,267 +1,66 @@
 0
-^PTueday 10th December 2002^N
 
-Initial creative meeting held, concept formed and decisions made!
-
-^PWednesday 11th December 2002^N
-
-Base telnet system coded. No commands available, but logon checking works.
-First player on gets God status.
-As many welcome splash screens as you want
-
-^PThrusday 12th December 2002^N
-
-Command interpreter coded. Basic chat commands of "Say", "Tell", "Emote" and "Remote" added, as well as the all important "Quit" command.
-
-^PFriday 13th December 2002^N
-
-"Who" and "fwho" commands added, as well as "cmd", the command listing command. Logon now checks to make sure that newbie names are not parts of other users names, and partial name matching added.
-
-res command added.
-added support for single character commands without space between command and arguments eg. ".alch hello"
-added anti-idle code that will only idle someone out if there is more than one player online
-added reconnect code
-
-fixed output to 80 cols.
-
-Added staff channels
-Added commands "think", "rthink", "sing" and "rsing"
-Added "kick" command
-
-^PSaturday 14th December 2002^N
-
-Added "grant" and "remove" commands
-Added code to the idle timer to reset all connections and free memory if no players are online.
-
-Added "x" (examine) command
-
-^PSunday 15th December 2002^N
-
-Rest day
-
-^PMonday 16th December 2002^N
-
-Added some more to the "x" command
-Added log file routines
-
-^PTuesday 17th December 2002^N
-
-Added "kill" admin command
-Added help system
-Added "shout","noshout" player commands and "silence" staff command
-Added "toggle" command for setting public/private e-mail addys 1 - 5
-Added "email" command to allow setting of e-mail addresses 1 - 5
-
-Re-wrote room code and made it more pritty
-Added "exits" command
-Added "go" command for moving between rooms
-Added "main" command
-Added "prefix" command
-Added "desc" command
-Added who listing at login
-Added "look" command
-
-^PWednesday 25th December 2002^N
-
-Yes, I am that sad that I have been coding on christmas day!
-
-Added "history" function
-Added "clog" command to check for log touches since last logon
-Added "bug" bug logging command
-Added "vlog" admin command
-Added the ini file system to set talker params
-
-^PFriday 27th December 2002^N
-
-Re-wrote prefix code to count actual characters properly and ignore colour codes
-Added "prompt" command for user customisable and colour prompts
-Added "staff" command to list staff on line
-Added "rename" admin command which can rename live players, not just newbies
-Added "pBlank" and "dBlank" staff commands to blank offensive prefixes/descriptions
-
-^PSaturday 28th December 2002^N
-
-Started work on the club channels
-Added "ccAdd" and "ccDel" admin commands
-Added "ccList" command
-Added "ccJoin" monster routine to add a player to a channel. Will probably end up re-writing this one
-
-^PSunday 29th December 2002^N
-
-Re-wrote the monster "ccJoin" code to something that is a little more efficient, and now toggles joining/removing a player
-Added "ccpcol" and "ccmcol" commands to set prefix and main colours
-Added "cu","ce","cs","ct" commands for channel communications
-Added "ccwho" command - think that's the channel stuff done
-Added "force" admin command ... not pritty, but it works
-
-^PMonday 30th December 2002^N
-
-Added mail system
-
-^PThursday 2nd January 2003^N
-
-Re-wrote mlist, mread and mdel commands to use sequential player numbers rather than mail id's
-Added new mail checking on login
-Added ed-time command
-
-^PFriday 3rd January 2003^N
-
-Added multiplayer "tell"
-Added "noidle" admin command
-Added "set" command for setting jabber/icq/msn/yahoo id's
-
-^PSunday 5th January 2003^N
-
-Removed "noidle" command and intergrated it with "grant" command
-Added tester priv (via "grant" command)
-Added "ccmute" command for global club channel muting
-Added listing of club channels player is on to x
-Added "idlehist" command to list the times between commands to check for triggers/timers
-Added "wibble" staff command
-
-^PMonday 6th January 2003^N
-
-Added "stats" command
-Added "all" and "command" sections to "stats"
-Added "save" command
-Added "last" command
-Added "abuse" command
-Added "alog" and "dlog" admin commands
-Added "lock" command to limit access by rank
-Added ip and name banning
-Added list command for ip,testers,staff,newbies and players
-Added "rescount" command
-Added "ccncol" command for more control over the look of channels
-
-^PTuesday 7th January 2003^N
-
-Re-wrote all say and tell commands to output correct message depending on the final punctuation mark
-Added "ccrname" command to rename channels on the fly
-Added code to rename command to transfer mail over to new name
-Added basic alias support added
-Added "%0" and "%1" support for aliases
-Added random stuff in aliases. Aliases now complete I think
-
-^PWednesday 8th January 2003^N
-
-Added "noprefix" command, as well adding prefix stuff in say/sing/emote/think
-Added code to mail system to inform a player of new mail if they are on-line when it is sent
-Added edump command to dump e-mail addresses of all ressies or staff to file
-Added "warn" command which will save the warning if player is off line
-Added "message" command to leave a player a message for them on next login
-Added "message all" for admin
-Added "message allstaff" for admin to send a message to staff
-Added "message guide", "message staff" and "message admin"
-Added full news system
-
-^PThursday 9th January 2003^N
-
-Added friends and inform list
-Added "inform all"
-Added inform stuff for login - inform stuff finished
-Added "tf","rf","ttf" & "rtf" commands - friends stuff finished
-Fixed telnet input to allow for windows telnet etc
-
-^PFriday 10th January 2003^N
-
-Added git, autogit (after 5 warnings) and inform tags
-Added "git", "agit" (to reset autogit until next warning) and "itag" commands
-Added "colour" command for player colour control
-First real alpha test of talker ... didn't break !!
-
-^PSaturday 11th January 2003^N
-
-Changed the on-line time code to work a little smoother
-Added logon count and average logon time
-Added loads of stuff to "set" and the x file:
-  Home URL
-  Work URL
-  Average Logon
-  Logon count
-  IRL Name
-  Occupation
-  Studying 
-  Hometown
-
-^PSunday 12th January 2003^N
-
-Changed edtime command to work in hours
-Added "password" command for players to change their passwords
-Resolved name changing to lower case on player logon
-Added "recap" command
-Added "logonscript" command and workings
-Added "away" command
-Added showing private email address to friends and admin
-
-^PMonday 13th January 2003^N
-
-Added the rest of the colour codes into output
-Added "quit" at login prompt
-
-^PFriday 17th January 2003^N
-
-Cleaned up the newbie logon screens
-Added last login stuff on res login
-Added rank listing to fwho
-Re-wrote mail system
-Added selectable hourly chime
-Added "hide" and "where" commands
-Sorted out prefix problem
-
-^PSaturday 18th January 2003^N
-
-Added command line help for news and mail editor
-Added Logon/off message support
-Added enter/exit message stuff
-Added "pinfo" command
-Started objects system
-
-^PSunday 19th January 2003^N
-
-Added minesweeper game
-
-^PTuesday 21st January 2003^N
-
-Fixed bug that did not save player or send message if player closed telnet connection without typing "quit"
-Added "jetlag" to "set" command
-Changed "list staff" command to list all talker staff, not just online ones
-Changed news code so only residents can post news items to stop abuse
-
-^PWednesday 22nd January 2003^N
-
-Added "echo" command
-
-^PThursday 23rd January 2003^N
-
-added "ccinfo" & "ccdesc" commands
-added "wall" command
-added "slap" admin command
-added "reset" admin command to zero any of warn/idle/kick/slap counts
-
-^PFriday 24th January 2003^N
-
-Sorted local echo bug so passwords are not echoed
-Rewrote command listing routine so priv commands are only shown if priv is granted
-Added "edobj" builder command
-Added "exobj" builder command
-Added room listing to "list" command
-Added "trans" command
-
-^PSaturday 25th January 2003^N
-
-Added object command code
-Added inventory player code
-Added inventory listing
-Added "get" and "drop" object commands
-Added "examine" object command
-Added "eat" object command
-Added "drink" object code
-Added "throw" object code
-Added "Play", "push", "pull", "shake" and "wield" object commands
-
-^PMonday 27th January 2003^N
-
-Added "poke", "use" and "Take" object commands
-Added if statement support to object command code
-Added "delobj" builder command
-Added "edweight" admin command
+^PTuesday 3rd August 2010^N
+r1-11 - Initial socket connection and communication code created
+
+^PWednesday 4th August 2010^N
+r12 - Finished club channel code
+r13 - Minor fixes
+r14 - Added cmdRename
+
+^PThursday 5th August 2010^N
+r15 - Added the internal mail code
+
+^PFriday 6th August 2010^N
+r16 - Added Warning and Git/AutoGit stuff
+r17 - Friend Add/Remove/tf/rf/ttf/rtf added
+r18 - ITAG Stuff
+r19 - Added Recap
+r20 - Started alias processing stuff, and added logonscript basics
+
+^PTuesday 10th August 2010^N
+r21 - Added more alias stuff
+r22 - Added logonmsg/logoffmsg/entermsg/exitmsg/pinfo
+r23 - Refactored the quit code
+r24 - Added description stuff
+r25 - Tagline added
+r26 - Started refactor of friends/list
+
+^PThursday 26th August 2010^N
+r27 - Fixed bug with creating the initial admin user
+r28 - Added cmdInform to set inform list.
+
+^PTuesday 31st August 2010^N
+r29 - Added roomMessage code
+
+^PWednesday 1st September 2010^N
+r30 - Added room description and room name code
+r31 - Added most of the room creation code etc (user's home rooms not done yet)
+r32 - Refactored room stuff to seperate room shortName and systemName
+r33 - Added room locks, room lists and join commands
+r34 - Added code to rename rooms system name and update links on change of username
+
+^PThursday 2nd September 2010^N
+r35 - Start of objects code - struct and list
+r36 - Object code, including object action code, plus start of inventory system.
+r37 - Added cmdInventory and weight
+r38 - added cmdGet for inventory
+r39 - added inventory drop
+
+^PFriday 3rd September 2010^N
+r40 - added more flist stuff, including key.
+r41 - Added grab code
+
+^PMonday 6th September 2010^N
+r42 - None
+r43 - None
+r44 - None
+r45 - Various bug fixes including reconnection code
+
+^PTuesday 7th September 2010^N
+r46 - added idlehistory code
+r47 - added last connections logging
+r48 - more object code, including dropping items on floor where CanDropOnFloor flag set
+
+^PWednesday 8th September 2010^N
+r49 - all commands except news system and games now added. various bug fixes included.

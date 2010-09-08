@@ -166,9 +166,6 @@ namespace MudServer
         private bool        inRoomEditor = false;                           // Are they editing a room description?
         private int         maxRooms = 3;                                   // How many rooms are they allowed?
 
-        private bool        informAll;                                      // Do they want to be notified when anyone logs on/off?
-        private bool        informFriends;                                  // Are they being informed of everyone?
-
         //public List<string> friends = new List<string>();                   // Friends list - set to public so can be manipulated
         //public List<string> informList = new List<string>();                // Inform list - set to public so can be manipulated
 
@@ -611,14 +608,14 @@ namespace MudServer
 
         public bool InformAll
         {
-            get { return informAll; }
-            set { informAll = value; }
+            get { return allPlayersList.inform; }
+            set { allPlayersList.inform = value; }
         }
 
         public bool InformFriends
         {
-            get { return informFriends; }
-            set { informFriends = value; }
+            get { return allFriendsList.inform; }
+            set { allFriendsList.inform = value; }
         }
 
         public string InformTag
