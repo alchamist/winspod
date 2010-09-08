@@ -25,8 +25,9 @@ Objects have their own scripting language. As with aliases, multiple commands ca
 
  ^RVar   Effect^N
 ^G%pnm^N - Player name
-^G%onm^N - Object creator's name
-^G%obn^N - Object owner's name
+^G%onm^N - Object owner's name
+^G%cnm^N - Object creator's name
+^G%obn^N - Object's name
 ^Y%psp^N - Player subject pronoun (he/she)
 ^Y%pop^N - Player object pronoun (him/her)
 ^Y%pap^N - Player attributive pronoun (his/her)
@@ -38,10 +39,11 @@ Objects have their own scripting language. As with aliases, multiple commands ca
 ^R Cmd   Rank  Effect
 ^G%stp^N - ^BAll^N - Send to player
 ^G%str^N - ^BAll^N - Send to room
+^G%sta^N - ^BAdm^N - Send to all
 ^G%rmv^N - ^BAll^N - Remove object from player inventory
 ^G%wld^N - ^BAll^N - Wield object
-^G%sta^N - ^BAdm^N - Send to all
 ^G%trn^N - ^BAdm^N - Transport player
 ^G%wib^N - ^BAdm^N - Wibble player
 ^G%jal^N - ^BAdm^N - Jail player (not yet implimented)
 ^G%bmp^N - ^BAdm^N - Bump player
+^G%drp^N = ^BAdm^N - Drop item on floor (lower ranks automatically drop item if it can be)
