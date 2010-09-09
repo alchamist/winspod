@@ -8769,14 +8769,14 @@ namespace MudServer
         private void doPrompt(string user)
         {
             if (user == myPlayer.UserName)
-                sendToUser(myPlayer.InEditor ? "> " : myPlayer.Prompt.Replace("%t", DateTime.Now.ToShortTimeString()).Replace("%d", DateTime.Now.ToShortDateString()), false, false, false);
+                sendToUser("\n" + (myPlayer.InEditor ? "> " : myPlayer.Prompt.Replace("%t", DateTime.Now.ToShortTimeString()).Replace("%d", DateTime.Now.ToShortDateString())), false, false, false);
             else
             {
                 foreach (Connection c in connections)
                 {
                     if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName == user)
                     {
-                        sendToUser(c.myPlayer.InEditor ? "> " :  c.myPlayer.Prompt.Replace("%t", DateTime.Now.ToShortTimeString()).Replace("%d", DateTime.Now.ToShortDateString()), c.myPlayer.UserName, false, c.myPlayer.DoColour, false, false);
+                        sendToUser("\n" + (c.myPlayer.InEditor ? "> " :  c.myPlayer.Prompt.Replace("%t", DateTime.Now.ToShortTimeString()).Replace("%d", DateTime.Now.ToShortDateString())), c.myPlayer.UserName, false, c.myPlayer.DoColour, false, false);
                     }
                 }
             }
