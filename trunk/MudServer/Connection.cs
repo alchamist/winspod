@@ -425,7 +425,7 @@ namespace MudServer
                         if (newUser.createStatus == 0)
                         {
                             // Check to see if any players exist - if not then we need to make this person a god!
-                            DirectoryInfo di = new DirectoryInfo(@"players" + Path.DirectorySeparatorChar);
+                            DirectoryInfo di = new DirectoryInfo(Path.Combine(Server.userFilePath,@"players" + Path.DirectorySeparatorChar));
                             DirectoryInfo[] dirs = null;
                             if (di.Exists)
                             {
@@ -538,12 +538,12 @@ namespace MudServer
                             if (line.Trim() == newUser.tPassword)
                             {
                                 sendEchoOn();
-                                sendToUser("\r\nPlease enter your e-mail address: ", true, false, false);
+                                sendToUser("\r\nPlease enter your e-mail address: ", false, false, false);
                                 newUser.createStatus = 3;
                             }
                             else
                             {
-                                sendToUser("\r\nPasswords do not match\r\nPlease enter a password: ", true, false, false);
+                                sendToUser("\r\nPasswords do not match\r\nPlease enter a password: ", false, false, false);
                                 newUser.createStatus = 1;
                             }
                         }
@@ -574,7 +574,7 @@ namespace MudServer
                             }
                             else
                             {
-                                sendToUser("Sorry, that is not a valid e-mail address.\r\n\r\nPlease enter your e-mail address: ", true, false, false);
+                                sendToUser("Sorry, that is not a valid e-mail address.\r\n\r\nPlease enter your e-mail address: ", false, false, false);
                             }
                         }
                     }
@@ -1174,7 +1174,7 @@ namespace MudServer
 
         private List<string> loadConnectionFile()
         {
-            string path = @"connections" + Path.DirectorySeparatorChar + "connections.log";
+            string path = Path.Combine(Server.userFilePath,@"connections" + Path.DirectorySeparatorChar + "connections.log");
             List<string> ret = new List<string>();
             if (File.Exists(path))
             {
@@ -1198,7 +1198,7 @@ namespace MudServer
         {
             //string path = @"logs" + Path.DirectorySeparatorChar + "connections.log";
 
-            string path = (@"connections" + Path.DirectorySeparatorChar);
+            string path = Path.Combine(Server.userFilePath,(@"connections" + Path.DirectorySeparatorChar));
             try
             {
                 if (!Directory.Exists(path))
@@ -1261,7 +1261,7 @@ namespace MudServer
         private List<Room> loadRooms()
         {
             List<Room> list = new List<Room>();
-            string path = (@"rooms" + Path.DirectorySeparatorChar);
+            string path = Path.Combine(Server.userFilePath,(@"rooms" + Path.DirectorySeparatorChar));
             if (Directory.Exists(path))
             {
                 DirectoryInfo di = new DirectoryInfo(path);
@@ -1296,7 +1296,7 @@ namespace MudServer
             string sLogFormat = DateTime.Now.ToShortDateString().ToString() + " " + DateTime.Now.ToLongTimeString().ToString() + " = " + type + " ==> " + error;
             try
             {
-                string path = @"logs" + Path.DirectorySeparatorChar;
+                string path = Path.Combine(Server.userFilePath,@"logs" + Path.DirectorySeparatorChar);
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
 
@@ -1316,7 +1316,7 @@ namespace MudServer
         public static void logToFile(string logMessage, string logFile)
         {
             string sLogFormat = "[" + DateTime.Now.ToShortDateString().ToString() + " " + DateTime.Now.ToLongTimeString().ToString() + "] " + logMessage;
-            string path = (@"logs" + Path.DirectorySeparatorChar);
+            string path = Path.Combine(Server.userFilePath,(@"logs" + Path.DirectorySeparatorChar));
             try
             {
                 if (!Directory.Exists(path))
@@ -1336,7 +1336,7 @@ namespace MudServer
 
         public void cmdCheckLogs(string message)
         {
-            string path = (@"logs" + Path.DirectorySeparatorChar);
+            string path = Path.Combine(Server.userFilePath,(@"logs" + Path.DirectorySeparatorChar));
             string output = "";
             if (Directory.Exists(path))
             {
@@ -1376,7 +1376,7 @@ namespace MudServer
         public void cmdVlog(string message)
         {
             // Routine to view logs
-            string path = (@"logs" + Path.DirectorySeparatorChar);
+            string path = Path.Combine(Server.userFilePath,(@"logs" + Path.DirectorySeparatorChar));
 
             if (Directory.Exists(path))
             {
@@ -1403,7 +1403,7 @@ namespace MudServer
                         if (f.Name.ToLower().Replace(f.Extension, "") == message.ToLower())
                         {
                             found = true;
-                            string showLog = loadTextFile(@"logs" + Path.DirectorySeparatorChar + f.Name);
+                            string showLog = loadTextFile(Path.Combine(Server.userFilePath,@"logs" + Path.DirectorySeparatorChar + f.Name));
                             sendToUser(("{bold}{cyan}---[{red}Log: " + f.Name.Replace(f.Extension, "") + "{cyan}]").PadRight(103, '-') + "{reset}\r\n" + showLog + "\r\n{bold}{cyan}" + "".PadRight(80, '-') + "{reset}", true, false, false);
                         }
                     }
@@ -1421,7 +1421,7 @@ namespace MudServer
         public void cmdDlog(string message)
         {
             // Routine to delete logs
-            string path = (@"logs" + Path.DirectorySeparatorChar);
+            string path = Path.Combine(Server.userFilePath,(@"logs" + Path.DirectorySeparatorChar));
 
             if (message == "")
                 sendToUser("Syntax: dlog <log file>", true, false, false);
@@ -1463,8 +1463,8 @@ namespace MudServer
         public void cmdAlog(string message)
         {
             // Routine to append logs to main and then delete
-            string path = (@"logs" + Path.DirectorySeparatorChar);
-            string append = (@"old" + Path.DirectorySeparatorChar);
+            string path = Path.Combine(Server.userFilePath,(@"logs" + Path.DirectorySeparatorChar));
+            string append = Path.Combine(Server.userFilePath,(@"old" + Path.DirectorySeparatorChar));
 
             if (message == "")
                 sendToUser("Syntax: alog <all/log file>", true, false, false);
@@ -3427,7 +3427,7 @@ namespace MudServer
         public void cmdEDump(string message)
         {
             List<Player> playerList = getPlayers((message.ToLower() == "staff"), false, false, false);
-            string path = (@"dump" + Path.DirectorySeparatorChar);
+            string path = Path.Combine(Server.userFilePath,(@"dump" + Path.DirectorySeparatorChar));
             int count = 0;
 
             if (Directory.Exists(path))
@@ -3454,7 +3454,7 @@ namespace MudServer
 
             sw.Flush();
             sw.Close();
-            sendToUser(count.ToString() + " e-mail address" + (count == 1 ? "" : "es") + " dumped to file", true, false, false);
+            sendToUser(count.ToString() + " e-mail address" + (count == 1 ? "" : "es") + " dumped to file " + path + "emaillist.txt", true, false, false);
         }
 
         public void cmdColour(string message)
@@ -3540,7 +3540,7 @@ namespace MudServer
                             }
                             if (temp.systemName.StartsWith(target[0].ToLower() + "."))
                             {
-                                string path = ("rooms" + Path.DirectorySeparatorChar + r.systemName.ToLower() + ".xml");
+                                string path = Path.Combine(Server.userFilePath,("rooms" + Path.DirectorySeparatorChar + r.systemName.ToLower() + ".xml"));
 
                                 if (File.Exists(path))
                                 {
@@ -5423,7 +5423,7 @@ namespace MudServer
                     }
                     temp.SaveRoom();
                 }
-                string path = ("rooms" + Path.DirectorySeparatorChar + currentRoom.systemName.ToLower() + ".xml");
+                string path = Path.Combine(Server.userFilePath,("rooms" + Path.DirectorySeparatorChar + currentRoom.systemName.ToLower() + ".xml"));
 
                 if (File.Exists(path))
                 {
@@ -6911,7 +6911,7 @@ namespace MudServer
         {
             try
             {
-                string path = @"messages" + Path.DirectorySeparatorChar;
+                string path = Path.Combine(Server.userFilePath,@"messages" + Path.DirectorySeparatorChar);
                 string fname = "messages.xml";
                 string fpath = path + fname;
                 if (!Directory.Exists(path))
@@ -6932,7 +6932,7 @@ namespace MudServer
         {
             try
             {
-                string path = @"objects" + Path.DirectorySeparatorChar;
+                string path = Path.Combine(Server.userFilePath,@"objects" + Path.DirectorySeparatorChar);
                 string fname = "objects.xml";
                 string fpath = path + fname;
                 if (!Directory.Exists(path))
@@ -6952,7 +6952,7 @@ namespace MudServer
         public List<objects> loadObjects()
         {
             List<objects> load = new List<objects>();
-            string path = @"objects" + Path.DirectorySeparatorChar;
+            string path = Path.Combine(Server.userFilePath,@"objects" + Path.DirectorySeparatorChar);
             string fname = "objects.xml";
             string fpath = path + fname;
 
@@ -6976,7 +6976,7 @@ namespace MudServer
         public List<message> loadMessages()
         {
             List<message> load = new List<message>();
-            string path = @"messages" + Path.DirectorySeparatorChar;
+            string path = Path.Combine(Server.userFilePath,@"messages" + Path.DirectorySeparatorChar);
             string fname = "messages.xml";
             string fpath = path + fname;
 
@@ -7000,7 +7000,7 @@ namespace MudServer
         public List<IPAddress> loadIPBans()
         {
             List<string> load = new List<string>();
-            string path = @"banish" + Path.DirectorySeparatorChar;
+            string path = Path.Combine(Server.userFilePath,@"banish" + Path.DirectorySeparatorChar);
             string fname = "ipban.xml";
             string fpath = path + fname;
 
@@ -7037,7 +7037,7 @@ namespace MudServer
                 {
                     output.Add(i.ToString());
                 }
-                string path = @"banish" + Path.DirectorySeparatorChar;
+                string path = Path.Combine(Server.userFilePath,@"banish" + Path.DirectorySeparatorChar);
                 string fname = "ipban.xml";
                 string fpath = path + fname;
                 if (!Directory.Exists(path))
@@ -7057,7 +7057,7 @@ namespace MudServer
         public List<string> loadNameBans()
         {
             List<string> load = new List<string>();
-            string path = @"banish" + Path.DirectorySeparatorChar;
+            string path = Path.Combine(Server.userFilePath,@"banish" + Path.DirectorySeparatorChar);
             string fname = "nameban.xml";
             string fpath = path + fname;
 
@@ -7083,7 +7083,7 @@ namespace MudServer
         {
             try
             {
-                string path = @"banish" + Path.DirectorySeparatorChar;
+                string path = Path.Combine(Server.userFilePath,@"banish" + Path.DirectorySeparatorChar);
                 string fname = "nameban.xml";
                 string fpath = path + fname;
                 if (!Directory.Exists(path))
@@ -7405,7 +7405,7 @@ namespace MudServer
         {
             try
             {
-                string path = @"mail" + Path.DirectorySeparatorChar;
+                string path = Path.Combine(Server.userFilePath,@"mail" + Path.DirectorySeparatorChar);
                 string fname = "mail.xml";
                 string fpath = path + fname;
                 if (!Directory.Exists(path))
@@ -7425,7 +7425,7 @@ namespace MudServer
         public List<message> loadMails()
         {
             List<message> load = new List<message>();
-            string path = @"mail" + Path.DirectorySeparatorChar;
+            string path = Path.Combine(Server.userFilePath,@"mail" + Path.DirectorySeparatorChar);
             string fname = "mail.xml";
             string fpath = path + fname;
 
@@ -7860,7 +7860,7 @@ namespace MudServer
         private List<Player> getPlayers(string startsWith, bool staffOnly, bool builderOnly, bool testerOnly, bool gitsOnly)
         {
             List<Player> list = new List<Player>();
-            string path = (@"players" + Path.DirectorySeparatorChar);
+            string path = Path.Combine(Server.userFilePath,(@"players" + Path.DirectorySeparatorChar));
             DirectoryInfo di = new DirectoryInfo(path);
             DirectoryInfo[] subs = di.GetDirectories(startsWith);
             foreach (DirectoryInfo dir in subs)
@@ -7879,7 +7879,7 @@ namespace MudServer
         private List<Player> getPlayers(int rank, bool singleRankOnly)
         {
             List<Player> list = new List<Player>();
-            string path = (@"players" + Path.DirectorySeparatorChar);
+            string path = Path.Combine(Server.userFilePath,(@"players" + Path.DirectorySeparatorChar));
             DirectoryInfo di = new DirectoryInfo(path);
             DirectoryInfo[] subs = di.GetDirectories();
             foreach (DirectoryInfo dir in subs)

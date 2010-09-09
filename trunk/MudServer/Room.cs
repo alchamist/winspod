@@ -89,7 +89,7 @@ namespace MudServer
         public static Room LoadRoom(string roomName)
         {
             Room load;
-            string path = ("rooms" + Path.DirectorySeparatorChar + roomName.ToLower() + ".xml");
+            string path = Path.Combine(Server.userFilePath,("rooms" + Path.DirectorySeparatorChar + roomName.ToLower() + ".xml"));
 
             if (File.Exists(path))
             {
@@ -124,7 +124,7 @@ namespace MudServer
         {
             if (this.systemName != null && this.fullName != null)
             {
-                string path = @"rooms" + Path.DirectorySeparatorChar;
+                string path = Path.Combine(Server.userFilePath,@"rooms" + Path.DirectorySeparatorChar);
                 string fname = this.systemName + ".xml";
                 string fpath = path + fname;
                 if (!Directory.Exists(path))

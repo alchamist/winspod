@@ -23,6 +23,8 @@ namespace MudServer
         public static int shutdownSecs = -1;
         public static int playerCount = 0;
 
+        public static string userFilePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);  
+
         public struct cmdStats
         {
             public string cmd;

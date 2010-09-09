@@ -67,3 +67,6 @@ r49 - all commands except news system and games now added. various bug fixes inc
 r50 - added inform code
 r51 - added some help files
 r52 - cleaned up the connection logging and fixed bug with show file code
+
+^PThursday 9th September 2010^N
+r53 - Moved volatile files to appdata folder to removed write permission issues
