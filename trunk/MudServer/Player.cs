@@ -768,7 +768,7 @@ namespace MudServer
             Player load;
             //string path = (@"players\" + name.Substring(0, 1) + @"\" + name.ToLower() + ".xml").ToLower();
             //string path = Path.Combine(Server.userFilePath,("players" + Path.DirectorySeparatorChar + name.Substring(0, 1).ToUpper() + Path.DirectorySeparatorChar + name.ToLower() + ".xml"));
-            string path = Path.Combine(Server.userFilePath, @"players" + Path.DirectorySeparatorChar);
+            string path = Path.Combine(Server.userFilePath, @"players" + Path.DirectorySeparatorChar + name.ToLower() + ".xml");
 
             Debug.Print(Path.GetFullPath(path));
 

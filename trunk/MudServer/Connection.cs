@@ -569,6 +569,7 @@ namespace MudServer
                                 p.tester = true;
                                 p.noidle = true;
                                 myPlayer.SpecialPrivs = p;
+                                myPlayer.NewPlayer = false;
 
                                 myState = 10;
                                 sendToUser("\r\nWelcome, " + myPlayer.ColourUserName + ". You are now the admin of the system", true);
