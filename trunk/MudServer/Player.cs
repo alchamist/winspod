@@ -716,7 +716,8 @@ namespace MudServer
                 try
                 {
                     //string path = @"players\" + this.username.Substring(0, 1) + @"\";
-                    string path = Path.Combine(Server.userFilePath, @"players" + Path.DirectorySeparatorChar + this.username.Substring(0, 1).ToUpper() + Path.DirectorySeparatorChar);
+                    //string path = Path.Combine(Server.userFilePath, @"players" + Path.DirectorySeparatorChar + this.username.Substring(0, 1).ToUpper() + Path.DirectorySeparatorChar);
+                    string path = Path.Combine(Server.userFilePath, @"players" + Path.DirectorySeparatorChar);
                     string fname = this.username + ".xml";
                     string fpath = path + fname;
                     if (!Directory.Exists(path))
@@ -743,7 +744,8 @@ namespace MudServer
         {
             Player load;
             //string path = (@"players\" + name.Substring(0, 1) + @"\" + name.ToLower() + ".xml").ToLower();
-            string path = Path.Combine(Server.userFilePath,("players" + Path.DirectorySeparatorChar + name.Substring(0, 1).ToUpper() + Path.DirectorySeparatorChar + name.ToLower() + ".xml"));
+            //string path = Path.Combine(Server.userFilePath,("players" + Path.DirectorySeparatorChar + name.Substring(0, 1).ToUpper() + Path.DirectorySeparatorChar + name.ToLower() + ".xml"));
+            string path = Path.Combine(Server.userFilePath, @"players" + Path.DirectorySeparatorChar);
 
             Debug.Print(Path.GetFullPath(path));
 
@@ -775,7 +777,8 @@ namespace MudServer
 
         public static void RemovePlayerFile(string name)
         {
-            string path = Path.Combine(Server.userFilePath,("players" + Path.DirectorySeparatorChar + name.Substring(0, 1).ToUpper() + Path.DirectorySeparatorChar + name.ToLower() + ".xml"));
+            //string path = Path.Combine(Server.userFilePath,("players" + Path.DirectorySeparatorChar + name.Substring(0, 1).ToUpper() + Path.DirectorySeparatorChar + name.ToLower() + ".xml"));
+            string path = Path.Combine(Server.userFilePath, ("players" + Path.DirectorySeparatorChar + name.ToLower() + ".xml"));
 
             Debug.Print(Path.GetFullPath(path));
 
