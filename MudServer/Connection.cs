@@ -7867,16 +7867,16 @@ namespace MudServer
             string path = Path.Combine(Server.userFilePath,(@"players" + Path.DirectorySeparatorChar));
             DirectoryInfo di = new DirectoryInfo(path);
             DirectoryInfo[] subs = di.GetDirectories(startsWith);
-            foreach (DirectoryInfo dir in subs)
-            {
-                FileInfo[] fi = dir.GetFiles();
+            //foreach (DirectoryInfo dir in subs)
+            //{
+                FileInfo[] fi = di.GetFiles();
                 foreach (FileInfo file in fi)
                 {
                     Player load = Player.LoadPlayer(file.Name.Replace(".xml",""),0);
                     if (load != null && ((staffOnly && load.PlayerRank >= (int)Player.Rank.Guide) || (builderOnly && load.SpecialPrivs.builder) || (testerOnly && load.SpecialPrivs.tester) || (gitsOnly && (load.Git || load.AutoGit))) || (!staffOnly && !builderOnly && !testerOnly && !gitsOnly))
                         list.Add(load);
                 }
-            }
+            //}
             return list;
         }
 
@@ -7886,9 +7886,9 @@ namespace MudServer
             string path = Path.Combine(Server.userFilePath,(@"players" + Path.DirectorySeparatorChar));
             DirectoryInfo di = new DirectoryInfo(path);
             DirectoryInfo[] subs = di.GetDirectories();
-            foreach (DirectoryInfo dir in subs)
-            {
-                FileInfo[] fi = dir.GetFiles();
+            //foreach (DirectoryInfo dir in subs)
+            //{
+                FileInfo[] fi = di.GetFiles();
                 foreach (FileInfo file in fi)
                 {
                     Player load = Player.LoadPlayer(file.Name.Replace(".xml", ""), 0);
@@ -7896,7 +7896,7 @@ namespace MudServer
                     if (load != null && (load.PlayerRank == rank || (load.PlayerRank > rank && !singleRankOnly)))
                         list.Add(load);
                 }
-            }
+            //}
             return list;
         }
 
