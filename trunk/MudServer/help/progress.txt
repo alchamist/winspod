@@ -70,3 +70,4 @@ r52 - cleaned up the connection logging and fixed bug with show file code
 
 ^PThursday 9th September 2010^N
 r53 - Moved volatile files to appdata folder to removed write permission issues
+r54 - More work on file permissions
