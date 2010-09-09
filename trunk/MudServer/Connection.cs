@@ -427,11 +427,14 @@ namespace MudServer
                             // Check to see if any players exist - if not then we need to make this person a god!
                             DirectoryInfo di = new DirectoryInfo(Path.Combine(Server.userFilePath,@"players" + Path.DirectorySeparatorChar));
                             DirectoryInfo[] dirs = null;
+                            FileInfo[] files = null;
                             if (di.Exists)
                             {
                                 dirs = di.GetDirectories();
+                                files = di.GetFiles();
                             }
-                            if (dirs == null || dirs.Length == 0) // There are no player files!
+                            //if (dirs == null || dirs.Length == 0) // There are no player files!
+                            if (files == null || files.Length == 0) // There are no player files!
                             {
                                 newUser.createStatus = 1;
                                 newUser.username = line.Trim();
