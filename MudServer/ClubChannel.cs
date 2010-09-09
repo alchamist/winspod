@@ -114,7 +114,7 @@ namespace MudServer
                 bool ret = false;
                 try
                 {
-                    string path = @"channels" + Path.DirectorySeparatorChar;
+                    string path = Path.Combine(Server.userFilePath,@"channels" + Path.DirectorySeparatorChar);
                     string fname = this.ID.ToString() + ".xml";
                     string fpath = path + fname;
                     if (!Directory.Exists(path))
@@ -153,7 +153,7 @@ namespace MudServer
         public static List<ClubChannel> GetChannels()
         {
             List<ClubChannel> ret = new List<ClubChannel>();
-            string path = ("channels" + Path.DirectorySeparatorChar);
+            string path = Path.Combine(Server.userFilePath,("channels" + Path.DirectorySeparatorChar));
 
             if (Directory.Exists(path))
             {
@@ -182,7 +182,7 @@ namespace MudServer
         public static ClubChannel LoadChannel(string name)
         {
             ClubChannel channel = null;
-            string path = ("channels" + Path.DirectorySeparatorChar);
+            string path = Path.Combine(Server.userFilePath,("channels" + Path.DirectorySeparatorChar));
 
             if (Directory.Exists(path))
             {
@@ -213,7 +213,7 @@ namespace MudServer
         public static ClubChannel LoadChannel(int channelNum)
         {
             ClubChannel channel = null;
-            string path = ("channels" + Path.DirectorySeparatorChar);
+            string path = Path.Combine(Server.userFilePath,("channels" + Path.DirectorySeparatorChar));
 
             if (Directory.Exists(path))
             {
@@ -246,7 +246,7 @@ namespace MudServer
         public static List<ClubChannel> LoadAllChannels()
         {
             List<ClubChannel> channels = new List<ClubChannel>();
-            string path = ("channels" + Path.DirectorySeparatorChar);
+            string path = Path.Combine(Server.userFilePath,("channels" + Path.DirectorySeparatorChar));
 
             if (Directory.Exists(path))
             {
@@ -296,7 +296,7 @@ namespace MudServer
             if (reindexChannels)
                 channels = ReindexChannels(channels);
 
-            string path = ("channels" + Path.DirectorySeparatorChar);
+            string path = Path.Combine(Server.userFilePath,("channels" + Path.DirectorySeparatorChar));
 
             if (Directory.Exists(path))
             {
