@@ -708,32 +708,55 @@ namespace MudServer
 
         #region Load/Save
 
+        //public bool SavePlayer()
+        //{
+        //    if (this.PlayerRank > (int)Rank.Newbie)
+        //    {
+        //        bool ret = false;
+        //        try
+        //        {
+        //            //string path = @"players\" + this.username.Substring(0, 1) + @"\";
+        //            //string path = Path.Combine(Server.userFilePath, @"players" + Path.DirectorySeparatorChar + this.username.Substring(0, 1).ToUpper() + Path.DirectorySeparatorChar);
+        //            string path = Path.Combine(Server.userFilePath, @"players" + Path.DirectorySeparatorChar);
+        //            string fname = this.username + ".xml";
+        //            string fpath = path + fname;
+        //            if (!Directory.Exists(path))
+        //                Directory.CreateDirectory(path);
+
+        //            //if (!File.Exists(fpath)) File.Create(path);
+        //            XmlSerializer serial = new XmlSerializer(typeof(Player));
+        //            TextWriter textWriter = new StreamWriter(@fpath.ToLower());
+        //            serial.Serialize(textWriter, this);
+        //            textWriter.Close();
+        //            ret = true;
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Connection.logError(ex.ToString(), "filesystem");
+        //        }
+        //        return ret;
+        //    }
+        //    else
+        //        return false;
+        //}
+
         public bool SavePlayer()
         {
             if (this.PlayerRank > (int)Rank.Newbie)
             {
                 bool ret = false;
-                try
-                {
-                    //string path = @"players\" + this.username.Substring(0, 1) + @"\";
-                    //string path = Path.Combine(Server.userFilePath, @"players" + Path.DirectorySeparatorChar + this.username.Substring(0, 1).ToUpper() + Path.DirectorySeparatorChar);
-                    string path = Path.Combine(Server.userFilePath, @"players" + Path.DirectorySeparatorChar);
-                    string fname = this.username + ".xml";
-                    string fpath = path + fname;
-                    if (!Directory.Exists(path))
-                        Directory.CreateDirectory(path);
+               
+                string path = Path.Combine(Server.userFilePath, @"players" + Path.DirectorySeparatorChar);
+                string fname = this.username + ".xml";
+                string fpath = path + fname;
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
 
-                    //if (!File.Exists(fpath)) File.Create(path);
-                    XmlSerializer serial = new XmlSerializer(typeof(Player));
-                    TextWriter textWriter = new StreamWriter(@fpath.ToLower());
-                    serial.Serialize(textWriter, this);
-                    textWriter.Close();
-                    ret = true;
-                }
-                catch (Exception ex)
-                {
-                    Connection.logError(ex.ToString(), "filesystem");
-                }
+                XmlSerializer serial = new XmlSerializer(typeof(Player));
+                TextWriter textWriter = new StreamWriter(@fpath.ToLower());
+                serial.Serialize(textWriter, this);
+                textWriter.Close();
+                ret = true;
                 return ret;
             }
             else
