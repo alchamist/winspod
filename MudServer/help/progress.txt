@@ -78,3 +78,4 @@ r61 - Seperated out classes for better clarity
 r62 - Added rank command
 r63 - Added spod priv and spod channel
 r64 - Added minister rank and marital status stuff
+r65 - Added annul command for admin

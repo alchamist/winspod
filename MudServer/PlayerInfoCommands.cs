@@ -586,7 +586,7 @@ namespace MudServer
 
         public void cmdUnpropose(string message)
         {
-            if (!myPlayer.proposer)
+            if (!myPlayer.proposer || myPlayer.maritalStatus != Player.MaritalStatus.ProposedTo)
                 sendToUser("You haven't made any proposals ...", true, false, false);
             else
             {
@@ -702,6 +702,55 @@ namespace MudServer
                             }
                         }
                     }
+                }
+            }
+        }
+
+        public void cmdAnnul(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: annul <player name>", true, false, false);
+            else
+            {
+                string[] target = matchPartial(message);
+                if (target.Length == 0)
+                    sendToUser("No such user \"" + message + "\"");
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else
+                {
+                    Player p = Player.LoadPlayer(target[0], 0);
+                    Player t = Player.LoadPlayer(p.Spouse, 0);
+
+                    if (p != null)
+                    {
+                        p.maritalStatus = Player.MaritalStatus.Single;
+                        p.Spouse = "";
+                        p.SavePlayer();
+
+                        if (t != null)
+                        {
+                            t.maritalStatus = Player.MaritalStatus.Single;
+                            t.Spouse = "";
+                            t.SavePlayer();
+                        }
+
+                        if (isOnline(p.UserName) || isOnline(t.UserName))
+                        {
+                            foreach (Connection c in connections)
+                            {
+                                if (c.myPlayer != null && c.myPlayer.UserName.ToLower() == p.UserName.ToLower())
+                                    c.myPlayer = p;
+                                else if (c.myPlayer != null && c.myPlayer.UserName.ToLower() == t.UserName.ToLower())
+                                    c.myPlayer = t;
+                            }
+                        }
+
+                        sendToUser("You annul " + p.UserName + "'s marital status", true, false, false);
+                    }
+                    else
+                        sendToUser("Sorry, something seems to have gone wrong", true, false, false);
+
                 }
             }
         }
