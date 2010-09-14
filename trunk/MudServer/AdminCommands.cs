@@ -18,7 +18,7 @@ namespace MudServer
         public void cmdGrant(string message)
         {
             if (message == "" || message.IndexOf(" ") == -1)
-                sendToUser("Syntax: Grant <player> <admin/staff/guide/noidle/tester/builder/spod>", true, false, false);
+                sendToUser("Syntax: Grant <player> <admin/staff/guide/noidle/tester/builder/spod/minister>", true, false, false);
             else
             {
                 string[] split = message.Split(new char[] { ' ' }, 2);
@@ -145,8 +145,17 @@ namespace MudServer
                                 p.spod = !p.spod;
                                 t.SpecialPrivs = p;
                                 break;
+                            case "minister":
+                                // Granting minister
+                                sendToUser("You " + (t.SpecialPrivs.minister ? "remove" : "grant") + " minister privs to " + t.UserName, true, false, false);
+                                logToFile(myPlayer.UserName + " has just " + (t.SpecialPrivs.minister ? "removed" : "granted") + " minister privs to " + t.UserName, "grant");
+                                if (online) sendToUser(myPlayer.UserName + " has " + (t.SpecialPrivs.minister ? "removed your" : "granted you") + " minister privs", true, false, false);
+                                p = t.SpecialPrivs;
+                                p.minister = !p.minister;
+                                t.SpecialPrivs = p;
+                                break;
                             default:
-                                sendToUser("Syntax: Grant <player> <admin/staff/guide/noidle/tester/builder/spod>", true, false, false);
+                                sendToUser("Syntax: Grant <player> <admin/staff/guide/noidle/tester/builder/spod/minister>", true, false, false);
                                 break;
                         }
                         if (online)
@@ -220,8 +229,6 @@ namespace MudServer
             }
         }
 
-
-
         public void cmdForce(string message)
         {
             if (message == "" || message.IndexOf(" ") == -1)
@@ -251,7 +258,6 @@ namespace MudServer
                 }
             }
         }
-
 
         public void cmdEdtime(string message)
         {
@@ -493,6 +499,31 @@ namespace MudServer
                             }
                         }
                     }
+
+                    // Check to see if they were married, if so then make the other person a widow
+                    Player p = Player.LoadPlayer(target[0], 0);
+                    if (p.Spouse != "" && (p.maritalStatus > Player.MaritalStatus.Single && p.maritalStatus < Player.MaritalStatus.Divorced))
+                    {
+                        Player t = Player.LoadPlayer(p.Spouse, 0);
+                        if (t != null)
+                        {
+                            t.Spouse = "";
+                            t.maritalStatus = Player.MaritalStatus.Widowed;
+                            t.SavePlayer();
+                            if (isOnline(t.UserName))
+                            {
+                                foreach(Connection c in connections)
+                                {
+                                    if (c.myPlayer != null && c.myPlayer.UserName.ToLower() == t.UserName.ToLower())
+                                    {
+                                        c.myPlayer = t;
+                                        c.sendToUser("You have just been made a widow by " + myPlayer.UserName, true, false, false);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    p = null;
 
                     // Now need to kill the user file
                     Player.RemovePlayerFile(target[0]);

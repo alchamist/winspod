@@ -368,6 +368,14 @@ namespace MudServer
                         roomList = loadRooms();
                     }
 
+                    // Check to see if they are married/engaged/whatever
+                    if (rename.Spouse != "" && rename.maritalStatus > Player.MaritalStatus.Single)
+                    {
+                        Player temp = Player.LoadPlayer(rename.Spouse, 0);
+                        temp.Spouse = rename.UserName;
+                        temp.SavePlayer();
+                    }
+
                     if (isOnline(target[0]))
                     {
                         foreach (Connection c in connections)

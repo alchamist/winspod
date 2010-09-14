@@ -28,12 +28,23 @@ namespace MudServer
             Private
         }
 
+        public enum MaritalStatus
+        {
+            Single,
+            ProposedTo,
+            Engaged,
+            Married,
+            Divorced,
+            Widowed
+        }
+
         public struct privs
         {
             public bool builder;
             public bool tester;
             public bool noidle;
             public bool spod;
+            public bool minister;
         }
 
         public struct alias
@@ -89,6 +100,11 @@ namespace MudServer
         private bool        away;                                           // Is the user afk?
 
         private bool        spodChan = false;                               // Spod channel mute
+
+        private string      spouse = "";                                    // Are they engaged/married?
+        public MaritalStatus maritalStatus = MaritalStatus.Single;          // Marital status
+
+        public bool         proposer = false;                               // Were they the one to propose?
         
         #endregion
 
@@ -494,6 +510,12 @@ namespace MudServer
         {
             get { return gender; }
             set { gender = value; }
+        }
+
+        public string Spouse
+        {
+            get { return spouse; }
+            set { spouse = value; }
         }
 
         public int KickedCount
