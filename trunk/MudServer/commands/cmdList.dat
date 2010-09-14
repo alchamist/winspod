@@ -137,6 +137,7 @@
 "quit","cmdQuit",0,"system"
 "rf","cmdEmoteFriends",1,"comms"
 "rtf","cmdEmoteToFriends",1,"comms"
+"rank","cmdRank",1,"spod"
 "recap","cmdRecap",1,"player"
 "remote","cmdRemote",0,"comms"
 "remove","cmdRemove",4,"admin"
