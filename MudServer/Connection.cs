@@ -1100,15 +1100,24 @@ namespace MudServer
                     if (pPrivs.builder || pPrivs.tester)
                     {
                         output += "{bold}{yellow}Special Privs {reset}".PadRight(50, ' ') + ": {yellow}";
-                        if (pPrivs.builder) output += "builder,";
-                        if (pPrivs.tester) output += "tester,";
-                        if (pPrivs.noidle) output += "noidle ";
+                        if (pPrivs.builder) output += "[builder] ";
+                        if (pPrivs.tester) output += "[tester] ";
+                        if (pPrivs.noidle) output += "[noidle] ";
+                        if (pPrivs.spod) output += "[spod] ";
+                        if (pPrivs.minister) output += "[minster] ";
                         output = output.Remove(output.Length - 1, 1) + "{reset}\r\n";
                     }
 
                     output += "{bold}{yellow}On Channels {reset}".PadRight(50, ' ') + ": {yellow}" + getChannels(ex.UserName) + "{reset}\r\n";
                     if (ex.InformTag != "")
                         output += "{bold}{yellow}Inform Tag {reset}".PadRight(50, ' ') + ": {yellow}[" + ex.InformTag + "{reset}{yellow}]{reset}\r\n";
+
+                    output += "{bold}{yellow}Marital Status {reset}".PadRight(50, ' ') + ": {yellow}";
+                    if (ex.maritalStatus > Player.MaritalStatus.ProposedTo && ex.Spouse != "")
+                        output += ex.maritalStatus.ToString() + " to " + ex.Spouse;
+                    else
+                        output += "Single";
+                    output += "{reset}\r\n";
 
                     if (myPlayer.PlayerRank >= (int)Player.Rank.Staff)
                     {

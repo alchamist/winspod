@@ -447,6 +447,263 @@ namespace MudServer
             }
         }
 
+        public void cmdPropose(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: propose <player name>", true, false, false);
+            else
+            {
+                string[] target = matchPartial(message);
+                if (target.Length == 0)
+                    sendToUser("No such user \"" + message + "\"");
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (!isOnline(target[0]))
+                    sendToUser("User \"" + target[0] + "\" is not online", true, false, false);
+                else if (target[0].ToLower() == myPlayer.UserName.ToLower())
+                    sendToUser("Trying to get engaged to yourself, eh?", true, false, false);
+                else if (myPlayer.maritalStatus > Player.MaritalStatus.Single && myPlayer.maritalStatus < Player.MaritalStatus.Divorced)
+                    sendToUser("You're already in a relationship!", true, false, false);
+                else
+                {
+                    foreach (Connection c in connections)
+                    {
+                        if (c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                        {
+                            if (myPlayer.maritalStatus == Player.MaritalStatus.ProposedTo)
+                            {
+                                sendToUser("You already have an outstanding proposal", true, false, false);
+                            }
+                            else if (c.myPlayer.maritalStatus == Player.MaritalStatus.ProposedTo)
+                            {
+                                sendToUser(c.myPlayer.UserName + " already has an outstanding proposal", true, false, false);
+                            }
+                            else if (c.myPlayer.maritalStatus > Player.MaritalStatus.Single && c.myPlayer.maritalStatus < Player.MaritalStatus.Divorced)
+                            {
+                                sendToUser(c.myPlayer.UserName + " is already in a relationship!", true, false, false);
+                                c.sendToUser("^Y" + myPlayer.UserName + " gets down on one knee to propose, but spots your ring and changes their mind");
+                            }
+                            else
+                            {
+                                c.sendToUser(myPlayer.ColourUserName + " ^Ygets down on one knee and asks for your hand in marriage!^N");
+                                sendToUser("^YYou get down on one knee and ask for " + c.myPlayer.ColourUserName + "^Y's hand in marriage!^N");
+                                c.myPlayer.Spouse = myPlayer.UserName;
+                                myPlayer.Spouse = c.myPlayer.UserName;
+                                myPlayer.proposer = true;
+                                c.myPlayer.proposer = false;
+                                myPlayer.maritalStatus = Player.MaritalStatus.ProposedTo;
+                                c.myPlayer.maritalStatus = Player.MaritalStatus.ProposedTo;
+                                logToFile(myPlayer.UserName + " asks " + c.myPlayer.UserName + " to marry them!", "player");
+                                c.myPlayer.SavePlayer();
+                                myPlayer.SavePlayer();
+                            }
+                            return;
+                        }
+                    }
+                }
+            }
+        }
 
+        public void cmdAccept(string message)
+        {
+            if (myPlayer.maritalStatus != Player.MaritalStatus.ProposedTo || myPlayer.proposer)
+            {
+                sendToUser("You don't have any marriage offers ...", true, false, false);
+            }
+            else
+            {
+                Player p = Player.LoadPlayer(myPlayer.Spouse, 0);
+                if (p != null)
+                {
+                    p.maritalStatus = Player.MaritalStatus.Engaged;
+                    myPlayer.maritalStatus = Player.MaritalStatus.Engaged;
+                    myPlayer.SavePlayer();
+                    p.SavePlayer();
+                    sendToAll(myPlayer.UserName + " has just become net.engaged to " + p.UserName + "! Congratulations", true);
+
+                    foreach (Connection c in connections)
+                    {
+                        if (c.myPlayer != null && c.myPlayer.UserName.ToLower() == p.UserName.ToLower())
+                        {
+                            c.myPlayer = p;
+                            return;
+                        }
+                    }
+
+                    message m = new message();
+                    m.To = p.UserName;
+                    m.From = myPlayer.UserName;
+                    m.Subject = "I said yes!";
+                    m.Body = "I said yes to your marriage proposal. We are now engaged!";
+                    messages.Add(m);
+                    saveMessages();
+                }
+            }
+        }
+
+        public void cmdReject(string message)
+        {
+            if (myPlayer.maritalStatus != Player.MaritalStatus.ProposedTo || myPlayer.proposer)
+            {
+                sendToUser("You don't have any marriage offers ...", true, false, false);
+            }
+            else
+            {
+                Player p = Player.LoadPlayer(myPlayer.Spouse, 0);
+                if (p != null)
+                {
+                    sendToUser("You reject " + myPlayer.Spouse + "'s offer of marriage", true, false, false);
+                    
+                    p.Spouse = "";
+                    p.maritalStatus = Player.MaritalStatus.Single;
+                    p.SavePlayer();
+
+                    myPlayer.Spouse = "";
+                    myPlayer.maritalStatus = Player.MaritalStatus.Single;
+                    myPlayer.SavePlayer();
+                    
+
+                    foreach (Connection c in connections)
+                    {
+                        if (c.myPlayer != null && c.myPlayer.UserName.ToLower() == p.UserName.ToLower())
+                        {
+                            c.sendToUser("Sorry, " + myPlayer.UserName + " has just rejected your offer of marriage", true, false, false);
+                            c.myPlayer = p;
+                            return;
+                        }
+                    }
+
+                    message m = new message();
+                    m.To = p.UserName;
+                    m.From = myPlayer.UserName;
+                    m.Subject = "I said no!";
+                    m.Body = "I said no to your marriage proposal. Sorry";
+                    messages.Add(m);
+                    saveMessages();
+                }
+            }
+        }
+
+        public void cmdUnpropose(string message)
+        {
+            if (!myPlayer.proposer)
+                sendToUser("You haven't made any proposals ...", true, false, false);
+            else
+            {
+                Player p = Player.LoadPlayer(myPlayer.Spouse, 0);
+                if (p != null)
+                {
+
+                    p.Spouse = "";
+                    p.maritalStatus = Player.MaritalStatus.Single;
+                    p.SavePlayer();
+                    sendToUser("You recind your offer of marriage to " + p.UserName, true, false, false);
+                    foreach (Connection c in connections)
+                    {
+                        if (c.myPlayer.UserName.ToLower() == p.UserName.ToLower())
+                        {
+                            c.sendToUser(myPlayer.UserName + " has just recinded their proposal of marriage.", true, false, false);
+                            c.myPlayer = p;
+                            break;
+                        }
+                    }
+                    message m = new message();
+                    m.To = p.UserName;
+                    m.From = myPlayer.UserName;
+                    m.Subject = "It's off";
+                    m.Body = "Sorry, but I have recinded my proposal of marriage";
+                    messages.Add(m);
+                    saveMessages();
+                }
+            }
+        }
+
+        public void cmdDivorce(string message)
+        {
+            if (myPlayer.maritalStatus != Player.MaritalStatus.Married)
+                sendToUser("You're not married!", true, false, false);
+            else
+            {
+                Player p = Player.LoadPlayer(myPlayer.Spouse, 0);
+                p.maritalStatus = Player.MaritalStatus.Divorced;
+                myPlayer.maritalStatus = Player.MaritalStatus.Divorced;
+                sendToUser("You divorce " + p.UserName, true, false, false);
+                myPlayer.SavePlayer();
+                p.SavePlayer();
+
+                foreach (Connection c in connections)
+                {
+                    if (c.myPlayer != null && c.myPlayer.UserName.ToLower() == p.UserName.ToLower())
+                    {
+                        c.myPlayer = p;
+                        c.sendToUser("You have just been divorced by " + myPlayer.UserName, true, false, false);
+                        return;
+                    }
+                }
+                message m = new message();
+                m.To = p.UserName;
+                m.From = myPlayer.UserName;
+                m.Subject = "It's over";
+                m.Body = "Sorry, but I have just divorced you";
+                messages.Add(m);
+                saveMessages();
+            }
+        }
+
+        public void cmdMarry(string message)
+        {
+            if (!myPlayer.SpecialPrivs.minister)
+                sendToUser("Sorry, only ministers can use this command", true, false, false);
+            else if (message == "" || message.IndexOf(' ') == -1)
+                sendToUser("Syntax: <name 1> <name 2>", true, false, false);
+            else
+            {
+                string[] split = message.Split(new char[]{' '});
+                string[] target1 = matchPartial(split[0]);
+                string[] target2 = matchPartial(split[1]);
+                if (target1.Length == 0)
+                    sendToUser("Player \"" + split[0] + "\" not found", true, false, false);
+                else if (target2.Length == 0)
+                    sendToUser("Player \"" + split[1] + "\" not found", true, false, false);
+                else if (target1.Length > 1)
+                    sendToUser("Multiple matches found: " + target1.ToString() + " - Please use more letters", true, false, false);
+                else if (target2.Length > 1)
+                    sendToUser("Multiple matches found: " + target2.ToString() + " - Please use more letters", true, false, false);
+                else if (!isOnline(target1[0]))
+                    sendToUser(target1[0] + " is not online at the moment", true, false, false);
+                else if (!isOnline(target2[0]))
+                    sendToUser(target2[0] + " is not online at the moment", true, false, false);
+                else
+                {
+                    // Ok, so we have the users and they are online ... next step is check to see if they are engaged to each other
+                    Player t1 = Player.LoadPlayer(target1[0], 0);
+                    Player t2 = Player.LoadPlayer(target2[0], 0);
+                    if (t1.Spouse.ToLower() != t2.UserName.ToLower() || t2.Spouse.ToLower() != t1.UserName.ToLower())
+                        sendToUser(t1.UserName + " is not engaged to " + t2.UserName, true, false, false);
+                    else
+                    {
+                        t1.maritalStatus = Player.MaritalStatus.Married;
+                        t2.maritalStatus = Player.MaritalStatus.Married;
+                        sendToAll(t1.UserName + " and " + t2.UserName + " have just been joined in marriage! Congratulations", true);
+                        foreach (Connection c in connections)
+                        {
+                            if (c.myPlayer != null)
+                            {
+                                if (c.myPlayer.UserName == t1.UserName)
+                                {
+                                    c.myPlayer = t1;
+                                    c.myPlayer.SavePlayer();
+                                }
+                                else if (c.myPlayer.UserName == t2.UserName)
+                                {
+                                    c.myPlayer = t2;
+                                    c.myPlayer.SavePlayer();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
