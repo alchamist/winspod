@@ -186,6 +186,21 @@ namespace MudServer
 
         #endregion
 
+        #region sendToSpod
+
+        private void sendToSpod(string message)
+        {
+            foreach (Connection conn in connections)
+            {
+                if (conn.socket.Connected && conn.myPlayer != null && conn.myPlayer.IsSpod && !myPlayer.SpodChannelMute)
+                {
+                    conn.sendToUser("^c" + message + "{reset}");
+                }
+            }
+        }
+
+        #endregion
+
         #region sendToChannel
 
         private void sendToChannel(string channel, string message, bool nohistory)

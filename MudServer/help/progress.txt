@@ -76,3 +76,4 @@ r60 - Updated code to improve Windows based telnet output
 ^PTuesday 14th September 2010^N
 r61 - Seperated out classes for better clarity
 r62 - Added rank command
+r63 - Added spod priv and spod channel
