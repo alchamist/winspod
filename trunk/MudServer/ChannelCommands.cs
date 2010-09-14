@@ -208,6 +208,57 @@ namespace MudServer
 
         #endregion
 
+        #region Spod Channel
+
+        public void cmdPU(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: PU <message>", true, false, false);
+            else if (myPlayer.SpodChannelMute || !myPlayer.IsSpod)
+                sendToUser("You cannot send to the spod channel if you " + (myPlayer.SpodChannelMute ? "have the channel muted" : "are not a spod"), true, false, false);
+            else
+                sendToSpod("[spod] " + myPlayer.UserName + " " + sayWord(message, false) + " \"" + message + "\"");
+        }
+
+        public void cmdPT(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: PT <message>", true, false, false);
+            else if (myPlayer.SpodChannelMute || !myPlayer.IsSpod)
+                sendToUser("You cannot send to the spod channel if you " + (myPlayer.SpodChannelMute ? "have the channel muted" : "are not a spod"), true, false, false);
+            else
+                sendToSpod("[spod] " + myPlayer.UserName + " thinks o0o( " + message + " )");
+        }
+
+        public void cmdPS(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: PS <message>", true, false, false);
+            else if (myPlayer.SpodChannelMute || !myPlayer.IsSpod)
+                sendToUser("You cannot send to the spod channel if you " + (myPlayer.SpodChannelMute ? "have the channel muted" : "are not a spod"), true, false, false);
+            else
+                sendToSpod("[spod] " + myPlayer.UserName + " sings ./ " + message + " ./");
+        }
+
+        public void cmdPE(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: PE <message>", true, false, false);
+            else if (myPlayer.SpodChannelMute || !myPlayer.IsSpod)
+                sendToUser("You cannot send to the spod channel if you " + (myPlayer.SpodChannelMute ? "have the channel muted" : "are not a spod"), true, false, false);
+            else
+                sendToSpod("[spod] " + myPlayer.UserName + (message.StartsWith("'") ? "" : " ") + message);
+        }
+
+        public void cmdPM(string message)
+        {
+            sendToUser("You " + (myPlayer.SpodChannelMute ? "un" : "") + "mute the spod channel", true, false, false);
+            myPlayer.SpodChannelMute = !myPlayer.SpodChannelMute;
+        }
+
+        #endregion
+
+
         #region Club Channels Stuff
 
         public void cmdCClist(string message)

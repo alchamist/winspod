@@ -33,6 +33,7 @@ namespace MudServer
             public bool builder;
             public bool tester;
             public bool noidle;
+            public bool spod;
         }
 
         public struct alias
@@ -86,6 +87,8 @@ namespace MudServer
         private string      currentAddress;                                 // The current IP address they are logged on from
         private privs       systemprivs;                                    // The user privs
         private bool        away;                                           // Is the user afk?
+
+        private bool        spodChan = false;                               // Spod channel mute
         
         #endregion
 
@@ -581,6 +584,18 @@ namespace MudServer
         {
             get { return isAutoGit; }
             set { isAutoGit = value; }
+        }
+
+        public bool IsSpod
+        {
+            get { return systemprivs.spod; }
+            set { systemprivs.spod = value; }
+        }
+
+        public bool SpodChannelMute
+        {
+            get { return spodChan; }
+            set { spodChan = value; }
         }
 
         public bool SeeEcho

@@ -18,7 +18,7 @@ namespace MudServer
         public void cmdGrant(string message)
         {
             if (message == "" || message.IndexOf(" ") == -1)
-                sendToUser("Syntax: Grant <player> <admin/staff/guide/noidle/tester/builder>", true, false, false);
+                sendToUser("Syntax: Grant <player> <admin/staff/guide/noidle/tester/builder/spod>", true, false, false);
             else
             {
                 string[] split = message.Split(new char[] { ' ' }, 2);
@@ -27,8 +27,8 @@ namespace MudServer
                     sendToUser("Player \"" + split[0] + "\" not found", true, false, false);
                 else if (target.Length > 1)
                     sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
-                else if (target[0].ToLower() == myPlayer.UserName.ToLower())
-                    sendToUser("You cannot grant privs to yourself!", true, false, false);
+                //else if (target[0].ToLower() == myPlayer.UserName.ToLower())
+                //    sendToUser("You cannot grant privs to yourself!", true, false, false);
                 else
                 {
                     // Load a temp Player object with the player details, update, then save back
@@ -71,9 +71,9 @@ namespace MudServer
                         Player.privs p; // for changing player privs;
 
                         // We have the player object
-                        switch (split[1].Substring(0, 1).ToLower())
+                        switch (split[1].ToLower())
                         {
-                            case "a":
+                            case "admin":
                                 // Granting Admin - no need to do demote staff, as can't demote from HCAdmin
                                 if (t.PlayerRank == (int)Player.Rank.Admin)
                                     sendToUser(t.UserName + " is already an admin", true, false, false);
@@ -85,7 +85,7 @@ namespace MudServer
                                     t.PlayerRank = (int)Player.Rank.Admin;
                                 }
                                 break;
-                            case "s":
+                            case "staff":
                                 // Granting staff
                                 if (t.PlayerRank == (int)Player.Rank.Staff)
                                     sendToUser(t.UserName + " is already staff", true, false, false);
@@ -97,7 +97,7 @@ namespace MudServer
                                     t.PlayerRank = (int)Player.Rank.Staff;
                                 }
                                 break;
-                            case "g":
+                            case "guide":
                                 // Granting guide
                                 if (t.PlayerRank == (int)Player.Rank.Guide)
                                     sendToUser(t.UserName + " is already a guide", true, false, false);
@@ -109,7 +109,7 @@ namespace MudServer
                                     t.PlayerRank = (int)Player.Rank.Guide;
                                 }
                                 break;
-                            case "n":
+                            case "noidle":
                                 // Granting noidle
                                 sendToUser("You " + (t.SpecialPrivs.noidle ? "remove" : "grant") + " idle protection to " + t.UserName, true, false, false);
                                 if (online) sendToUser(myPlayer.UserName + " has " + (t.SpecialPrivs.noidle ? "removed your" : "granted you") + " idle protection", true, false, false);
@@ -118,7 +118,7 @@ namespace MudServer
                                 p.noidle = !p.noidle;
                                 t.SpecialPrivs = p;
                                 break;
-                            case "b":
+                            case "builder":
                                 // Granting builder
                                 sendToUser("You " + (t.SpecialPrivs.builder ? "remove" : "grant") + " builder privs to " + t.UserName, true, false, false);
                                 logToFile(myPlayer.UserName + " has just " + (t.SpecialPrivs.builder ? "removed" : "granted") + " builder privs to " + t.UserName, "grant");
@@ -127,7 +127,7 @@ namespace MudServer
                                 p.builder = !p.builder;
                                 t.SpecialPrivs = p;
                                 break;
-                            case "t":
+                            case "tester":
                                 // Granting builder
                                 sendToUser("You " + (t.SpecialPrivs.tester ? "remove" : "grant") + " tester privs to " + t.UserName, true, false, false);
                                 logToFile(myPlayer.UserName + " has just " + (t.SpecialPrivs.tester ? "removed" : "granted") + " tester privs to " + t.UserName, "grant");
@@ -136,8 +136,17 @@ namespace MudServer
                                 p.tester = !p.tester;
                                 t.SpecialPrivs = p;
                                 break;
+                            case "spod":
+                                // Granting spod
+                                sendToUser("You " + (t.SpecialPrivs.spod ? "remove" : "grant") + " spod privs to " + t.UserName, true, false, false);
+                                logToFile(myPlayer.UserName + " has just " + (t.SpecialPrivs.spod ? "removed" : "granted") + " spod privs to " + t.UserName, "grant");
+                                if (online) sendToUser(myPlayer.UserName + " has " + (t.SpecialPrivs.spod ? "removed your" : "granted you") + " spod privs", true, false, false);
+                                p = t.SpecialPrivs;
+                                p.spod = !p.spod;
+                                t.SpecialPrivs = p;
+                                break;
                             default:
-                                sendToUser("Syntax: Grant <player> <admin/staff/guide/noidle/tester/builder>", true, false, false);
+                                sendToUser("Syntax: Grant <player> <admin/staff/guide/noidle/tester/builder/spod>", true, false, false);
                                 break;
                         }
                         if (online)
