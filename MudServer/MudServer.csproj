@@ -65,18 +65,34 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdminCommands.cs" />
+    <Compile Include="Alias.cs" />
     <Compile Include="AnsiColour.cs" />
     <Compile Include="AppSettings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>AppSettings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Bans.cs" />
+    <Compile Include="ChannelCommands.cs" />
     <Compile Include="ClubChannel.cs" />
+    <Compile Include="CommsCommands.cs" />
     <Compile Include="Connection.cs" />
+    <Compile Include="FileMethods.cs" />
+    <Compile Include="Heartbeat.cs" />
+    <Compile Include="Mail.cs" />
+    <Compile Include="Messages.cs" />
+    <Compile Include="ObjectCommands.cs" />
+    <Compile Include="Outputs.cs" />
     <Compile Include="Player.cs" />
+    <Compile Include="PlayerInfoCommands.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Room.cs" />
+    <Compile Include="RoomCommands.cs" />
+    <Compile Include="SendCommands.cs" />
+    <Compile Include="SpodCommands.cs" />
+    <Compile Include="StaffCommands.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="files\scare.txt">
