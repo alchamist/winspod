@@ -22,6 +22,7 @@
 "agit","cmdAGit",3,"staff"
 "alias","cmdAlias",1,"player"
 "alog","cmdAlog",4,"admin"
+"annul","cmdAnnul",4,"admin"
 "away","cmdAway",0,"player"
 "barge","cmdBarge",4,"admin"
 "bug","cmdBug",1,"tester"

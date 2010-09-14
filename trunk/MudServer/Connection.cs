@@ -1114,7 +1114,7 @@ namespace MudServer
 
                     output += "{bold}{yellow}Marital Status {reset}".PadRight(50, ' ') + ": {yellow}";
                     if (ex.maritalStatus > Player.MaritalStatus.ProposedTo && ex.Spouse != "")
-                        output += ex.maritalStatus.ToString() + " to " + ex.Spouse;
+                        output += ex.maritalStatus.ToString() + (ex.maritalStatus == Player.MaritalStatus.Engaged || ex.maritalStatus == Player.MaritalStatus.Married ? " to " : (ex.maritalStatus == Player.MaritalStatus.Divorced ? " from " : " by ")) + ex.Spouse;
                     else
                         output += "Single";
                     output += "{reset}\r\n";
