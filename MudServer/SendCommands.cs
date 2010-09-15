@@ -153,6 +153,22 @@ namespace MudServer
             }
         }
 
+        private void sendToRoomExcept(string playerToExclude, string msgToOthers, string msgToSender, string msgToExcluded, string room, string sender, bool newline, bool senderPrompt, bool receiverPrompt)
+        {
+            foreach (Connection conn in connections)
+            {
+                if (conn.myPlayer != null && conn.myPlayer.UserName != "" && conn.myPlayer.UserRoom.ToLower() == room.ToLower())
+                {
+                    if (conn.myPlayer.UserName.ToLower() == sender.ToLower())
+                        conn.sendToUser(msgToSender, newline, senderPrompt, true);
+                    else if (conn.myPlayer.UserName.ToLower() == playerToExclude.ToLower())
+                        conn.sendToUser(msgToExcluded, newline, receiverPrompt, true);
+                    else
+                        conn.sendToUser(msgToOthers, newline, receiverPrompt, true);
+                }
+            }
+        }
+
         #endregion
 
         #region sendToStaff
@@ -221,6 +237,7 @@ namespace MudServer
         }
 
         #endregion
+
 
         #endregion
 

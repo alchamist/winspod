@@ -66,6 +66,7 @@
 "emote","cmdEmote",0,"comms"
 "entermsg","cmdEnterMsg",1,"player"
 "examine","cmdObjExamine",1,"player"
+"exclude","cmdExclude",1,"comms"
 "exitmsg","cmdExitMsg",1,"player"
 "exits","cmdExits",0,"room"
 "exobj","cmdExObj",1,"builder"

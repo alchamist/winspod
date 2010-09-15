@@ -301,6 +301,30 @@ namespace MudServer
             }
         }
 
+        public void cmdExclude(string message)
+        {
+            string[] split = message.Split(new char[]{' '},2);
+            if (message == "" || split.Length < 2)
+                sendToUser("Syntax: exclude <player> <message>", true, false, false);
+
+            else
+            {
+                string[] target = matchPartial(split[0]);
+                if (target.Length == 0)
+                    sendToUser("Player \"" + target + "\" not found", true, false, false);
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (target[0] == myPlayer.UserName)
+                    sendToUser("Trying to exclude yourself, eh?", true, false, false);
+                else if (Player.LoadPlayer(target[0], 0).UserRoom != myPlayer.UserRoom)
+                    sendToUser(target[0] + " is not in the same room as you ...", true, false, false);
+                else
+                {
+                    sendToRoomExcept(target[0], myPlayer.UserName + " " + sayWord(split[1], true) + " to everone except " + target[0] + " \"" + split[1] + "\"", "You " + sayWord(split[1], true) + " to everone except " + target[0] + " \"" + split[1] + "\"", myPlayer.UserName + " tells everyone in the room something about you", myPlayer.UserRoom, myPlayer.UserName, true, false, false);
+                }
+            }
+        }
+
         public void cmdTellFriends(string message)
         {
             if (message == "")
