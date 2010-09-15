@@ -84,3 +84,4 @@ r65 - Added annul command for admin
 r66 - Added some more player info stuff (facebook, twitter etc)
 r67 - Tidied up the cmd command output
 r68 - Added the exclude command
+r69 - Tidied up the cmd command to allow listing by start letter
