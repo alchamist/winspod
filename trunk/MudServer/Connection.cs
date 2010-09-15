@@ -867,16 +867,16 @@ namespace MudServer
                 }
                 cmdCat.Sort();
 
-                string fmtMsg = "[all|";
+                string fmtMsg = "[all|a-z|";
                 foreach (string c in cmdCat)
                 {
                     fmtMsg += c + "|";
                 }
                 if (fmtMsg.Length > 70)
                 {
-                    int midPoint = (int)fmtMsg.Length / 2;
-                    int midSplit = fmtMsg.IndexOf("|", midPoint);
-                    fmtMsg = fmtMsg.Substring(0, midPoint+2) + "\r\n             " + fmtMsg.Substring(midPoint+3);
+                    int midPoint = ((int)(fmtMsg.Length / 2))-1;
+                    int midSplit = fmtMsg.IndexOf("|", midPoint)+1;
+                    fmtMsg = fmtMsg.Substring(0, midSplit) + "\r\n             " + fmtMsg.Substring(midSplit);
 
                 }
 
@@ -888,7 +888,7 @@ namespace MudServer
                 List<string> cmdCat = new List<string>();
                 foreach (commands c in cmds)
                 {
-                    if ((c.helpSection == message || message == "all") && c.helpSection != "dnl")
+                    if ((c.helpSection == message || message == "all" || (message.Length == 1 && c.cmdText.ToLower().StartsWith(message.ToLower()))) && c.helpSection != "dnl")
                     {
                         cmdCat.Add(c.cmdText);
                     }
