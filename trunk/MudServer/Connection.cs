@@ -867,11 +867,21 @@ namespace MudServer
                 }
                 cmdCat.Sort();
 
-                string fmtMsg = "Format: cmd [all|";
+                string fmtMsg = "[all|";
                 foreach (string c in cmdCat)
+                {
                     fmtMsg += c + "|";
+                }
+                if (fmtMsg.Length > 70)
+                {
+                    int midPoint = (int)fmtMsg.Length / 2;
+                    int midSplit = fmtMsg.IndexOf("|", midPoint);
+                    fmtMsg = fmtMsg.Substring(0, midPoint+2) + "\r\n             " + fmtMsg.Substring(midPoint+3);
+
+                }
+
                 fmtMsg = fmtMsg.Remove(fmtMsg.Length - 1) + "]";
-                sendToUser(fmtMsg, true, false, false);
+                sendToUser("Format: cmd " + fmtMsg, true, false, false);
             }
             else
             {
@@ -894,6 +904,7 @@ namespace MudServer
                     foreach (string c in cmdCat)
                         output += c + ", ";
                     output = output.Remove(output.Length - 2) + ".\r\n" + line;
+                    output += "\r\n" + centerText("There are " + cmdCat.Count.ToString() + " commands available for " + message) + "\r\n" + line;
                     sendToUser(output, true, false, false);
                 }
                 else
