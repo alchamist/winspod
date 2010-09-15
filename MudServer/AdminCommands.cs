@@ -577,6 +577,47 @@ namespace MudServer
             Server.Restart();
         }
 
+        public void cmdCreatePlayer(string message)
+        {
+            string[] split = message.Split(' ');
+            if (message == "" || split.Length < 2)
+            {
+                sendToUser("Syntax: pcreate <username> <password> [e-mail address]", true, false, false);
+            }
+            else if (split.Length == 3 && !testEmailRegex(split[2]))
+            {
+                sendToUser("Sorry, \"" + split[2] + "\" is not a valid e-mail address", true, false, false);
+            }
+            else if (NameIsBanned(split[0]) && myPlayer.PlayerRank < (int)Player.Rank.Admin)
+            {
+                sendToUser("Sorry, that name is banned", true, false, false);
+            }
+            else if (Regex.Replace(split[0], @"\W*", "") != split[0])
+            {
+                sendToUser("Sorry, only alphanumerc characters allowed in usernames", true, false, false);
+            }
+            else if (matchPartial(split[0]).Length > 0)
+            {
+                sendToUser("Sorry, that name (or similar) is already in use!", true, false, false);
+            }
+            else
+            {
+                // Should be good to go
+                Player newPlayer = new Player();
+                newPlayer.UserName = split[0];
+                newPlayer.Password = split[1];
+                if (split.Length == 3)
+                    newPlayer.EmailAddress = split[2];
+                newPlayer.ResBy = myPlayer.UserName;
+                newPlayer.ResDate = DateTime.Now;
+                newPlayer.Title = "is a newbie, be nice!";
+                newPlayer.PlayerRank = (int)Player.Rank.Member;
+                newPlayer.SavePlayer();
+                myPlayer.ResCount++;
+                sendToUser("Player \"" + newPlayer.UserName + "\" successfully created", true, false, false);
+            }
+        }
+
         #endregion
 
     }

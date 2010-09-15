@@ -280,19 +280,24 @@ namespace MudServer
         private string formatTime(TimeSpan time)
         {
             string ret = "";
-            if (time.Days > 365)
-                ret = ((int)(time.Days / 365.25)).ToString() + " years, ";
-            if (time.Days > 0)
-                ret += ((int)time.Days % 365.25).ToString() + " days, ";
-            if (time.Hours > 0 || time.Days > 0)
-                ret += time.Hours.ToString() + " hours, ";
-            if (time.Minutes > 0 || time.Days > 0 || time.Hours > 0)
-                ret += time.Minutes.ToString() + " minutes ";
-            if (time.Seconds > 0)
+            if (time.TotalSeconds == 0)
+                ret = "0 seconds";
+            else
             {
-                if (ret != "")
-                    ret += "and ";
-                ret += time.Seconds.ToString() + " seconds";
+                if (time.Days > 365)
+                    ret = ((int)(time.Days / 365.25)).ToString() + " year" + (Math.Floor((double)time.Days / 365) > 1 ? "s" : "") + ", ";
+                if (time.Days > 0)
+                    ret += ((int)time.Days % 365.25).ToString() + " day" + (time.Days > 1 ? "s" : "") + ", ";
+                if (time.Hours > 0 || time.Days > 0)
+                    ret += time.Hours.ToString() + " hour" + (time.Hours > 1 ? "s" : "") + ", ";
+                if (time.Minutes > 0 || time.Days > 0 || time.Hours > 0)
+                    ret += time.Minutes.ToString() + " minute" + (time.Minutes > 0 ? "s " : " ");
+                if (time.Seconds > 0)
+                {
+                    if (ret != "")
+                        ret += "and ";
+                    ret += time.Seconds.ToString() + " second" + (time.Seconds > 1 ? "s" : "");
+                }
             }
             return ret;
         }

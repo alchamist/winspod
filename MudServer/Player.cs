@@ -76,6 +76,12 @@ namespace MudServer
             public bool wielded;
         }
 
+        public struct favourite
+        {
+            public string type;
+            public string value;
+        }
+
         #region attributes
 
         private string      username;                                       // Players username
@@ -132,12 +138,17 @@ namespace MudServer
         private string      msn = "";                                       // Their MSN ID
         private string      yahoo = "";                                     // Their Yahoo ID
         private string      skype = "";                                     // Their Skype ID
+        private string      facebook = "";                                  // Their facebook Page
+        private string      twitter = "";                                   // Their twitter id ... tweet from talker?
+
         private DateTime    dateOfBirth;                                    // Their DOB
         private string      homeURL = "";                                   // Their home URL
         private string      workURL = "";                                   // Their work URL
         private string      occupation = "";                                // Their occupation
         private string      hometown = "";                                  // Their home town
         private int         jetlag;                                         // Their time difference
+
+        public List<favourite> favourites = new List<favourite>(3);         // Their favourites ... 
 
         #endregion
 
@@ -468,6 +479,18 @@ namespace MudServer
         {
             get { return skype; }
             set { skype = value; }
+        }
+
+        public string FacebookPage
+        {
+            get { return facebook; }
+            set { facebook = value; }
+        }
+
+        public string Twitter
+        {
+            get { return twitter; }
+            set { twitter = value; }
         }
 
         public string HomeURL
@@ -829,6 +852,14 @@ namespace MudServer
             {
                 load = new Player();
                 load.NewPlayer = true;
+            }
+            if (load.favourites.Count < 3)
+            {
+                favourite f = new favourite();
+                f.type = "";
+                f.value = "";
+                for (int i = load.favourites.Count; i < 3; i++)
+                    load.favourites.Add(f);
             }
             
             return load;

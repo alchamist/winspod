@@ -39,7 +39,6 @@ namespace MudServer
             }
         }
 
-
         public void cmdWall(string message)
         {
             if (message == "")
@@ -116,7 +115,6 @@ namespace MudServer
             }
         }
 
-
         public void cmdRes(string message)
         {
             if (message == "")
@@ -158,7 +156,6 @@ namespace MudServer
                 }
             }
         }
-
 
         public void cmdPBlank(string message)
         {
@@ -280,7 +277,6 @@ namespace MudServer
             }
         }
 
-
         public void cmdRename(string message)
         {
             if (message == "" || message.IndexOf(" ") == -1)
@@ -393,7 +389,6 @@ namespace MudServer
             }
         }
 
-
         public void cmdRecap(string message)
         {
             if (message == "")
@@ -452,7 +447,6 @@ namespace MudServer
                 }
             }
         }
-
 
         public void cmdBump(string message)
         {
@@ -601,7 +595,6 @@ namespace MudServer
             }
             sendToUser(headerLine("Last") + "\r\n" + output + footerLine(), true, false, false);
         }
-
 
         public void cmdSlap(string message)
         {
@@ -909,7 +902,6 @@ namespace MudServer
             }
         }
 
-
         public void cmdSilence(string message)
         {
             if (message == "")
@@ -960,7 +952,6 @@ namespace MudServer
                 }
             }
         }
-
 
         public void cmdMuteList(string message)
         {
