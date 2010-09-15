@@ -1077,7 +1077,17 @@ namespace MudServer
                         output += "{bold}{magenta}Home URL {reset}".PadRight(51, ' ') + ": {magenta}" + ex.HomeURL + "{reset}\r\n";
                     if (ex.WorkURL != "")
                         output += "{bold}{magenta}Work URL {reset}".PadRight(51, ' ') + ": {magenta}" + ex.WorkURL + "{reset}\r\n";
+                    if (ex.FacebookPage != "")
+                        output += "{bold}{magenta}Facebook Page {reset}".PadRight(51, ' ') + ": {magenta}" + ex.FacebookPage + "{reset}\r\n";
+                    if (ex.Twitter != "")
+                        output += "{bold}{magenta}Twitter ID {reset}".PadRight(51, ' ') + ": {magenta}" + ex.Twitter + "{reset}\r\n";
 
+                    for (int i = 0; i < ex.favourites.Count; i++)
+                    {
+                        if (ex.favourites[i].value != "" && ex.favourites[i].type != "")
+                            output += ("{bold}{magenta}Favourite " + ex.favourites[i].type + " {reset}").PadRight(51, ' ') + ": {magenta}" + ex.favourites[i].value + "{reset}\r\n";
+                    }
+                    
                     if (ex.RealName != "")
                         output += "{bold}{cyan}IRL Name {reset}".PadRight(48, ' ') + ": {cyan}" + ex.RealName + "{reset}\r\n";
                     if (ex.DateOfBirth != DateTime.MinValue)

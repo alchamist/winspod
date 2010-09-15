@@ -10,8 +10,9 @@ namespace MudServer
 
         public void cmdSet(string message)
         {
+            string syntax = "Syntax: set <info> <value>\r\n" + footerLine() + "\r\n^YAvailable info settings:^N\r\n\r\n jabber, icq, msn, yahoo, skype, email, hUrl, wUrl, irl, occ, home, jetlag, favourite, facebook, twitter\r\n" + footerLine();
             if (message == "")
-                sendToUser("Syntax: set <jabber/icq/msn/yahoo/skype/email/hUrl/wUrl/irl/occ/home/jetlag> <value>", true, false, false);
+                sendToUser(syntax, true, false, false);
             else
             {
                 // Split the input to see if we are setting or blanking
@@ -97,8 +98,59 @@ namespace MudServer
                         else
                             sendToUser("Maximum jetlag is +/- 12 hours", true, false, false);
                         break;
+                    case "facebook":
+                        if (split.Length > 1 && split[1].ToLower().IndexOf("facebook.com") == -1)
+                            sendToUser("Sorry, that is not a facebook url!", true, false, false);
+                        else
+                        {
+                            myPlayer.FacebookPage = (split.Length > 1 ? split[1] : "");
+                            sendToUser(split.Length > 1 ? "You set your Facebook page to " + split[1] : "You blank your Facebook Page", true, false, false);
+                        }
+                        break;
+                    case "twitter":
+                        myPlayer.Twitter = (split.Length > 1 ? split[1] : "");
+                        sendToUser(split.Length > 1 ? "You set your Twitter ID to " + split[1] : "You blank your Twitter ID", true, false, false);
+                        break;
+                    case "favourite":
+                        if (split.Length > 1)
+                        {
+                            int fav = 0;
+                            string[] favSplit = split[1].Split(' ');
+                            if (int.TryParse(favSplit[0], out fav))
+                            {
+                                if (fav < 1 || fav > 3)
+                                    sendToUser("Syntax: set favourite <1-3> <favorite type> <value>");
+                                else
+                                {
+                                    if (favSplit.Length == 3)
+                                    {
+                                        Player.favourite f = new Player.favourite();
+                                        f.type = favSplit[1];
+                                        f.value = favSplit[2];
+
+                                        myPlayer.favourites[fav-1] = f;
+                                        sendToUser("You set your favourite " + f.type + " to be " + f.value, true, false, false);
+                                    }
+                                    else
+                                    {
+                                        Player.favourite f = new Player.favourite();
+                                        f.type = "";
+                                        f.value = "";
+                                        myPlayer.favourites[fav-1] = f;
+                                        sendToUser("You blank your favourite number " + fav.ToString(), true, false, false);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                sendToUser("Syntax: set favourite <1-3> <favorite type> <value>");
+                            }
+                        }
+                        else
+                            sendToUser("Syntax: set favourite <1-3> <favorite type> <value>");
+                        break;
                     default:
-                        sendToUser("Syntax: set <jabber/icq/msn/yahoo/skype/hUrl/wUrl/irl/occ/home/jetlag> <value>", true, false, false);
+                        sendToUser(syntax, true, false, false);
                         break;
                 }
                 myPlayer.SavePlayer();
@@ -196,7 +248,6 @@ namespace MudServer
             }
         }
 
-
         public void cmdTitle(string message)
         {
             if (message == "" || AnsiColour.Colorise(message, true) == "")
@@ -217,7 +268,6 @@ namespace MudServer
                 }
             }
         }
-
 
         public void cmdLogonMsg(string message)
         {
@@ -291,7 +341,6 @@ namespace MudServer
             }
         }
 
-
         public void cmdDescription(string message)
         {
             if (message == "")
@@ -340,7 +389,6 @@ namespace MudServer
                 sendToUser("You set your tagline to: " + myPlayer.Tagline, true, false, false);
             }
         }
-
 
         public void cmdColour(string message)
         {
@@ -408,7 +456,6 @@ namespace MudServer
                 }
             }
         }
-
 
         public void cmdHChime(string message)
         {

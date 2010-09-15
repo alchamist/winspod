@@ -135,6 +135,7 @@
 "pm","cmdPM",1,"spod"
 "password","cmdPassword",1,"player"
 "pblank","cmdPBlank",3,"staff"
+"pcreate","cmdCreatePlayer",3,"staff"
 "pick","cmdPick",1,"player"
 "pinfo","cmdPinfo",1,"player"
 "play","cmdPlay",1,"player"
