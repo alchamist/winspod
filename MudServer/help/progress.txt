@@ -79,4 +79,7 @@ r62 - Added rank command
 r63 - Added spod priv and spod channel
 r64 - Added minister rank and marital status stuff
 r65 - Added annul command for admin
+
+^PWednesday 15th September 2010^N
 r66 - Added some more player info stuff (facebook, twitter etc)
+r67 - Tidied up the cmd command output
