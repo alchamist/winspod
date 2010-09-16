@@ -1,0 +1,58 @@
+﻿body
+{
+	background-color:#E7E4D3;
+	margin:0px;
+	padding:0px;
+	font-family: tahoma;
+	font-size: 12px;
+}
+
+.onlinelist
+{
+	font-family: tahoma;
+	font-size: 12px;
+	border: solid 1px #000000;
+	background-color: white;
+}
+
+.onlinelist_header
+{
+    font-weight: bold;
+}
+
+tr.rank5 td
+{
+    background-color: cyan;
+    background: cyan;
+    
+}
+
+.title
+{
+    color: #ff0000;
+}
+
+span.rank5
+{
+	color: cyan;
+}
+
+span.rank4
+{
+    color: red;
+}
+
+span.rank3
+{
+    color: magenta;
+}
+
+span.rank2
+{
+    color: green;
+}
+
+span.rank1
+{
+    color: white;
+}
