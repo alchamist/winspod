@@ -96,17 +96,18 @@ namespace MudServer
 
 
         static object               BigLock = new object();
-        Socket                      socket;
+        public Socket                      socket;
         public StreamReader         Reader;
         public StreamWriter         Writer;
-        static ArrayList            connections = new ArrayList();
+        public static ArrayList     connections = new ArrayList();
         private int                 myNum;
-        private int                 myState = 0; // 0 = new connection, 1 = username supplied, 2 = new player, 3 = password supplied, 4 = active
-        private Player              myPlayer;
+        public int                  myState = 0; // 0 = new connection, 1 = username supplied, 2 = new player, 3 = password supplied, 4 = active
+        public Player               myPlayer;
         private string              connPoint;
         private ArrayList           cmds = new ArrayList();
         public string               lastSent;
         public createUser           newUser = new createUser();
+        public DateTime             connectTime = DateTime.Now; // used for tracking how long they have been at the prompt ...
 
         private byte[]              echoOff = new byte[] { 0xFF, 0xFB, 0x01 };
         private byte[]              echoOn = new byte[] { 0xFF, 0xFC, 0x01 };
@@ -2108,7 +2109,7 @@ namespace MudServer
         {
             foreach (Connection c in connections)
             {
-                if (myPlayer!=null && c.myPlayer.UserName != myPlayer.UserName && c.myPlayer != null)
+                if (c.socket.Connected && myPlayer != null && c.myPlayer != null && c.myPlayer.UserName != myPlayer.UserName && c.myState >= 10)
                 {
                     if (c.myPlayer.InformFor(myPlayer.UserName))
                     {

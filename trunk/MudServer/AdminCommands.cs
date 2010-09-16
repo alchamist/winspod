@@ -17,8 +17,9 @@ namespace MudServer
 
         public void cmdGrant(string message)
         {
+            string syntax = "Syntax: Grant <player> <admin/staff/guide/noidle/tester/builder/spod/minister>";
             if (message == "" || message.IndexOf(" ") == -1)
-                sendToUser("Syntax: Grant <player> <admin/staff/guide/noidle/tester/builder/spod/minister>", true, false, false);
+                sendToUser(syntax, true, false, false);
             else
             {
                 string[] split = message.Split(new char[] { ' ' }, 2);
@@ -155,7 +156,7 @@ namespace MudServer
                                 t.SpecialPrivs = p;
                                 break;
                             default:
-                                sendToUser("Syntax: Grant <player> <admin/staff/guide/noidle/tester/builder/spod/minister>", true, false, false);
+                                sendToUser(syntax, true, false, false);
                                 break;
                         }
                         if (online)

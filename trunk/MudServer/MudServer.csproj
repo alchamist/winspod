@@ -93,6 +93,7 @@
     <Compile Include="SendCommands.cs" />
     <Compile Include="SpodCommands.cs" />
     <Compile Include="StaffCommands.cs" />
+    <Compile Include="webserver\webserver.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="files\scare.txt">
@@ -273,6 +274,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="help\version.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="webserver\style.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="webserver\who.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="webserver\index.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

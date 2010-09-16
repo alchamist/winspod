@@ -789,9 +789,9 @@ namespace MudServer
         }
 
 
-        private string getChannels(string username)
+        public static string getChannels(string username)
         {
-            clubChannels = ClubChannel.LoadAllChannels();
+            List<ClubChannel>clubChannels = ClubChannel.LoadAllChannels();
 
             string ret = "";
             foreach (ClubChannel c in clubChannels)
