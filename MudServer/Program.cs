@@ -41,6 +41,12 @@ namespace MudServer
 
             socketThread = new Thread(new ThreadStart(Startup));
             socketThread.Start();
+
+            if (AppSettings.Default.HTTPEnabled && HttpListener.IsSupported || 1 == 1)
+            {
+                new webserver();
+            }
+
             //sysargs = args;
             //Version vrs = Assembly.GetExecutingAssembly().GetName().Version;
             //Console.WriteLine("[" + DateTime.Now.ToShortTimeString() + "] Winspod II " + vrs.ToString());

@@ -38,5 +38,11 @@
     <Setting Name="LockLevel" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
+    <Setting Name="HTTPEnabled" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="HTTPPort" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">4001</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

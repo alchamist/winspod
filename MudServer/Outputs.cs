@@ -23,7 +23,7 @@ namespace MudServer
             return text.PadLeft((40 + (text.Length / 2)), ' ');
         }
 
-        private string rankName(int rank)
+        public static string rankName(int rank)
         {
             switch (rank)
             {
@@ -177,7 +177,7 @@ namespace MudServer
             return pNames.ToArray();
         }
 
-        private bool isOnline(string username)
+        public static bool isOnline(string username)
         {
             bool found = false;
             foreach (Connection c in connections)
@@ -277,7 +277,7 @@ namespace MudServer
             return ret;
         }
 
-        private string formatTime(TimeSpan time)
+        public static string formatTime(TimeSpan time)
         {
             string ret = "";
             if (time.TotalSeconds == 0)
@@ -302,7 +302,7 @@ namespace MudServer
             return ret;
         }
 
-        private string formatTimeNoZeros(TimeSpan ts)
+        public static string formatTimeNoZeros(TimeSpan ts)
         {
             string output = "";
             if (ts.Days > 0)

@@ -10,6 +10,11 @@ namespace MudServer
 
         void heartbeat_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
+            if ((myPlayer == null || myState <= 4) && connectTime.AddMinutes(10) <= DateTime.Now)
+            {
+                socket.Close();
+                return;
+            }
             if (myPlayer != null)
             {
                 if (myPlayer.HourlyChime && DateTime.Now.Minute == 0 && DateTime.Now.Hour != lastHChimeHour && !myPlayer.InEditor)

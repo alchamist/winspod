@@ -21,7 +21,7 @@ namespace MudServer
         {
             foreach (Connection conn in connections)
             {
-                if (conn.socket.Connected && conn.myPlayer != null)
+                if (conn.socket.Connected && conn.myPlayer != null && conn.myState >= 10)
                 {
                     try
                     {
@@ -140,7 +140,7 @@ namespace MudServer
         {
             foreach (Connection conn in connections)
             {
-                if (conn.myPlayer != null && conn.myPlayer.UserName != sender && conn.myPlayer.UserRoom == room && !conn.myPlayer.InEditor && conn.myPlayer.CanHear(sender))
+                if (conn.myPlayer != null && conn.myState >= 10 && conn.myPlayer.UserName != sender && conn.myPlayer.UserRoom == room && !conn.myPlayer.InEditor && conn.myPlayer.CanHear(sender))
                 {
                     //sendToUser(msgToOthers, conn.myPlayer.UserName, newline, conn.myPlayer.DoColour, receiverPrompt, true);
                     conn.sendToUser(msgToOthers, newline, receiverPrompt, true);
@@ -157,7 +157,7 @@ namespace MudServer
         {
             foreach (Connection conn in connections)
             {
-                if (conn.myPlayer != null && conn.myPlayer.UserName != "" && conn.myPlayer.UserRoom.ToLower() == room.ToLower())
+                if (conn.myPlayer != null && conn.myState >= 10 && conn.myPlayer.UserName != "" && conn.myPlayer.UserRoom.ToLower() == room.ToLower())
                 {
                     if (conn.myPlayer.UserName.ToLower() == sender.ToLower())
                         conn.sendToUser(msgToSender, newline, senderPrompt, true);
@@ -177,7 +177,7 @@ namespace MudServer
         {
             foreach (Connection conn in connections)
             {
-                if (conn.socket.Connected && conn.myPlayer != null && conn.myPlayer.PlayerRank >= rank && myPlayer.onStaffChannel((Player.Rank)rank) && !conn.myPlayer.InEditor && conn.myPlayer.CanHear(myPlayer.UserName))
+                if (conn.socket.Connected && conn.myState >= 10 && conn.myPlayer != null && conn.myPlayer.PlayerRank >= rank && myPlayer.onStaffChannel((Player.Rank)rank) && !conn.myPlayer.InEditor && conn.myPlayer.CanHear(myPlayer.UserName))
                 {
                     string col = null;
                     switch (rank)
@@ -208,7 +208,7 @@ namespace MudServer
         {
             foreach (Connection conn in connections)
             {
-                if (conn.socket.Connected && conn.myPlayer != null && conn.myPlayer.IsSpod && !myPlayer.SpodChannelMute)
+                if (conn.socket.Connected && conn.myState >= 10 && conn.myPlayer != null && conn.myPlayer.IsSpod && !myPlayer.SpodChannelMute)
                 {
                     conn.sendToUser("^c" + message + "{reset}");
                 }
@@ -228,7 +228,7 @@ namespace MudServer
             {
                 foreach (Connection c in connections)
                 {
-                    if (c.socket.Connected && c.myPlayer != null && chan.OnChannel(c.myPlayer.UserName) && !c.myPlayer.ClubChannelMute && !c.myPlayer.InEditor)
+                    if (c.socket.Connected && c.myState >= 10 && c.myPlayer != null && chan.OnChannel(c.myPlayer.UserName) && !c.myPlayer.ClubChannelMute && !c.myPlayer.InEditor)
                     {
                         sendToUser(chan.FormatMessage(message), true, c.myPlayer.UserName != myPlayer.UserName, nohistory);
                     }
