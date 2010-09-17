@@ -261,6 +261,7 @@ namespace MudServer
                 logConnection(myPlayer.UserName, myPlayer.CurrentIP, DateTime.Now);
 
             myPlayer = null;
+            myState = -1;
             Console.WriteLine("[" + DateTime.Now.ToShortTimeString() + "] Disconnect: " + connPoint);
             connections.Remove(this);
 

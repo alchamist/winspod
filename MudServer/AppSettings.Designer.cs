@@ -190,5 +190,29 @@ namespace MudServer {
                 this["HTTPPort"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("sitback.dyndns.org")]
+        public string TalkerAddress {
+            get {
+                return ((string)(this["TalkerAddress"]));
+            }
+            set {
+                this["TalkerAddress"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("homelands@sitback.dyndns.org")]
+        public string TalkerEmail {
+            get {
+                return ((string)(this["TalkerEmail"]));
+            }
+            set {
+                this["TalkerEmail"] = value;
+            }
+        }
     }
 }

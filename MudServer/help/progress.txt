@@ -89,3 +89,6 @@ r69 - Tidied up the cmd command to allow listing by start letter
 ^PThursday 16th September 2010^N
 r70 - Added basic webserver with who is online and player bio
 r71 - Corrected svn error with files
+
+^PFriday 17th September 2010^N
+r72 - Fixed bugs found in testing. Added more funtion to webserver

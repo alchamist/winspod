@@ -142,7 +142,8 @@ namespace MudServer
 
         private string[] matchPartial(string name)
         {
-            string source = @"players/";
+            //string source = @"players/";
+            string source = Path.Combine(Server.userFilePath, "players");
             List<string> pNames = new List<string>();
 
             if (pNames.Count == 0)
@@ -151,9 +152,9 @@ namespace MudServer
                 {
                     string[] dirs = Directory.GetDirectories(source);
 
-                    foreach (string subdir in dirs)
-                    {
-                        string[] fNames = Directory.GetFiles(@subdir);
+                    //foreach (string subdir in dirs)
+                    //{
+                        string[] fNames = Directory.GetFiles(@source);
                         foreach (string n in fNames)
                         {
                             string fn = Path.GetFileNameWithoutExtension(n);
@@ -164,13 +165,13 @@ namespace MudServer
                                     pNames.Add(p.UserName);
                             }
                         }
-                    }
+                    //}
                 }
             }
 
             foreach (Connection c in connections)
             {
-                if (c.socket.Connected && c.myPlayer != null && c.myPlayer != null && pNames.IndexOf(c.myPlayer.UserName) < 0 && c.myPlayer.UserName.ToLower().StartsWith(name.ToLower()))
+                if (c.socket.Connected && c.myState > 4 && c.myPlayer != null && pNames.IndexOf(c.myPlayer.UserName) < 0 && c.myPlayer.UserName.ToLower().StartsWith(name.ToLower()))
                     pNames.Add(c.myPlayer.UserName);
             }
 

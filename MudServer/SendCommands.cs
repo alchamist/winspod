@@ -230,7 +230,7 @@ namespace MudServer
                 {
                     if (c.socket.Connected && c.myState >= 10 && c.myPlayer != null && chan.OnChannel(c.myPlayer.UserName) && !c.myPlayer.ClubChannelMute && !c.myPlayer.InEditor)
                     {
-                        sendToUser(chan.FormatMessage(message), true, c.myPlayer.UserName != myPlayer.UserName, nohistory);
+                        c.sendToUser(chan.FormatMessage(message), true, c.myPlayer.UserName != myPlayer.UserName, nohistory);
                     }
                 }
             }

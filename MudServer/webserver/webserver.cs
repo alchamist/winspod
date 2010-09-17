@@ -31,12 +31,14 @@ namespace MudServer
             header += "\r\n  </head>";
             header += "\r\n  <body>";
             header += "\r\n    <div style='margin-top: 5px; margin-bottom: 20px; width: 765px; margin-left: auto; margin-right: auto; background-color: #ffffff; border: solid 1px #000000; padding: 2px 0px 2px 0px; text-align: center;'>";
-            header += "\r\n    <h1 class='title'>" + AppSettings.Default.TalkerName + "</h1>";
+            header += "\r\n    <h1 class='title'><a href='/'>" + AppSettings.Default.TalkerName + "</a></h1>";
+            header += "\r\n    [ <a href='/'>Home</a> | <a href='/who.html'>Who's online</a> | <a href='/spods.html'>Top Spods</a> | <a href='connect.html'>Connect</a> | <a href='contact.html'>Contact</a> ]<br><br>";
             header += "\r\n    </div>";
             header += "\r\n\r\n";
 
 
-            footer = "\r\n\r\n  <br><br><hr><center>Powered by <a href = 'http://code.google.com/p/winspod/'>Winspod II</a> - Copyright (C) 2001 - " + DateTime.Now.Year.ToString() + " Jay Eames</center>";
+            footer = "\r\n\r\n  <br><br><hr><center>Powered by <a href = 'http://code.google.com/p/winspod/'>Winspod II</a> - Copyright (C) 2001 - " + DateTime.Now.Year.ToString() + " Jay Eames";
+            footer += "<br><a href='telnet:" + AppSettings.Default.TalkerAddress + ":" + AppSettings.Default.Port.ToString() + "'>Connect to " + AppSettings.Default.TalkerName + "</a></center><br><br>";
             footer += "\r\n  </body>";
             footer += "\r\n</html>";
 
@@ -82,6 +84,13 @@ namespace MudServer
                     string file = File.ReadAllText(path);
 
                     file = file.Replace("{ONLINE_LIST}", GetOnlineList());
+                    file = file.Replace("{TALKER_NAME}", AppSettings.Default.TalkerName);
+                    file = file.Replace("{TALKER_ADDRESS}", AppSettings.Default.TalkerAddress);
+                    file = file.Replace("{TALKER_PORT}", AppSettings.Default.Port.ToString());
+                    file = file.Replace("{TALKER_EMAIL}", AppSettings.Default.TalkerEmail.ToString());
+                    file = file.Replace("{ONLINE_COUNT}", GetOnlineCount());
+                    file = file.Replace("{TOP_RANKS}", GetTopRankedList());
+                    
 
                     if (Path.GetExtension(path) != ".css")
                         msg = Encoding.UTF8.GetBytes(header + file + footer);
@@ -118,6 +127,56 @@ namespace MudServer
             }
             ret = (ret == "" ? "<table class='onlinelist'><tr><td>There are no players currently online</td></tr></table>" : ret + "\r\n<tr><td colspan=5><center>There " + (playerCount == 1 ? "is " :  "are ") + playerCount.ToString() + " user" + (playerCount==1 ? "" : "s") + " online</td></tr>\r\n</table>");
             return AnsiColour.Colorise(ret, true);
+        }
+
+        private string GetOnlineCount()
+        {
+            int count = 0;
+            foreach (Connection c in Connection.connections)
+            {
+                if (c.socket.Connected && c.myPlayer != null && c.myState >= 4 && !(c.myPlayer.PlayerRank >= (int)Player.Rank.Admin && c.myPlayer.Invisible))
+                {
+                    count++;
+                }
+            }
+            return (count == 0 ? "No users" : count.ToString() + " user" + (count > 1 ? "s" : ""));
+        }
+
+        private string GetTopRankedList()
+        {
+            List<Player> playerList = getPlayers();
+            string output = "";
+
+            playerList.Sort(delegate(Player p1, Player p2) { return p2.TotalOnlineTime.CompareTo(p1.TotalOnlineTime); });
+
+            int max = (playerList.Count > 20 ? 20 : playerList.Count);
+            for (int i = 0; i < max; i++)
+            {
+                output += "<tr><td><span style='color: blue'>" + (i + 1).ToString() + "</span></td><td><a href='player/" + playerList[i].UserName + "'>" + playerList[i].UserName + "</a> <span style='color: green;'>with</span> " + Connection.formatTime(TimeSpan.FromSeconds(playerList[i].TotalOnlineTime)) + "</td></tr>\r\n";
+            }
+            if (output == "")
+                output = "<tr><td colspan=2>No players found</td></tr>\r\n";
+
+            return "<table cellpadding=2 class='onlinelist'><tr><td>Rank</td><td>Player</td></tr>\r\n" + output + "</table>";
+        }
+
+        private List<Player> getPlayers()
+        {
+            List<Player> list = new List<Player>();
+            string path = Path.Combine(Server.userFilePath, (@"players" + Path.DirectorySeparatorChar));
+            DirectoryInfo di = new DirectoryInfo(path);
+            DirectoryInfo[] subs = di.GetDirectories();
+            //foreach (DirectoryInfo dir in subs)
+            //{
+            FileInfo[] fi = di.GetFiles();
+            foreach (FileInfo file in fi)
+            {
+                Player load = Player.LoadPlayer(file.Name.Replace(".xml", ""), 0);
+                //if (load != null && ((staffOnly && load.PlayerRank >= (int)Player.Rank.Guide) || (builderOnly && load.SpecialPrivs.builder) || (testerOnly && load.SpecialPrivs.tester) || (gitsOnly && (load.Git || load.AutoGit))) || (!staffOnly && !builderOnly && !testerOnly && !gitsOnly))
+                    list.Add(load);
+            }
+            //}
+            return list;
         }
 
         private string GetPlayerInfo(Player ex)
