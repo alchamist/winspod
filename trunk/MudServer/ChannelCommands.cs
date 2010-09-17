@@ -463,7 +463,7 @@ namespace MudServer
                                 {
                                     sendToUser("Player \"" + target[0] + "\" removed from channel \"" + c.Name + "\"", true, false, false);
                                     if (isOnline(target[0]))
-                                        sendToUser("You have been removed from channel \"" + c.Name + "\"", true, true, false);
+                                        sendToUser("You have been removed from channel \"" + c.Name + "\"", target[0], true, false, true, false);
 
                                     c.RemovePlayer(target[0]);
                                     c.SaveChannel();
@@ -472,7 +472,7 @@ namespace MudServer
                                 {
                                     sendToUser("Player \"" + target[0] + "\" added to channel \"" + c.Name + "\"", true, false, false);
                                     if (isOnline(target[0]))
-                                        sendToUser("You have been added to channel \"" + c.Name + "\"", true, true, false);
+                                        sendToUser("You have been added to channel \"" + c.Name + "\"", target[0], true, false, true, false);
 
                                     c.AddPlayer(target[0]);
                                     c.SaveChannel();

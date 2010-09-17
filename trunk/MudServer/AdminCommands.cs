@@ -113,7 +113,7 @@ namespace MudServer
                             case "noidle":
                                 // Granting noidle
                                 sendToUser("You " + (t.SpecialPrivs.noidle ? "remove" : "grant") + " idle protection to " + t.UserName, true, false, false);
-                                if (online) sendToUser(myPlayer.UserName + " has " + (t.SpecialPrivs.noidle ? "removed your" : "granted you") + " idle protection", true, false, false);
+                                if (online) sendToUser(myPlayer.UserName + " has " + (t.SpecialPrivs.noidle ? "removed your" : "granted you") + " idle protection", t.UserName, true, t.DoColour, false, false);
                                 logToFile(myPlayer.UserName + " has just " + (t.SpecialPrivs.noidle ? "removed" : "granted") + " idle protection to " + t.UserName, "grant");
                                 p = t.SpecialPrivs;
                                 p.noidle = !p.noidle;
@@ -123,7 +123,7 @@ namespace MudServer
                                 // Granting builder
                                 sendToUser("You " + (t.SpecialPrivs.builder ? "remove" : "grant") + " builder privs to " + t.UserName, true, false, false);
                                 logToFile(myPlayer.UserName + " has just " + (t.SpecialPrivs.builder ? "removed" : "granted") + " builder privs to " + t.UserName, "grant");
-                                if (online) sendToUser(myPlayer.UserName + " has " + (t.SpecialPrivs.builder ? "removed your" : "granted you") + " builder privs", true, false, false);
+                                if (online) sendToUser(myPlayer.UserName + " has " + (t.SpecialPrivs.builder ? "removed your" : "granted you") + " builder privs", t.UserName, true, t.DoColour, false, false);
                                 p = t.SpecialPrivs;
                                 p.builder = !p.builder;
                                 t.SpecialPrivs = p;
@@ -132,7 +132,7 @@ namespace MudServer
                                 // Granting builder
                                 sendToUser("You " + (t.SpecialPrivs.tester ? "remove" : "grant") + " tester privs to " + t.UserName, true, false, false);
                                 logToFile(myPlayer.UserName + " has just " + (t.SpecialPrivs.tester ? "removed" : "granted") + " tester privs to " + t.UserName, "grant");
-                                if (online) sendToUser(myPlayer.UserName + " has " + (t.SpecialPrivs.tester ? "removed your" : "granted you") + " tester privs", true, false, false);
+                                if (online) sendToUser(myPlayer.UserName + " has " + (t.SpecialPrivs.tester ? "removed your" : "granted you") + " tester privs", t.UserName, true, t.DoColour, false, false);
                                 p = t.SpecialPrivs;
                                 p.tester = !p.tester;
                                 t.SpecialPrivs = p;
@@ -141,7 +141,7 @@ namespace MudServer
                                 // Granting spod
                                 sendToUser("You " + (t.SpecialPrivs.spod ? "remove" : "grant") + " spod privs to " + t.UserName, true, false, false);
                                 logToFile(myPlayer.UserName + " has just " + (t.SpecialPrivs.spod ? "removed" : "granted") + " spod privs to " + t.UserName, "grant");
-                                if (online) sendToUser(myPlayer.UserName + " has " + (t.SpecialPrivs.spod ? "removed your" : "granted you") + " spod privs", true, false, false);
+                                if (online) sendToUser(myPlayer.UserName + " has " + (t.SpecialPrivs.spod ? "removed your" : "granted you") + " spod privs", t.UserName, true, t.DoColour, false, false);
                                 p = t.SpecialPrivs;
                                 p.spod = !p.spod;
                                 t.SpecialPrivs = p;
@@ -150,7 +150,7 @@ namespace MudServer
                                 // Granting minister
                                 sendToUser("You " + (t.SpecialPrivs.minister ? "remove" : "grant") + " minister privs to " + t.UserName, true, false, false);
                                 logToFile(myPlayer.UserName + " has just " + (t.SpecialPrivs.minister ? "removed" : "granted") + " minister privs to " + t.UserName, "grant");
-                                if (online) sendToUser(myPlayer.UserName + " has " + (t.SpecialPrivs.minister ? "removed your" : "granted you") + " minister privs", true, false, false);
+                                if (online) sendToUser(myPlayer.UserName + " has " + (t.SpecialPrivs.minister ? "removed your" : "granted you") + " minister privs", t.UserName, true, t.DoColour, false, false);
                                 p = t.SpecialPrivs;
                                 p.minister = !p.minister;
                                 t.SpecialPrivs = p;

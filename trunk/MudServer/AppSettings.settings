@@ -44,5 +44,11 @@
     <Setting Name="HTTPPort" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">4001</Value>
     </Setting>
+    <Setting Name="TalkerAddress" Type="System.String" Scope="User">
+      <Value Profile="(Default)">sitback.dyndns.org</Value>
+    </Setting>
+    <Setting Name="TalkerEmail" Type="System.String" Scope="User">
+      <Value Profile="(Default)">homelands@sitback.dyndns.org</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
