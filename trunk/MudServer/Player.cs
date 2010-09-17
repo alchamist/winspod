@@ -45,6 +45,12 @@ namespace MudServer
             public bool noidle;
             public bool spod;
             public bool minister;
+
+
+            public bool anyPrivs
+            {
+                get { return builder || tester || noidle || spod || minister; }
+            }
         }
 
         public struct alias
