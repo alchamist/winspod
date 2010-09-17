@@ -630,6 +630,9 @@ namespace MudServer
                             myPlayer.SavePlayer();
 
                             doInform(true);
+
+                            if (myPlayer.LastLogon.ToShortDateString() != DateTime.Now.ToShortDateString())
+                                Server.playerCountToday++;
                         }
                         else
                         {
@@ -1976,6 +1979,7 @@ namespace MudServer
 
                         output += centerText(AppSettings.Default.TalkerName + " has been up for " + formatTime(DateTime.Now - Server.startTime) + "\r\n");
                         output += centerText("There " + (Server.playerCount == 1 ? "has " : "have ") + "been " + Server.playerCount + " player" + (Server.playerCount == 1 ? "" : "s") + " connected in that time") + "\r\n";
+                        output += centerText("There " + (Server.playerCountToday == 1 ? "has " : "have ") + "been " + Server.playerCountToday + " player" + (Server.playerCountToday == 1 ? "" : "s") + " connected today") + "\r\n";
                         output += centerText("There are " + cmds.Count.ToString() + " player commands and " + roomList.Count.ToString() + " system room" + (roomCount() > 1 ? "s" : "")) + "\r\n";
                         output += centerText("There are currently " + mail.Count.ToString() + " mail item" + (mail.Count == 1 ? "" : "s") + " on the server") + "\r\n";
                         output += centerText("The local time for " + AppSettings.Default.TalkerName + " is " + DateTime.Now.ToShortTimeString()) + "\r\n";

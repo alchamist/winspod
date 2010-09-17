@@ -22,6 +22,7 @@ namespace MudServer
         public static System.Timers.Timer t = new System.Timers.Timer();
         public static int shutdownSecs = -1;
         public static int playerCount = 0;
+        public static int playerCountToday = 0;
 
         public static string userFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "winspod");  
 
@@ -76,6 +77,16 @@ namespace MudServer
                     Thread.Sleep(1);
                     socketThread.Join();
                     Environment.Exit(1);
+                }
+            }
+
+            if (DateTime.Now.Hour == 0 && DateTime.Now.Minute == 0 && DateTime.Now.Second > 2)
+            {
+                playerCountToday = 0;
+                foreach (Connection c in Connection.connections)
+                {
+                    if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName != null && c.myState >= 10)
+                        playerCountToday++;
                 }
             }
         }

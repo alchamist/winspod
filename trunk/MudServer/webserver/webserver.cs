@@ -32,7 +32,7 @@ namespace MudServer
             header += "\r\n  <body>";
             header += "\r\n    <div style='margin-top: 5px; margin-bottom: 20px; width: 765px; margin-left: auto; margin-right: auto; background-color: #ffffff; border: solid 1px #000000; padding: 2px 0px 2px 0px; text-align: center;'>";
             header += "\r\n    <h1 class='title'><a href='/'>" + AppSettings.Default.TalkerName + "</a></h1>";
-            header += "\r\n    [ <a href='/'>Home</a> | <a href='/who.html'>Who's online</a> | <a href='/spods.html'>Top Spods</a> | <a href='connect.html'>Connect</a> | <a href='contact.html'>Contact</a> ]<br><br>";
+            header += "\r\n    [ <a href='/'>Home</a> | <a href='/who.html'>Who's online</a> | <a href='/spods.html'>Top Spods</a> | <a href='stats.html'>Stats</a> | <a href='connect.html'>Connect</a> | <a href='contact.html'>Contact</a> ]<br><br>";
             header += "\r\n    </div>";
             header += "\r\n\r\n";
 
@@ -83,13 +83,14 @@ namespace MudServer
                     //msg = Encoding.UTF8.GetBytes(header) & File.ReadAllBytes(path) & Encoding.UTF8.GetBytes(footer);
                     string file = File.ReadAllText(path);
 
-                    file = file.Replace("{ONLINE_LIST}", GetOnlineList());
-                    file = file.Replace("{TALKER_NAME}", AppSettings.Default.TalkerName);
-                    file = file.Replace("{TALKER_ADDRESS}", AppSettings.Default.TalkerAddress);
-                    file = file.Replace("{TALKER_PORT}", AppSettings.Default.Port.ToString());
-                    file = file.Replace("{TALKER_EMAIL}", AppSettings.Default.TalkerEmail.ToString());
-                    file = file.Replace("{ONLINE_COUNT}", GetOnlineCount());
-                    file = file.Replace("{TOP_RANKS}", GetTopRankedList());
+                    //file = file.Replace("{ONLINE_LIST}", GetOnlineList());
+                    //file = file.Replace("{TALKER_NAME}", AppSettings.Default.TalkerName);
+                    //file = file.Replace("{TALKER_ADDRESS}", AppSettings.Default.TalkerAddress);
+                    //file = file.Replace("{TALKER_PORT}", AppSettings.Default.Port.ToString());
+                    //file = file.Replace("{TALKER_EMAIL}", AppSettings.Default.TalkerEmail.ToString());
+                    //file = file.Replace("{ONLINE_COUNT}", GetOnlineCount());
+                    //file = file.Replace("{TOP_RANKS}", GetTopRankedList());
+                    file = ProcessDynamic(file);
                     
 
                     if (Path.GetExtension(path) != ".css")
@@ -103,6 +104,42 @@ namespace MudServer
                     s.Write(msg, 0, msg.Length);
             }
             catch (Exception ex) { Console.WriteLine("Request error: " + ex); }
+        }
+
+        private string ProcessDynamic(string file)
+        {
+            file = file.Replace("{ONLINE_LIST}", GetOnlineList());
+            file = file.Replace("{TALKER_NAME}", AppSettings.Default.TalkerName);
+            file = file.Replace("{TALKER_ADDRESS}", AppSettings.Default.TalkerAddress);
+            file = file.Replace("{TALKER_PORT}", AppSettings.Default.Port.ToString());
+            file = file.Replace("{TALKER_EMAIL}", AppSettings.Default.TalkerEmail.ToString());
+            file = file.Replace("{ONLINE_COUNT}", GetOnlineCount());
+            file = file.Replace("{ONLINE_TODAY_COUNT}", GetUsersToday());
+            file = file.Replace("{TALKER_STATS}", GetStats());
+            file = file.Replace("{TOP_RANKS}", GetTopRankedList());
+            
+            return file;
+        }
+
+        private string GetStats()
+        {
+            List<Player> playerList = getPlayers();
+
+            string output = "<div class='stats'><center>";
+            output += AppSettings.Default.TalkerName + " has been up for " + Connection.formatTime(DateTime.Now - Server.startTime) + "<br>";
+            output += AppSettings.Default.TalkerName + " has " + playerList.Count.ToString() + " resident" + (playerList.Count == 1 ? "" : "s") + "<br>";
+            output += "There " + (Server.playerCount == 1 ? "has " : "have ") + "been " + Server.playerCount + " player" + (Server.playerCount == 1 ? "" : "s") + " connected in that time<br>";
+            output += "There " + (Server.playerCountToday == 1 ? "has " : "have ") + "been " + Server.playerCountToday + " player" + (Server.playerCountToday == 1 ? "" : "s") + " connected today\r\n";
+            int pph = (int)(Server.playerCount / (DateTime.Now - Server.startTime).TotalHours);
+            output += "At an average of " + pph.ToString() + " players per hour<br>";
+            output += "The local time for " + AppSettings.Default.TalkerName + " is " + DateTime.Now.ToShortTimeString() + "<br>";
+            output += "</center></div>";
+            return output;
+        }
+
+        private string GetUsersToday()
+        {
+            return "There " + (Server.playerCountToday == 1 ? "has " : "have ") + "been " + Server.playerCountToday + " player" + (Server.playerCountToday == 1 ? "" : "s") + " connected today";
         }
 
         private string GetOnlineList()
