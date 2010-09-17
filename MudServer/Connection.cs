@@ -1063,6 +1063,9 @@ namespace MudServer
                     //output += "{bold}{blue}Total Online Time {reset}".PadRight(48, ' ') + ": {blue}" + tOnline.Remove(tOnline.IndexOf('.')) + "{reset}\r\n";
                     string tOnline = formatTimeNoZeros(TimeSpan.FromSeconds((DateTime.Now - ex.CurrentLogon).TotalSeconds + ex.TotalOnlineTime));
                     output += "{bold}{blue}Total Online Time {reset}".PadRight(48, ' ') + ": {blue}" + tOnline + "{reset}\r\n";
+                    int[] rank = getRank(ex.UserName);
+                    if (rank[0] > -1)
+                        output += "{bold}{blue}Spodlist Rank {reset}".PadRight(48, ' ') + ": {blue}" + rank[0].ToString() + " (out of " + rank[1] + "){reset}\r\n";
 
                     if (ex.PlayerRank > (int)Player.Rank.Newbie)
                     {
@@ -1113,22 +1116,24 @@ namespace MudServer
                     output += "{bold}{cyan}Local Time {reset}".PadRight(48, ' ') + ": {cyan}" + DateTime.Now.AddHours(ex.JetLag).ToShortTimeString() + "{reset}\r\n";
 
                     output += "{bold}{yellow}Gender {reset}".PadRight(50, ' ') + ": {yellow}" + (gender)ex.Gender + "{reset}\r\n";
-                    output += "{bold}{yellow}Rank {reset}".PadRight(50, ' ') + ": " + rankName(ex.PlayerRank) + "{reset}\r\n";
+                    output += "{bold}{yellow}Rank {reset}".PadRight(50, ' ') + ": " + ex.ColourUserName.Replace(ex.UserName, rankName(ex.PlayerRank)) + "{reset}\r\n";
                     output += "{bold}{yellow}Blocking Shouts {reset}".PadRight(50, ' ') + ": {yellow}" + (ex.HearShouts ? "No" : "Yes") + "{reset}\r\n";
 
                     if (ex.PlayerRank >= (int)Player.Rank.Staff)
                         output += "{bold}{yellow}Has ressed{reset}".PadRight(50, ' ') + ": {yellow}" + ex.ResCount.ToString() + " player" + (ex.ResCount == 1 ? "" : "s") + "{reset}\r\n";
 
                     Player.privs pPrivs = ex.SpecialPrivs;
-                    if (pPrivs.builder || pPrivs.tester)
+                    //if (pPrivs.builder || pPrivs.tester || pPrivs.noidle || pPrivs.spod || pPrivs.minister)
+                    if (pPrivs.anyPrivs)
                     {
                         output += "{bold}{yellow}Special Privs {reset}".PadRight(50, ' ') + ": {yellow}";
-                        if (pPrivs.builder) output += "[builder] ";
-                        if (pPrivs.tester) output += "[tester] ";
-                        if (pPrivs.noidle) output += "[noidle] ";
-                        if (pPrivs.spod) output += "[spod] ";
-                        if (pPrivs.minister) output += "[minster] ";
-                        output = output.Remove(output.Length - 1, 1) + "{reset}\r\n";
+                        if (pPrivs.builder) output += "[builder]";
+                        if (pPrivs.tester) output += "[tester]";
+                        if (pPrivs.noidle) output += "[noidle]";
+                        if (pPrivs.spod) output += "[spod]";
+                        if (pPrivs.minister) output += "[minster]";
+                        //output = output.Remove(output.Length - 1, 1) + "{reset}\r\n";
+                        output += "{reset}\r\n";
                     }
 
                     output += "{bold}{yellow}On Channels {reset}".PadRight(50, ' ') + ": {yellow}" + getChannels(ex.UserName) + "{reset}\r\n";
@@ -2131,22 +2136,22 @@ namespace MudServer
 
         #region getPlayers
 
-        private List<Player> getPlayers()
+        private static List<Player> getPlayers()
         {
             return getPlayers("*", false, false, false, false);
         }
 
-        private List<Player> getPlayers(bool staffOnly, bool builderOnly, bool testerOnly, bool gitsOnly)
+        private static List<Player> getPlayers(bool staffOnly, bool builderOnly, bool testerOnly, bool gitsOnly)
         {
             return getPlayers("*", staffOnly, builderOnly, testerOnly, gitsOnly);
         }
 
-        private List<Player> getPlayers(string startsWith)
+        private static List<Player> getPlayers(string startsWith)
         {
             return getPlayers(startsWith, false, false, false, false);
         }
 
-        private List<Player> getPlayers(string startsWith, bool staffOnly, bool builderOnly, bool testerOnly, bool gitsOnly)
+        private static List<Player> getPlayers(string startsWith, bool staffOnly, bool builderOnly, bool testerOnly, bool gitsOnly)
         {
             List<Player> list = new List<Player>();
             string path = Path.Combine(Server.userFilePath,(@"players" + Path.DirectorySeparatorChar));

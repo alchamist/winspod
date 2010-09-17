@@ -7,11 +7,27 @@ namespace MudServer
 {
     public partial class Connection
     {
+        public static int[] getRank(string username)
+        {
+            List<Player> playerList = getPlayers();
+
+            int[] ret = new int[] { -1, playerList.Count() };
+            
+            for (int i = 0; i < playerList.Count; i++)
+            {
+                if (playerList[i].UserName.ToLower() == username.ToLower())
+                {
+                    ret[0] = i + 1;
+                }
+            }
+            return ret;
+        }
+
         public void cmdRank(string message)
         {
-            int num = 0;
             List<Player> playerList = getPlayers();
             string output = "";
+            int num = 0;
 
             playerList.Sort(delegate(Player p1, Player p2) { return p2.TotalOnlineTime.CompareTo(p1.TotalOnlineTime); });
 

@@ -223,6 +223,9 @@ namespace MudServer
                 //output += "{bold}{blue}Total Online Time {reset}".PadRight(48, ' ') + ": {blue}" + tOnline.Remove(tOnline.IndexOf('.')) + "{reset}<br>";
                 string tOnline = (online ? Connection.formatTimeNoZeros(TimeSpan.FromSeconds((DateTime.Now - ex.CurrentLogon).TotalSeconds + ex.TotalOnlineTime)) : Connection.formatTimeNoZeros(TimeSpan.FromSeconds(ex.TotalOnlineTime)));
                 output += "{bold}{blue}Total Online Time {reset}".PadRight(48, ' ') + ": {blue}" + tOnline + "{reset}<br>";
+                int[] rank = Connection.getRank(ex.UserName);
+                if (rank[0] > -1)
+                    output += "{bold}{blue}Spodlist Rank {reset}".PadRight(48, ' ') + ": {blue}" + rank[0].ToString() + " (out of " + rank[1] + "){reset}<br>";
 
                 if (ex.PlayerRank > (int)Player.Rank.Newbie)
                 {
@@ -286,15 +289,15 @@ namespace MudServer
                     output += "{bold}{yellow}Has ressed{reset}".PadRight(50, ' ') + ": {yellow}" + ex.ResCount.ToString() + " player" + (ex.ResCount == 1 ? "" : "s") + "{reset}<br>";
 
                 Player.privs pPrivs = ex.SpecialPrivs;
-                if (pPrivs.builder || pPrivs.tester)
+                if (pPrivs.anyPrivs)
                 {
                     output += "{bold}{yellow}Special Privs {reset}".PadRight(50, ' ') + ": {yellow}";
-                    if (pPrivs.builder) output += "[builder] ";
-                    if (pPrivs.tester) output += "[tester] ";
-                    if (pPrivs.noidle) output += "[noidle] ";
-                    if (pPrivs.spod) output += "[spod] ";
+                    if (pPrivs.builder) output += "[builder]";
+                    if (pPrivs.tester) output += "[tester]";
+                    if (pPrivs.noidle) output += "[noidle]";
+                    if (pPrivs.spod) output += "[spod]";
                     if (pPrivs.minister) output += "[minster] ";
-                    output = output.Remove(output.Length - 1, 1) + "{reset}<br>";
+                    output += "{reset}<br>";
                 }
 
                 output += "{bold}{yellow}On Channels {reset}".PadRight(50, ' ') + ": {yellow}" + Connection.getChannels(ex.UserName) + "{reset}<br>";
