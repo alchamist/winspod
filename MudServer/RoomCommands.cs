@@ -280,6 +280,10 @@ namespace MudServer
                 sendToUser("Sorry, that room is not valid", true, false, false);
                 logError("Room \"" + room + "\" appears in a link from " + myPlayer.UserRoom + " but is not valid", "room");
             }
+            else if (myPlayer.JailedUntil > DateTime.Now && myPlayer.PlayerRank < (int)Player.Rank.Admin)
+            {
+                sendToUser("You rattle the jail bars, but you are not able to get out", true, false, false);
+            }
             else
             {
                 Room currentRoom = Room.LoadRoom(myPlayer.UserRoom);
@@ -857,6 +861,77 @@ namespace MudServer
                     }
                     else
                         sendToUser("Room \"" + split[1] + "\" not found", true, false, false);
+                }
+            }
+
+        }
+
+        public void cmdJail(string message)
+        {
+            Room jail = Room.LoadRoom("jail");
+            if (jail == null || jail.fullName == null)
+            {
+                //We don't have a jail ... need to make one!
+                jail.systemName = "Jail";
+                jail.fullName = "Sing-sing";
+                jail.description = "You are in prison, plan on spending quite some time here... Whatever you did, consider not doing it again, or you may find this becomes your new, permenant home.\r\n\r\nOh, and watch out for Bubba.. he's been looking for \"fresh meat...\"";
+                jail.systemRoom = true;
+                jail.roomOwner = "System";
+                jail.shortName = "Jail";
+                jail.enterMessage = "is thrown into a cell";
+                jail.SaveRoom();
+            }
+            string[] split = message.Split(' ');
+            int timeout = 0;
+            if (message == "" || split.Length != 2 || !int.TryParse(split[1], out timeout))
+                sendToUser("Syntax: jail <player> <timeout>", true, false, false);
+            else
+            {
+                string[] target = matchPartial(split[0]);
+                if (target.Length == 0)
+                    sendToUser("Player \"" + message + "\" not found", true, false, false);
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (!isOnline(target[0]))
+                    sendToUser("Player \"" + target[0] + "\" is not online", true, false, false);
+                else
+                {
+                    foreach (Connection c in connections)
+                    {
+                        if (c.myPlayer.UserName.ToLower() == target[0].ToLower() && c.socket.Connected)
+                        {
+                            if (c.myPlayer.UserRoom.ToLower() == jail.systemName.ToLower())
+                            {
+                                sendToUser(c.myPlayer.UserName + " is already in jail until " + c.myPlayer.JailedUntil.ToShortTimeString(), true, false, false);
+                                return;
+                            }
+                            else
+                            {
+                                if (c.myPlayer.PlayerRank > myPlayer.PlayerRank)
+                                {
+                                    sendToUser("Trying to jail a higher rank, eh? Where's your evidence!?", true, false, false);
+                                    c.sendToUser(myPlayer.UserName + " just tried to throw you in jail!", true, false, false);
+                                    return;
+                                }
+                                else
+                                {
+                                    c.sendToUser(myPlayer.ColourUserName + " summons the guards to throw your sorry bones into the clink for " + timeout + " minute" + (timeout > 1 ? "s" : "") + "!");
+                                    sendToUser("You throw " + c.myPlayer.ColourUserName + " into jail for " + timeout + " minute" + (timeout > 1 ? "s" : ""), true, false, false);
+                                    c.sendToStaff("[JAIL] " + myPlayer.UserName + " throws " + c.myPlayer.UserName + " into jail for " + timeout + " minute" + (timeout > 1 ? "s" : ""), (int)Player.Rank.Staff, true);
+                                    logToFile(myPlayer.UserName + " throws " + c.myPlayer.UserName + " into jail for " + timeout + " minute" + (timeout > 1 ? "s" : ""), "jail");
+                                    c.movePlayer("jail", true);
+                                    if (c.myPlayer != myPlayer)
+                                    {
+                                        c.myPlayer.JailedUntil = DateTime.Now.AddMinutes(timeout);
+                                        c.myPlayer.JailedCount++;
+                                        c.myPlayer.SavePlayer();
+                                    }
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                    sendToUser("Strange - something wierd happened here!", true, false, false);
                 }
             }
 

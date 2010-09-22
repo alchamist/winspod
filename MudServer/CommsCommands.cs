@@ -61,6 +61,8 @@ namespace MudServer
                         sendToUser("Multiple matches found: " + matches.ToString() + " - Please use more letters", true, false, false);
                     else if (matches[0] == myPlayer.UserName)
                         sendToUser("Trying to talk to yourself, eh?", true, false, false);
+                    else if (myPlayer.UserRoom.ToLower() == "jail" && myPlayer.JailedUntil > DateTime.Now)
+                        sendToUser("Nobody can hear you from your jail cell", true, false, false);
                     else
                     {
                         bool found = false;
@@ -72,7 +74,7 @@ namespace MudServer
                                     sendToUser(c.myPlayer.ColourUserName + " is editing at the moment and can't be disturbed", true, false, false);
                                 else
                                 {
-                                    sendToUser("You " + tellWord(text) + c.myPlayer.UserName + " \"" + wibbleText(text, false) + "{reset}\"", true, false);
+                                    sendToUser("You " + tellWord(text) + c.myPlayer.ColourUserName + " \"" + wibbleText(text, false) + "{reset}\"", true, false);
                                     c.sendToUser("\r\n^Y>>" + myPlayer.ColourUserName + " ^Y" + tellWord(text, false) + "\"" + wibbleText(text, false) + "^Y\"{reset}", true, true, true);
                                     found = true;
                                 }
@@ -107,6 +109,8 @@ namespace MudServer
                         sendToUser("Multiple matches found: " + matches.ToString() + " - Please use more letters", true, false, false);
                     else if (matches[0] == myPlayer.UserName)
                         sendToUser("Trying to emote to yourself, eh?", true, false, false);
+                    else if (myPlayer.UserRoom.ToLower() == "jail" && myPlayer.JailedUntil > DateTime.Now)
+                        sendToUser("Nobody can hear you from your jail cell", true, false, false);
                     else
                     {
                         bool found = false;
@@ -156,6 +160,8 @@ namespace MudServer
                         sendToUser("Multiple matches found: " + matches.ToString() + " - Please use more letters", true, false, false);
                     else if (matches[0] == myPlayer.UserName)
                         sendToUser("Trying to sing to yourself, eh?", true, false, false);
+                    else if (myPlayer.UserRoom.ToLower() == "jail" && myPlayer.JailedUntil > DateTime.Now)
+                        sendToUser("Nobody can hear you from your jail cell", true, false, false);
                     else
                     {
                         bool found = false;
@@ -203,6 +209,8 @@ namespace MudServer
                         sendToUser("Multiple matches found: " + matches.ToString() + " - Please use more letters", true, false, false);
                     else if (matches[0] == myPlayer.UserName)
                         sendToUser("Trying to think to yourself, eh?", true, false, false);
+                    else if (myPlayer.UserRoom.ToLower() == "jail" && myPlayer.JailedUntil > DateTime.Now)
+                        sendToUser("Nobody can hear you from your jail cell", true, false, false);
                     else
                     {
                         bool found = false;
@@ -238,7 +246,7 @@ namespace MudServer
             {
                 if (!message.StartsWith("'"))
                     message = " " + message;
-                sendToRoom(myPlayer.UserName + wibbleText(message, true), "You emote: " + myPlayer.UserName + wibbleText(message, true), false, true);
+                sendToRoom(myPlayer.ColourUserName + wibbleText(message, true), "You emote: " + myPlayer.ColourUserName + wibbleText(message, true), false, true);
             }
         }
 
@@ -259,7 +267,7 @@ namespace MudServer
                         }
                         else
                         {
-                            sendToUser("{bold}{yellow}[" + myPlayer.UserName + "]{reset} " + wibbleText(message, false), c.myPlayer.UserName, true, c.myPlayer.DoColour, c.myPlayer.UserName == myPlayer.UserName ? false : true, true);
+                            sendToUser("{bold}{yellow}[" + myPlayer.ColourUserName + "^Y]{reset} " + wibbleText(message, false), c.myPlayer.UserName, true, c.myPlayer.DoColour, c.myPlayer.UserName == myPlayer.UserName ? false : true, true);
                         }
                     }
                 }
@@ -281,7 +289,9 @@ namespace MudServer
             {
                 if (myPlayer != null)
                 {
-                    if (myPlayer.CanShout)
+                    if (myPlayer.UserRoom.ToLower() == "jail" && myPlayer.JailedUntil > DateTime.Now)
+                        sendToUser("Nobody can hear you from your jail cell", true, false, false);
+                    else if (myPlayer.CanShout)
                     {
                         foreach (Connection c in connections)
                         {
@@ -320,7 +330,7 @@ namespace MudServer
                     sendToUser(target[0] + " is not in the same room as you ...", true, false, false);
                 else
                 {
-                    sendToRoomExcept(target[0], myPlayer.UserName + " " + sayWord(split[1], true) + " to everone except " + target[0] + " \"" + split[1] + "\"", "You " + sayWord(split[1], true) + " to everone except " + target[0] + " \"" + split[1] + "\"", myPlayer.UserName + " tells everyone in the room something about you", myPlayer.UserRoom, myPlayer.UserName, true, false, false);
+                    sendToRoomExcept(target[0], myPlayer.ColourUserName + " " + sayWord(split[1], true) + " to everone except " + target[0] + " \"" + split[1] + "\"", "You " + sayWord(split[1], true) + " to everone except " + target[0] + " \"" + split[1] + "\"", myPlayer.ColourUserName + " tells everyone in the room something about you", myPlayer.UserRoom, myPlayer.UserName, true, false, false);
                 }
             }
         }
@@ -329,6 +339,8 @@ namespace MudServer
         {
             if (message == "")
                 sendToUser("Syntax: tf <message>", true, false, false);
+            else if (myPlayer.UserRoom.ToLower() == "jail" && myPlayer.JailedUntil > DateTime.Now)
+                sendToUser("Nobody can hear you from your jail cell", true, false, false);
             else
             {
                 int count = 0;
@@ -338,7 +350,7 @@ namespace MudServer
                     {
                         count++;
                         if (!c.myPlayer.InEditor)
-                            c.sendToUser("\r\n{bold}{green}(To friends) " + myPlayer.UserName + " " + sayWord(message, false) + " \"" + message + "\"", true, true, true);
+                            c.sendToUser("\r\n{bold}{green}(To friends) " + myPlayer.ColourUserName + " {bold}{green}" + sayWord(message, false) + " \"" + message + "\"", true, true, true);
                     }
                 }
                 if (count == 0)
@@ -352,6 +364,8 @@ namespace MudServer
         {
             if (message == "")
                 sendToUser("Syntax: rf <message>", true, false, false);
+            else if (myPlayer.UserRoom.ToLower() == "jail" && myPlayer.JailedUntil > DateTime.Now)
+                sendToUser("Nobody can hear you from your jail cell", true, false, false);
             else
             {
                 int count = 0;
@@ -361,13 +375,13 @@ namespace MudServer
                     {
                         count++;
                         if (!c.myPlayer.InEditor)
-                            c.sendToUser("\r\n{bold}{green}(To friends) " + myPlayer.UserName + (message.Substring(0, 1) == "'" ? "" : " ") + message, true, true, true);
+                            c.sendToUser("\r\n{bold}{green}(To friends) " + myPlayer.ColourUserName + "{bold}{green}" + (message.Substring(0, 1) == "'" ? "" : " ") + message, true, true, true);
                     }
                 }
                 if (count == 0)
                     sendToUser("None of your friends are online right now");
                 else
-                    sendToUser("You emote to your friends: " + myPlayer.UserName + (message.Substring(0, 1) == "'" ? "" : " ") + message, true, false, true);
+                    sendToUser("You emote to your friends: " + myPlayer.ColourUserName + (message.Substring(0, 1) == "'" ? "" : " ") + message, true, false, true);
             }
         }
 
@@ -385,6 +399,8 @@ namespace MudServer
                     sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
                 else if (!isOnline(target[0]))
                     sendToUser("Player \"" + target[0] + "\" is not online at the moment", true, false, false);
+                else if (myPlayer.UserRoom.ToLower() == "jail" && myPlayer.JailedUntil > DateTime.Now)
+                    sendToUser("Nobody can hear you from your jail cell", true, false, false);
                 else if (target.Length == 1 && (target[0].ToLower() == myPlayer.UserName.ToLower()))
                     cmdTellFriends(split[1]);
                 else
@@ -404,7 +420,7 @@ namespace MudServer
                                     count++;
                                     if (!c.myPlayer.InEditor)
                                     {
-                                        c.sendToUser("\r\n{bold}{green}(To " + (c.myPlayer.UserName == temp.UserName ? "your" : temp.UserName + "'s") + " friends) " + myPlayer.UserName + " " + sayWord(split[1], false) + " \"" + split[1] + "\"", true, true, true);
+                                        c.sendToUser("\r\n{bold}{green}(To " + (c.myPlayer.UserName == temp.UserName ? "your" : temp.UserName + "'s") + " friends) " + myPlayer.ColourUserName + " {bold}{green}" + sayWord(split[1], false) + " \"" + split[1] + "\"", true, true, true);
                                     }
                                 }
                             }
@@ -412,7 +428,7 @@ namespace MudServer
                         if (count == 0)
                             sendToUser("None of " + temp.UserName + "'s friends can receive messages at the moment", true, false, false);
                         else
-                            sendToUser("You " + sayWord(split[1], true) + " to " + temp.UserName + "'s friends \"" + split[1] + "\"", true, false, true);
+                            sendToUser("You " + sayWord(split[1], true) + " to " + temp.ColourUserName + "'s friends \"" + split[1] + "\"", true, false, true);
                     }
                 }
             }
@@ -432,6 +448,8 @@ namespace MudServer
                     sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
                 else if (!isOnline(target[0]))
                     sendToUser("Player \"" + target[0] + "\" is not online at the moment", true, false, false);
+                else if (myPlayer.UserRoom.ToLower() == "jail" && myPlayer.JailedUntil > DateTime.Now)
+                    sendToUser("Nobody can hear you from your jail cell", true, false, false);
                 else if (target.Length == 1 && (target[0].ToLower() == myPlayer.UserName.ToLower()))
                     cmdTellFriends(split[1]);
                 else
@@ -451,7 +469,7 @@ namespace MudServer
                                     count++;
                                     if (!c.myPlayer.InEditor)
                                     {
-                                        c.sendToUser("\r\n{bold}{green}(To " + (c.myPlayer.UserName == temp.UserName ? "your" : temp.UserName + "'s") + " friends) " + myPlayer.UserName + (split[1].Substring(0, 1) == "'" ? "" : " ") + split[1], true, true, true);
+                                        c.sendToUser("\r\n{bold}{green}(To " + (c.myPlayer.UserName == temp.UserName ? "your" : temp.UserName + "'s") + " friends) " + myPlayer.ColourUserName + "{bold}{green}" + (split[1].Substring(0, 1) == "'" ? "" : " ") + split[1], true, true, true);
                                     }
                                 }
                             }
@@ -459,7 +477,7 @@ namespace MudServer
                         if (count == 0)
                             sendToUser("None of " + temp.UserName + "'s friends can receive messages at the moment", true, false, false);
                         else
-                            sendToUser("You emote to " + temp.UserName + "'s friends: " + myPlayer.UserName + (split[1].Substring(0, 1) == "'" ? "" : " ") + split[1], true, false, true);
+                            sendToUser("You emote to " + temp.ColourUserName + "'s friends: " + myPlayer.ColourUserName + (split[1].Substring(0, 1) == "'" ? "" : " ") + split[1], true, false, true);
                     }
                 }
             }

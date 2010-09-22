@@ -1156,6 +1156,7 @@ namespace MudServer
                         output += "{bold}{red}Warned {reset}".PadRight(47, ' ') + ": {red}" + ex.WarnedCount.ToString() + "{reset}\r\n";
                         output += "{bold}{red}Idled {reset}".PadRight(47, ' ') + ": {red}" + ex.IdledCount.ToString() + "{reset}\r\n";
                         output += "{bold}{red}Slapped {reset}".PadRight(47, ' ') + ": {red}" + ex.SlappedCount.ToString() + "{reset}\r\n";
+                        output += "{bold}{red}Jailed {reset}".PadRight(47, ' ') + ": {red}" + ex.JailedCount.ToString() + "{reset}\r\n";
                         output += "{bold}{red}Tags {reset}".PadRight(47, ' ') + ": {red}" + (ex.Git || ex.AutoGit ? (ex.Git ? "[GIT] " : "") + (ex.AutoGit ? "[AUTOGIT]" : "") : "None") + "{reset}\r\n";
                         if (ex.Wibbled)
                             output += "{bold}{red}Wibbled By {reset}".PadRight(47, ' ') + ": {red}" + ex.WibbledBy + "{reset}\r\n";
