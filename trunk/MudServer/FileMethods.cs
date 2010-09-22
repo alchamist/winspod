@@ -148,6 +148,17 @@ namespace MudServer
                 newRoom.roomOwner = "System";
                 newRoom.SaveRoom();
                 list.Add(newRoom);
+
+                Room jail = new Room();
+                jail.systemName = "Jail";
+                jail.fullName = "Sing-sing";
+                jail.description = "You are in prison, plan on spending quite some time here... Whatever you did, consider not doing it again, or you may find this becomes your new, permenant home.\r\n\r\nOh, and watch out for Bubba.. he's been looking for \"fresh meat...\"";
+                jail.systemRoom = true;
+                jail.roomOwner = "System";
+                jail.shortName = "Jail";
+                jail.enterMessage = "is thrown into a cell";
+                jail.SaveRoom();
+                list.Add(jail);
             }
             return list;
         }
@@ -231,6 +242,10 @@ namespace MudServer
                 motd = "{bold}{cyan}---[{red}Message of the Day{cyan}]".PadRight(103, '-') + "\r\n{reset}" + motd;
                 sumotd = "\r\n{bold}{cyan}---[{green}Staff Message of the Day{cyan}]".PadRight(107, '-') + "\r\n{reset}" + sumotd;
                 sendToUser(motd + (myPlayer.PlayerRank >= (int)Player.Rank.Guide ? sumotd : "") + "\r\n{bold}{cyan}" + "".PadRight(80, '-') + "{reset}\r\n", true, false, false);
+            }
+            else
+            {
+                sendToUser("\r\n", false, false, false);
             }
         }
 

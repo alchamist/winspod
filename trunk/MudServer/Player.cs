@@ -184,6 +184,10 @@ namespace MudServer
         private int         kicked;                                         // Number of times kicked off
         private int         idled;                                          // Number of times idled out
         private int         warned;                                         // Number of times they have been warned
+        private int         jailed;                                         // Number of times they have been jailed
+
+        private DateTime    jailtime;                                       // How long are they in jail until ...
+
         private bool        hearShout = true;                               // Can they hear shouts?
         private bool        canShout = true;                                // Can they shout?
         private string      prompt = AppSettings.Default.TalkerName + ">";  // Their own personal prompt
@@ -571,6 +575,18 @@ namespace MudServer
             set { slapped = value; }
         }
 
+        public int JailedCount
+        {
+            get { return jailed; }
+            set { jailed = value; }
+        }
+
+        public DateTime JailedUntil
+        {
+            get { return jailtime; }
+            set { jailtime = value; }
+        }
+
         public privs SpecialPrivs
         {
             get { return systemprivs; }
@@ -831,41 +847,50 @@ namespace MudServer
 
         public static Player LoadPlayer(string name, int userConn)
         {
-            Player load;
-            //string path = (@"players\" + name.Substring(0, 1) + @"\" + name.ToLower() + ".xml").ToLower();
-            //string path = Path.Combine(Server.userFilePath,("players" + Path.DirectorySeparatorChar + name.Substring(0, 1).ToUpper() + Path.DirectorySeparatorChar + name.ToLower() + ".xml"));
-            string path = Path.Combine(Server.userFilePath, @"players" + Path.DirectorySeparatorChar + name.ToLower() + ".xml");
+            Player load = null;
 
-            Debug.Print(Path.GetFullPath(path));
-
-            if (File.Exists(path))
+            try
             {
-                try
+
+                //string path = (@"players\" + name.Substring(0, 1) + @"\" + name.ToLower() + ".xml").ToLower();
+                //string path = Path.Combine(Server.userFilePath,("players" + Path.DirectorySeparatorChar + name.Substring(0, 1).ToUpper() + Path.DirectorySeparatorChar + name.ToLower() + ".xml"));
+                string path = Path.Combine(Server.userFilePath, @"players" + Path.DirectorySeparatorChar + name.ToLower() + ".xml");
+
+                Debug.Print(Path.GetFullPath(path));
+
+                if (File.Exists(path))
                 {
-                    XmlSerializer deserial = new XmlSerializer(typeof(Player));
-                    TextReader textReader = new StreamReader(@path);
-                    load = (Player)deserial.Deserialize(textReader);
-                    textReader.Close();
-                    load.NewPlayer = false;
+                    try
+                    {
+                        XmlSerializer deserial = new XmlSerializer(typeof(Player));
+                        TextReader textReader = new StreamReader(@path);
+                        load = (Player)deserial.Deserialize(textReader);
+                        textReader.Close();
+                        load.NewPlayer = false;
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.Print(e.ToString());
+                        load = null;
+                    }
                 }
-                catch (Exception e)
+                else
                 {
-                    Debug.Print(e.ToString());
-                    load = null;
+                    load = new Player();
+                    load.NewPlayer = true;
+                }
+                if (load.favourites.Count < 3)
+                {
+                    favourite f = new favourite();
+                    f.type = "";
+                    f.value = "";
+                    for (int i = load.favourites.Count; i < 3; i++)
+                        load.favourites.Add(f);
                 }
             }
-            else
+            catch (Exception ex)
             {
-                load = new Player();
-                load.NewPlayer = true;
-            }
-            if (load.favourites.Count < 3)
-            {
-                favourite f = new favourite();
-                f.type = "";
-                f.value = "";
-                for (int i = load.favourites.Count; i < 3; i++)
-                    load.favourites.Add(f);
+                Connection.logError(ex.ToString(), "Player");
             }
             
             return load;

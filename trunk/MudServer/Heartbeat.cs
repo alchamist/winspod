@@ -15,7 +15,7 @@ namespace MudServer
                 socket.Close();
                 return;
             }
-            if (myPlayer != null)
+            if (myPlayer != null && myState == 10)
             {
                 if (myPlayer.HourlyChime && DateTime.Now.Minute == 0 && DateTime.Now.Hour != lastHChimeHour && !myPlayer.InEditor)
                 {
@@ -23,6 +23,14 @@ namespace MudServer
                     sendToUser("{bold}{red}{bell} [[Ding Dong. It is now " + (DateTime.Now.AddHours(myPlayer.JetLag)).ToShortTimeString() + "]{reset}", true, true, false);
                     flushSocket();
                 }
+
+                if (myPlayer.JailedUntil <= DateTime.Now && myPlayer.UserRoom.ToLower() == "jail")
+                {
+                    sendToUser("The jail doors swing open as you are released from your incarceration", true, false, false);
+                    movePlayer("main",true,true);
+                }
+
+
                 if (myPlayer.PlayerRank < (int)Player.Rank.Admin && !myPlayer.SpecialPrivs.noidle)
                 {
                     TimeSpan ts = (TimeSpan)(DateTime.Now - myPlayer.LastActive);
