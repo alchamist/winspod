@@ -227,6 +227,13 @@ namespace MudServer
             }
         }
 
+        public void cmdTimeStamp(string message)
+        {
+            myPlayer.TimeStampPrompt = !myPlayer.TimeStampPrompt;
+            sendToUser("You " + (myPlayer.TimeStampPrompt ? "en" : "dis") + "able timestamps on prompts", true, false, false);
+            myPlayer.SavePlayer();
+        }
+
         public void cmdPrefix(string message)
         {
             if (message == "" || AnsiColour.Colorise(message, true) == "")

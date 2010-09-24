@@ -191,6 +191,7 @@ namespace MudServer
         private bool        hearShout = true;                               // Can they hear shouts?
         private bool        canShout = true;                                // Can they shout?
         private string      prompt = AppSettings.Default.TalkerName + ">";  // Their own personal prompt
+        private bool        timeStampPrompt = false;                        // Do they want a timestamp with their prompt?
         private bool        wibbled;                                        // Has the user been wibbled?
         private string      wibbledBy;                                      // Who wibbled them
         private bool        isGit = false;                                  // Is the user a git?
@@ -322,6 +323,12 @@ namespace MudServer
         {
             get { return prompt.Trim() + " "; }
             set { prompt = value.Trim(); }
+        }
+
+        public bool TimeStampPrompt
+        {
+            get { return timeStampPrompt; }
+            set { timeStampPrompt = value; }
         }
 
         public bool Wibbled

@@ -851,6 +851,7 @@ namespace MudServer
                 myState = 10;
                 doPrompt();
             }
+            Writer.Flush();
         } 
 
         #endregion

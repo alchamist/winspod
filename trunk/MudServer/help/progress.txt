@@ -97,3 +97,6 @@ r74 - More webserver work. Added count of players on in day for stats
 
 ^PWednesday 22nd September 2010^N
 r75 - Added jail system
+
+^PFriday 24th September 2010^N
+r76 - Added timestamp command

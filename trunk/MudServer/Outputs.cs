@@ -127,14 +127,14 @@ namespace MudServer
         private void doPrompt(string user)
         {
             if (user == myPlayer.UserName)
-                sendToUser("\r" + (myPlayer.InEditor ? "> " : myPlayer.Prompt.Replace("%t", DateTime.Now.ToShortTimeString()).Replace("%d", DateTime.Now.ToShortDateString())), false, false, false);
+                sendToUser("\r" + (myPlayer.InEditor ? "> " : (myPlayer.TimeStampPrompt ? DateTime.Now.ToShortTimeString() + ":" : "") + myPlayer.Prompt.Replace("%t", DateTime.Now.ToShortTimeString()).Replace("%d", DateTime.Now.ToShortDateString())), false, false, false);
             else
             {
                 foreach (Connection c in connections)
                 {
                     if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName == user)
                     {
-                        sendToUser("\r" + (c.myPlayer.InEditor ? "> " : c.myPlayer.Prompt.Replace("%t", DateTime.Now.ToShortTimeString()).Replace("%d", DateTime.Now.ToShortDateString())), c.myPlayer.UserName, false, c.myPlayer.DoColour, false, false);
+                        sendToUser("\r" + (c.myPlayer.InEditor ? "> " : (c.myPlayer.TimeStampPrompt ? DateTime.Now.ToShortTimeString() + ":" : "") + c.myPlayer.Prompt.Replace("%t", DateTime.Now.ToShortTimeString()).Replace("%d", DateTime.Now.ToShortDateString())), c.myPlayer.UserName, false, c.myPlayer.DoColour, false, false);
                     }
                 }
             }
