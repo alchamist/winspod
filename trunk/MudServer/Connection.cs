@@ -1067,6 +1067,7 @@ namespace MudServer
                     //output += "{bold}{blue}Total Online Time {reset}".PadRight(48, ' ') + ": {blue}" + tOnline.Remove(tOnline.IndexOf('.')) + "{reset}\r\n";
                     string tOnline = formatTimeNoZeros(TimeSpan.FromSeconds((DateTime.Now - ex.CurrentLogon).TotalSeconds + ex.TotalOnlineTime));
                     output += "{bold}{blue}Total Online Time {reset}".PadRight(48, ' ') + ": {blue}" + tOnline + "{reset}\r\n";
+                    output += "{bold}{blue}Truespod Time {reset}".PadRight(48, ' ') + ": {blue}" + formatTimeNoZeros(TimeSpan.FromSeconds(ex.TrueSpodTime)) + "{reset}\r\n";
                     int[] rank = getRank(ex.UserName);
                     if (rank[0] > -1)
                         output += "{bold}{blue}Spodlist Rank {reset}".PadRight(48, ' ') + ": {blue}" + rank[0].ToString() + " (out of " + rank[1] + "){reset}\r\n";
@@ -2163,16 +2164,26 @@ namespace MudServer
             string path = Path.Combine(Server.userFilePath,(@"players" + Path.DirectorySeparatorChar));
             DirectoryInfo di = new DirectoryInfo(path);
             DirectoryInfo[] subs = di.GetDirectories(startsWith);
-            //foreach (DirectoryInfo dir in subs)
-            //{
-                FileInfo[] fi = di.GetFiles();
-                foreach (FileInfo file in fi)
+
+            FileInfo[] fi = di.GetFiles();
+            foreach (FileInfo file in fi)
+            {
+                Player load = Player.LoadPlayer(file.Name.Replace(".xml",""),0);
+                if (load != null && ((staffOnly && load.PlayerRank >= (int)Player.Rank.Guide) || (builderOnly && load.SpecialPrivs.builder) || (testerOnly && load.SpecialPrivs.tester) || (gitsOnly && (load.Git || load.AutoGit))) || (!staffOnly && !builderOnly && !testerOnly && !gitsOnly))
+                    list.Add(load);
+            }
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (isOnline(list[i].UserName))
                 {
-                    Player load = Player.LoadPlayer(file.Name.Replace(".xml",""),0);
-                    if (load != null && ((staffOnly && load.PlayerRank >= (int)Player.Rank.Guide) || (builderOnly && load.SpecialPrivs.builder) || (testerOnly && load.SpecialPrivs.tester) || (gitsOnly && (load.Git || load.AutoGit))) || (!staffOnly && !builderOnly && !testerOnly && !gitsOnly))
-                        list.Add(load);
+                    foreach (Connection c in connections)
+                    {
+                        if (c.myPlayer.UserName.ToLower() == list[i].UserName.ToLower())
+                            list[i] = c.myPlayer;
+                    }
                 }
-            //}
+            }
             return list;
         }
 
