@@ -198,6 +198,7 @@
 "tell","cmdTell",0,"comms"
 "think","cmdThink",0,"comms"
 "throw","cmdThrow",1,"player"
+"timestamp","cmdTimeStamp",1,"player"
 "title","cmdTitle",1,"player"
 "trans","cmdTrans",4,"admin"
 "unpropose","cmdUnpropose",1,"player"
