@@ -10,6 +10,7 @@ namespace MudServer
         public static int[] getRank(string username)
         {
             List<Player> playerList = getPlayers();
+            playerList.Sort(delegate(Player p1, Player p2) { return p2.TrueSpodTime.CompareTo(p1.TrueSpodTime); });
 
             int[] ret = new int[] { -1, playerList.Count() };
             
@@ -29,7 +30,7 @@ namespace MudServer
             string output = "";
             int num = 0;
 
-            playerList.Sort(delegate(Player p1, Player p2) { return p2.TotalOnlineTime.CompareTo(p1.TotalOnlineTime); });
+            playerList.Sort(delegate(Player p1, Player p2) { return p2.TrueSpodTime.CompareTo(p1.TrueSpodTime); });
 
             if (message == "")
             {
@@ -48,9 +49,9 @@ namespace MudServer
                         }
                         for (int j = start; j < i; j++)
                         {
-                            output += "\r\n^C" + (j + 1).ToString().PadRight(7) + "^N" + playerList[j].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[j].TotalOnlineTime));
+                            output += "\r\n^C" + (j + 1).ToString().PadRight(7) + "^N" + playerList[j].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[j].TrueSpodTime));
                         }
-                        output += "\r\n^C" + (i + 1).ToString().PadRight(7) + "^N" + playerList[i].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[i].TotalOnlineTime));
+                        output += "\r\n^C" + (i + 1).ToString().PadRight(7) + "^N" + playerList[i].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[i].TrueSpodTime));
 
                         if (i+1 != playerList.Count)
                         {
@@ -62,7 +63,7 @@ namespace MudServer
                             start = i + 1;
                             for (int j = start; j <= end; j++)
                             {
-                                output += "\r\n^C" + (j + 1).ToString().PadRight(7) + "^N" + playerList[j].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[j].TotalOnlineTime));
+                                output += "\r\n^C" + (j + 1).ToString().PadRight(7) + "^N" + playerList[j].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[j].TrueSpodTime));
                             }
                         }
                     }
@@ -95,9 +96,9 @@ namespace MudServer
                             realStart = start + 1;
                             for (int j = start; j < i; j++)
                             {
-                                output += "\r\n^C" + (j + 1).ToString().PadRight(7) + "^N" + playerList[j].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[j].TotalOnlineTime));
+                                output += "\r\n^C" + (j + 1).ToString().PadRight(7) + "^N" + playerList[j].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[j].TrueSpodTime));
                             }
-                            output += "\r\n^C" + (i + 1).ToString().PadRight(7) + "^N" + playerList[i].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[i].TotalOnlineTime));
+                            output += "\r\n^C" + (i + 1).ToString().PadRight(7) + "^N" + playerList[i].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[i].TrueSpodTime));
 
                             if (i + 1 != playerList.Count)
                             {
@@ -109,7 +110,7 @@ namespace MudServer
                                 start = i + 1;
                                 for (int j = start; j <= end; j++)
                                 {
-                                    output += "\r\n^C" + (j + 1).ToString().PadRight(7) + "^N" + playerList[j].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[j].TotalOnlineTime));
+                                    output += "\r\n^C" + (j + 1).ToString().PadRight(7) + "^N" + playerList[j].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[j].TrueSpodTime));
                                 }
                             }
                             realEnd = (end == 0 ? playerList.Count : end+1);
@@ -149,9 +150,9 @@ namespace MudServer
                             }
                             for (int j = start; j < i; j++)
                             {
-                                output += "\r\n^C" + (j + 1).ToString().PadRight(7) + "^N" + playerList[j].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[j].TotalOnlineTime));
+                                output += "\r\n^C" + (j + 1).ToString().PadRight(7) + "^N" + playerList[j].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[j].TrueSpodTime));
                             }
-                            output += "\r\n^C" + (i + 1).ToString().PadRight(7) + "^N" + playerList[i].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[i].TotalOnlineTime));
+                            output += "\r\n^C" + (i + 1).ToString().PadRight(7) + "^N" + playerList[i].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[i].TrueSpodTime));
 
                             if (i + 1 != playerList.Count)
                             {
@@ -163,7 +164,7 @@ namespace MudServer
                                 start = i + 1;
                                 for (int j = start; j <= end; j++)
                                 {
-                                    output += "\r\n^C" + (j + 1).ToString().PadRight(7) + "^N" + playerList[j].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[j].TotalOnlineTime));
+                                    output += "\r\n^C" + (j + 1).ToString().PadRight(7) + "^N" + playerList[j].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[j].TrueSpodTime));
                                 }
                             }
                         }
@@ -172,5 +173,6 @@ namespace MudServer
             }
             sendToUser(headerLine("Rank: " + message) + "\r\n" + output + "\r\n" + footerLine(), true, false, false);
         }
+
     }
 }

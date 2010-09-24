@@ -20,7 +20,7 @@ namespace MudServer
                 if (myPlayer.HourlyChime && DateTime.Now.Minute == 0 && DateTime.Now.Hour != lastHChimeHour && !myPlayer.InEditor)
                 {
                     lastHChimeHour = DateTime.Now.Hour;
-                    sendToUser("{bell} -=*>^RDing^YDong^N! The time is now " + (DateTime.Now.AddHours(myPlayer.JetLag)).ToShortTimeString() + "]{reset}", true, true, false);
+                    sendToUser("{bell} \r\n-=*>^RDing^YDong^N! The time is now " + (DateTime.Now.AddHours(myPlayer.JetLag)).ToShortTimeString() + "{reset}", true, true, false);
                     flushSocket();
                 }
 
@@ -28,6 +28,11 @@ namespace MudServer
                 {
                     sendToUser("The jail doors swing open as you are released from your incarceration", true, false, false);
                     movePlayer("main",true,true);
+                }
+
+                if ((DateTime.Now - myPlayer.LastActive).Minutes < 5 || myPlayer.PlayerRank >= (int)Player.Rank.Admin)
+                {
+                    myPlayer.TrueSpodTime++;
                 }
 
 

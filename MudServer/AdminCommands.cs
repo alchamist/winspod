@@ -287,15 +287,19 @@ namespace MudServer
                         if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName.ToLower() == target[0].ToLower())
                         {
                             //c.myPlayer.TotalOnlineTime = increment ? c.myPlayer.TotalOnlineTime + (amount * 3600) : c.myPlayer.TotalOnlineTime - (amount * 3600);
-                            sendToUser("Pre: " + c.myPlayer.TotalOnlineTime.ToString());
-                            sendToUser("Amount: " + amount.ToString());
+                            //sendToUser("Pre: " + c.myPlayer.TotalOnlineTime.ToString());
+                            //sendToUser("Amount: " + amount.ToString());
+
                             if (increment)
                                 c.myPlayer.TotalOnlineTime += amount;
                             else if (!increment && amount >= c.myPlayer.TotalOnlineTime)
                                 c.myPlayer.TotalOnlineTime = 0;
                             else
                                 c.myPlayer.TotalOnlineTime = c.myPlayer.TotalOnlineTime - amount;
-                            sendToUser("Post: " + c.myPlayer.TotalOnlineTime.ToString());
+
+                            c.myPlayer.TrueSpodTime = c.myPlayer.TotalOnlineTime;
+
+                            //sendToUser("Post: " + c.myPlayer.TotalOnlineTime.ToString());
 
                             sendToUser("You " + (increment ? "add " : "remove ") + alt.ToString() + " hour" + (alt > 1 ? "s " : " ") + (increment ? "to " : "from ") + c.myPlayer.UserName + "'s total time");
                             sendToUser(myPlayer.ColourUserName + " has just altered your total online time", c.myPlayer.UserName);
