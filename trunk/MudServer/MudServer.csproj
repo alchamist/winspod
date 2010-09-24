@@ -307,6 +307,7 @@
     <None Include="commands\cmdList.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="default.build" />
     <None Include="MudServer_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>

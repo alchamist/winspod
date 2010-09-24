@@ -1,0 +1,48 @@
+﻿<?xml version="1.0"?>
+<project name="Mudserver" default="build" basedir=".">
+  <target name="build">
+    <mkdir dir="bin" />
+
+    <csc target="exe" output="bin/Mudserver.exe">
+      <sources>
+        <includes name="*.cs"/>
+        <includes name="webserver/*.cs"/>
+      </sources>
+    </csc>
+
+        <copy todir="bin/commands">
+          <fileset basedir="commands">
+            <include name="*" />
+          </fileset>
+        </copy>
+
+        <copy todir="bin/help">
+          <fileset basedir="help">
+            <include name="*" />
+          </fileset>
+        </copy>
+
+        <copy todir="bin/webserver">
+          <fileset basedir="webserver">
+            <include name="*.html" />
+          </fileset>
+        </copy>
+
+        <copy todir="bin/files">
+          <fileset basedir="files">
+            <include name="*" />
+          </fileset>
+        </copy>
+
+  </target>
+
+
+  <target name="clean">
+    <delete dir="bin" failonerror="false"/>
+  </target>
+
+  <target name="run" depends="build">
+    <exec program="bin/Mudserver.exe"/>
+  </target>
+  
+</project>
