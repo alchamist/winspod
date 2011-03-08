@@ -1,0 +1,11 @@
+﻿4
+^YSyntax: ^Nae <action>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Sends an action to the admin channel. If leading character is a ' then no space will be left between the players name and the action.
+
+^RRestrictions:^N
+
+None

@@ -1,0 +1,54 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="MudServer" GeneratedClassName="AppSettings">
+  <Profiles />
+  <Settings>
+    <Setting Name="TalkerName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Homelands Uni</Value>
+    </Setting>
+    <Setting Name="AdminColour" Type="System.String" Scope="User">
+      <Value Profile="(Default)">{bold}{red}</Value>
+    </Setting>
+    <Setting Name="HCAdminColour" Type="System.String" Scope="User">
+      <Value Profile="(Default)">{bold}{cyan}</Value>
+    </Setting>
+    <Setting Name="StaffColour" Type="System.String" Scope="User">
+      <Value Profile="(Default)">{bold}{magenta}</Value>
+    </Setting>
+    <Setting Name="GuideColour" Type="System.String" Scope="User">
+      <Value Profile="(Default)">{bold}{green}</Value>
+    </Setting>
+    <Setting Name="Port" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">4000</Value>
+    </Setting>
+    <Setting Name="HCAdminName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">HCAdmin</Value>
+    </Setting>
+    <Setting Name="AdminName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Admin</Value>
+    </Setting>
+    <Setting Name="StaffName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Staff</Value>
+    </Setting>
+    <Setting Name="GuideName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Guide</Value>
+    </Setting>
+    <Setting Name="DefaultLoginRoom" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Main</Value>
+    </Setting>
+    <Setting Name="LockLevel" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="HTTPEnabled" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="HTTPPort" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">4001</Value>
+    </Setting>
+    <Setting Name="TalkerAddress" Type="System.String" Scope="User">
+      <Value Profile="(Default)">sitback.dyndns.org</Value>
+    </Setting>
+    <Setting Name="TalkerEmail" Type="System.String" Scope="User">
+      <Value Profile="(Default)">homelands@sitback.dyndns.org</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

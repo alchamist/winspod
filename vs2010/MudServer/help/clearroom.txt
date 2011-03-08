@@ -1,0 +1,11 @@
+3
+^YSyntax: ^Nclearroom
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Removes all objects "on the floor" of the room you are in
+
+^RRestrictions:^N
+
+None

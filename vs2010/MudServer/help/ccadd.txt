@@ -1,0 +1,11 @@
+4
+^YSyntax: ^Nccadd <channel> <owner>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+This command adds a new club channel, and sets it's owner.
+
+^RRestrictions:^N
+
+None

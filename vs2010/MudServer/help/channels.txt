@@ -1,0 +1,19 @@
+0
+^RChannels^N
+
+Channels are there to allow players who share an interest to chat without having to use mutli-tells or go to another room. Channels can only be created by the admin, and only the owner can allow a player to join a channel.
+
+To use a channel, either find the channel name or the number off of "cclist"
+
+eg, channel 0 is the "techie" channel
+
+to see who is listening on this channel, use "ccwho techie" or "ccwho 0"
+
+Then to chat on the channel use the following commands:
+
+^Hcu <channel> <message>^N - channel say
+^Hce <channel> <action>^N - channel emote
+^Hcs <channel> <song>^N - channel sing
+^Hct <channel> <thought>^N - channel think
+
+If the channels are getting a little much, you can mute all channels with the "ccmute" command

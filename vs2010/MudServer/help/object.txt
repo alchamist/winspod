@@ -1,0 +1,49 @@
+1
+^YObject Help^N
+
+Objects have their own scripting language. As with aliases, multiple commands can be scripted for one action using a semicolon to seperate them. The commands come in three parts, and the systems will process them in the following order.
+
+"Player" refers to the player using the object
+
+^PIf statements ^N^p(Must be at the start of the command line if used)^N
+
+ ^RCmd   Effect^N
+^G%ipn^N - If player rank = Newbie
+^G%ipr^N - If player rank = Resident
+^G%ipg^N - If player rank = Guide
+^G%ips^N - If player rank = Staff
+^G%ipa^N - If player rank = Admin
+^Y%ign^N - If player rank > Newbie
+^Y%igr^N - If player rank > Resident
+^Y%igg^N - If player rank > guide
+^R%ilg^N - If player rank < guide
+^R%ils^N - If player rank < staff
+^R%ila^N - If player rank < admin
+
+
+^PVariables ^N^p(Can appear anywhere in the command line)^N
+
+ ^RVar   Effect^N
+^G%pnm^N - Player name
+^G%onm^N - Object owner's name
+^G%cnm^N - Object creator's name
+^G%obn^N - Object's name
+^Y%psp^N - Player subject pronoun (he/she)
+^Y%pop^N - Player object pronoun (him/her)
+^Y%pap^N - Player attributive pronoun (his/her)
+^Y%ppn^N - Player possesive pronoun (his/hers)
+
+
+^PCommands ^N^p(Must be at the start or directly after an if statement)
+
+^R Cmd   Rank  Effect
+^G%stp^N - ^BAll^N - Send to player
+^G%str^N - ^BAll^N - Send to room
+^G%sta^N - ^BAdm^N - Send to all
+^G%rmv^N - ^BAll^N - Remove object from player inventory
+^G%wld^N - ^BAll^N - Wield object
+^G%trn^N - ^BAdm^N - Transport player
+^G%wib^N - ^BAdm^N - Wibble player
+^G%jal^N - ^BAdm^N - Jail player (not yet implimented)
+^G%bmp^N - ^BAdm^N - Bump player
+^G%drp^N = ^BAdm^N - Drop item on floor (lower ranks automatically drop item if it can be)

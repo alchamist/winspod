@@ -1,0 +1,104 @@
+0
+
+^PTuesday 3rd August 2010^N
+r1-11 - Initial socket connection and communication code created
+
+^PWednesday 4th August 2010^N
+r12 - Finished club channel code
+r13 - Minor fixes
+r14 - Added cmdRename
+
+^PThursday 5th August 2010^N
+r15 - Added the internal mail code
+
+^PFriday 6th August 2010^N
+r16 - Added Warning and Git/AutoGit stuff
+r17 - Friend Add/Remove/tf/rf/ttf/rtf added
+r18 - ITAG Stuff
+r19 - Added Recap
+r20 - Started alias processing stuff, and added logonscript basics
+
+^PTuesday 10th August 2010^N
+r21 - Added more alias stuff
+r22 - Added logonmsg/logoffmsg/entermsg/exitmsg/pinfo
+r23 - Refactored the quit code
+r24 - Added description stuff
+r25 - Tagline added
+r26 - Started refactor of friends/list
+
+^PThursday 26th August 2010^N
+r27 - Fixed bug with creating the initial admin user
+r28 - Added cmdInform to set inform list.
+
+^PTuesday 31st August 2010^N
+r29 - Added roomMessage code
+
+^PWednesday 1st September 2010^N
+r30 - Added room description and room name code
+r31 - Added most of the room creation code etc (user's home rooms not done yet)
+r32 - Refactored room stuff to seperate room shortName and systemName
+r33 - Added room locks, room lists and join commands
+r34 - Added code to rename rooms system name and update links on change of username
+
+^PThursday 2nd September 2010^N
+r35 - Start of objects code - struct and list
+r36 - Object code, including object action code, plus start of inventory system.
+r37 - Added cmdInventory and weight
+r38 - added cmdGet for inventory
+r39 - added inventory drop
+
+^PFriday 3rd September 2010^N
+r40 - added more flist stuff, including key.
+r41 - Added grab code
+
+^PMonday 6th September 2010^N
+r42 - None
+r43 - None
+r44 - None
+r45 - Various bug fixes including reconnection code
+
+^PTuesday 7th September 2010^N
+r46 - added idlehistory code
+r47 - added last connections logging
+r48 - more object code, including dropping items on floor where CanDropOnFloor flag set
+
+^PWednesday 8th September 2010^N
+r49 - all commands except news system and games now added. various bug fixes included.
+r50 - added inform code
+r51 - added some help files
+r52 - cleaned up the connection logging and fixed bug with show file code
+
+^PThursday 9th September 2010^N
+r53 - Moved volatile files to appdata folder to removed write permission issues
+r54 to r59 - More work on file permissions
+r60 - Updated code to improve Windows based telnet output
+
+^PTuesday 14th September 2010^N
+r61 - Seperated out classes for better clarity
+r62 - Added rank command
+r63 - Added spod priv and spod channel
+r64 - Added minister rank and marital status stuff
+r65 - Added annul command for admin
+
+^PWednesday 15th September 2010^N
+r66 - Added some more player info stuff (facebook, twitter etc)
+r67 - Tidied up the cmd command output
+r68 - Added the exclude command
+r69 - Tidied up the cmd command to allow listing by start letter
+
+^PThursday 16th September 2010^N
+r70 - Added basic webserver with who is online and player bio
+r71 - Corrected svn error with files
+
+^PFriday 17th September 2010^N
+r72 - Fixed bugs found in testing. Added more funtion to webserver
+r73 - Updated a few output errors in examine
+r74 - More webserver work. Added count of players on in day for stats
+
+^PWednesday 22nd September 2010^N
+r75 - Added jail system
+
+^PFriday 24th September 2010^N
+r76 - Added timestamp command
+r77 - Added default.build to project for nant
+r78 - Added Truespod time

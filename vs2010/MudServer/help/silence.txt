@@ -1,0 +1,11 @@
+3
+^YSyntax: ^NSilence <player>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Removes a players ability to shout
+
+^RRestrictions:^N
+
+Player must be on-line

@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Ncclist
+^YAliases: ^NNone
+
+^PEffect:^N
+
+This command will list all active channels
+
+^RRestrictions:^N
+
+None

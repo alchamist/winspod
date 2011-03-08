@@ -1,0 +1,67 @@
+﻿body
+{
+	background-color:#E7E4D3;
+	margin-left: auto;
+	margin-right: auto;
+	padding:0px;
+	font-family: tahoma;
+	font-size: 12px;
+	width: 765px;
+}
+
+.onlinelist
+{
+	font-family: tahoma;
+	font-size: 12px;
+	border: solid 1px #000000;
+	background-color: white;
+}
+
+.onlinelist_header
+{
+    font-weight: bold;
+}
+
+tr.rank5 td
+{
+    background-color: cyan;
+    background: cyan;
+    
+}
+
+.title
+{
+    color: #ff0000;
+}
+
+span.rank5
+{
+	color: cyan;
+}
+
+span.rank4
+{
+    color: red;
+}
+
+span.rank3
+{
+    color: magenta;
+}
+
+span.rank2
+{
+    color: green;
+}
+
+span.rank1
+{
+    color: white;
+}
+
+.stats
+{
+	border: solid 1px #000000;
+	background-color: white;
+	padding: 10px;
+}

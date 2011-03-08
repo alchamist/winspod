@@ -1,0 +1,11 @@
+﻿4
+^YSyntax: ^Nat <thought>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Sends a thought to the admin channel.
+
+^RRestrictions:^N
+
+None

@@ -1,0 +1,11 @@
+﻿4
+^YSyntax: ^Nam
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Toggles muting of the admin channel
+
+^RRestrictions:^N
+
+None

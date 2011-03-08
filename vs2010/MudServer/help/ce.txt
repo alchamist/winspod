@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Nce <channel> <action>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Sends an emote <action> to Club channel <channel>
+
+^RRestrictions:^N
+
+You must be on the channel to use this command

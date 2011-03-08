@@ -1,0 +1,11 @@
+﻿4
+^YSyntax: ^Nau <thought>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Sends a message to the admin channel.
+
+^RRestrictions:^N
+
+None

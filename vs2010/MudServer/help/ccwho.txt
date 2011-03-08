@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Nccwho <channel>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Lists all players listening on <channel>
+
+^RRestrictions:^N
+
+You must be a memeber of that channel
