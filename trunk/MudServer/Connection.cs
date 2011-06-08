@@ -100,7 +100,7 @@ namespace MudServer
         public StreamReader         Reader;
         public StreamWriter         Writer;
         public static ArrayList     connections = new ArrayList();
-        private int                 myNum;
+        private int                 myNum = 0;
         public int                  myState = 0; // 0 = new connection, 1 = username supplied, 2 = new player, 3 = password supplied, 4 = active
         public Player               myPlayer;
         private string              connPoint;

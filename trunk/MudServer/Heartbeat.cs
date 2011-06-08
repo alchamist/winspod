@@ -20,7 +20,7 @@ namespace MudServer
                 if (myPlayer.HourlyChime && DateTime.Now.Minute == 0 && DateTime.Now.Hour != lastHChimeHour && !myPlayer.InEditor)
                 {
                     lastHChimeHour = DateTime.Now.Hour;
-                    sendToUser("{bell} \r\n-=*>^RDing^YDong^N! The time is now " + (DateTime.Now.AddHours(myPlayer.JetLag)).ToShortTimeString() + "{reset}", true, true, false);
+                    sendToUser("{bell} \r\n-=*> ^YDing^RDong^N! The time is now " + (DateTime.Now.AddHours(myPlayer.JetLag)).ToShortTimeString() + "{reset}", true, true, false);
                     flushSocket();
                 }
 
