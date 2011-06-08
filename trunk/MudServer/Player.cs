@@ -861,11 +861,10 @@ namespace MudServer
 
         public static Player LoadPlayer(string name, int userConn)
         {
-            Player load = null;
+            Player load = new Player();
 
             try
             {
-
                 //string path = (@"players\" + name.Substring(0, 1) + @"\" + name.ToLower() + ".xml").ToLower();
                 //string path = Path.Combine(Server.userFilePath,("players" + Path.DirectorySeparatorChar + name.Substring(0, 1).ToUpper() + Path.DirectorySeparatorChar + name.ToLower() + ".xml"));
                 string path = Path.Combine(Server.userFilePath, @"players" + Path.DirectorySeparatorChar + name.ToLower() + ".xml");
