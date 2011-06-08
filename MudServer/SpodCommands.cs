@@ -49,9 +49,9 @@ namespace MudServer
                         }
                         for (int j = start; j < i; j++)
                         {
-                            output += "\r\n^C" + (j + 1).ToString().PadRight(7) + "^N" + playerList[j].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[j].TrueSpodTime));
+                            output += "\r\n^C" + (j + 1).ToString().PadRight(7) + "^H" + playerList[j].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[j].TrueSpodTime));
                         }
-                        output += "\r\n^C" + (i + 1).ToString().PadRight(7) + "^N" + playerList[i].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[i].TrueSpodTime));
+                        output += "\r\n^C" + (i + 1).ToString().PadRight(7) + "^H" + playerList[i].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[i].TrueSpodTime));
 
                         if (i+1 != playerList.Count)
                         {
@@ -63,7 +63,7 @@ namespace MudServer
                             start = i + 1;
                             for (int j = start; j <= end; j++)
                             {
-                                output += "\r\n^C" + (j + 1).ToString().PadRight(7) + "^N" + playerList[j].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[j].TrueSpodTime));
+                                output += "\r\n^C" + (j + 1).ToString().PadRight(7) + "^H" + playerList[j].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[j].TrueSpodTime));
                             }
                         }
                     }
@@ -96,9 +96,9 @@ namespace MudServer
                             realStart = start + 1;
                             for (int j = start; j < i; j++)
                             {
-                                output += "\r\n^C" + (j + 1).ToString().PadRight(7) + "^N" + playerList[j].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[j].TrueSpodTime));
+                                output += "\r\n^C" + (j + 1).ToString().PadRight(7) + "^H" + playerList[j].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[j].TrueSpodTime));
                             }
-                            output += "\r\n^C" + (i + 1).ToString().PadRight(7) + "^N" + playerList[i].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[i].TrueSpodTime));
+                            output += "\r\n^C" + (i + 1).ToString().PadRight(7) + "^H" + playerList[i].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[i].TrueSpodTime));
 
                             if (i + 1 != playerList.Count)
                             {
@@ -110,7 +110,7 @@ namespace MudServer
                                 start = i + 1;
                                 for (int j = start; j <= end; j++)
                                 {
-                                    output += "\r\n^C" + (j + 1).ToString().PadRight(7) + "^N" + playerList[j].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[j].TrueSpodTime));
+                                    output += "\r\n^C" + (j + 1).ToString().PadRight(7) + "^H" + playerList[j].UserName + " ^Gwith^N " + formatTime(TimeSpan.FromSeconds(playerList[j].TrueSpodTime));
                                 }
                             }
                             realEnd = (end == 0 ? playerList.Count : end+1);
