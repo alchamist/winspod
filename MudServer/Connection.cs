@@ -341,7 +341,16 @@ namespace MudServer
                             }
                             else
                             {
-                                myPlayer = Player.LoadPlayer(line.Trim(), myNum);
+                                myPlayer = null;
+                                try
+                                {
+                                    myPlayer = Player.LoadPlayer(line.Trim(), myNum);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Writer.WriteLine("Sorry, there has been an error loading your profile " + ex.ToString());
+                                }
+
 
                                 if ((AppSettings.Default.LockLevel > 0 && myPlayer.PlayerRank < AppSettings.Default.LockLevel))
                                 {
