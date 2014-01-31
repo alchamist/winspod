@@ -203,7 +203,14 @@ namespace MudServer
                     }
                     lock (BigLock)
                     {
-                        ProcessLine(line);
+                        try
+                        {
+                            ProcessLine(line);
+                        }
+                        catch
+                        {
+
+                        }
                     }
                 }
             }
@@ -1870,6 +1877,8 @@ namespace MudServer
         {
             Writer.WriteLine(AnsiColour.Colorise("Thanks for visiting &t. Goodbye", myPlayer.DoColour));
             Writer.Flush();
+            Writer.Close();
+            heartbeat.Stop();
             
             Console.WriteLine("[" + DateTime.Now.ToShortTimeString() + "] Logout: " + myPlayer.UserName);
 

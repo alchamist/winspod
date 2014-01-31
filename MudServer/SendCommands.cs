@@ -106,7 +106,9 @@ namespace MudServer
                     }
                     catch (Exception ex)
                     {
+                        conn.socket.Close();
                         logError(ex.ToString(), "Socket write");
+                        continue;
                     }
                 }
             }
