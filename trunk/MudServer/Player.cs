@@ -118,6 +118,7 @@ namespace MudServer
         public MaritalStatus maritalStatus = MaritalStatus.Single;          // Marital status
 
         public bool         proposer = false;                               // Were they the one to propose?
+
         
         #endregion
 
