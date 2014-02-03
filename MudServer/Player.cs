@@ -88,6 +88,13 @@ namespace MudServer
             public string value;
         }
 
+        public struct gamestats
+        {
+            public int won;
+            public int lost;
+            public int drawn;
+        }
+
         #region attributes
 
         private string      username;                                       // Players username
@@ -200,6 +207,8 @@ namespace MudServer
         private bool        isAutoGit = false;                              // Has the user been auto-gitted for too many warnings?
         private int         slapped;                                        // Number of times a player has been slapped
         private int         logons;                                         // Number of times they have logged on
+
+        public gamestats    minesweeper;                                    // Minesweeper game stats
 
         #endregion
 
