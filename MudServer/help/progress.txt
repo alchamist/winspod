@@ -111,3 +111,4 @@ r85 - Fixed mono crash on quit
 
 ^PMonday 3rd February 2014^N
 r86 - Fixed issue with ASCII control characters sent in password
+r87 - Implemented Minesweeper game
