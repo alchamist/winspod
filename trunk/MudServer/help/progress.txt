@@ -102,3 +102,12 @@ r75 - Added jail system
 r76 - Added timestamp command
 r77 - Added default.build to project for nant
 r78 - Added Truespod time
+
+^PWednesday 8th June 2011^N
+r79-84 - Mono compatibility work
+
+^PFriday 31st January 2014^N
+r85 - Fixed mono crash on quit
+
+^PMonday 3rd February 2014^N
+r86 - Fixed issue with ASCII control characters sent in password
