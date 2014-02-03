@@ -1171,6 +1171,9 @@ namespace MudServer
                         output += "Single";
                     output += "{reset}\r\n";
 
+                    if (ex.minesweeper.won > 0 || ex.minesweeper.lost > 0)
+                        output += "{bold}{green}Minesweeper {reset}".PadRight(49, ' ') + ": {green}Won " + ex.minesweeper.won + ", Lost " + ex.minesweeper.lost + "{reset}\r\n";
+
                     if (myPlayer.PlayerRank >= (int)Player.Rank.Staff)
                     {
                         output += "{bold}{red}Kicked {reset}".PadRight(47, ' ') + ": {red}" + ex.KickedCount.ToString() + "{reset}\r\n";

@@ -167,6 +167,7 @@ namespace MudServer
                 msInGame = false;
                 msShowGrid(true);
                 sendToUser("^RKABOOOOOOOOOOM^N - Game Over", true, false, false);
+                myPlayer.minesweeper.lost++;
             }
             else
             {
@@ -192,6 +193,7 @@ namespace MudServer
                     // Won!
                     msShowGrid(true);
                     sendToUser("^YCongratulations - You win!^N", true, false, false);
+                    myPlayer.minesweeper.won++;
                     msInGame = false;
                 }
                 else
