@@ -595,8 +595,11 @@ namespace MudServer
             }
             else if (myState == 9)
             {
+                // Remove ascii control characters that appear in Tinyfuge connection issue
+                line = Regex.Replace(line, @"[^\u0000-\u007F]", string.Empty).Replace(((char)31).ToString(), ""); ;
+
                 // password supplied
-                if (line.Trim().ToLower() == "quit")
+                if (line.Replace('�', ' ').Trim().ToLower() == "quit")
                 {
                     sendEchoOn();
                     Writer.Write(AnsiColour.Colorise("\r\n{bold}Please enter your username: {reset}"));

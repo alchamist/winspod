@@ -572,11 +572,19 @@ namespace MudServer
             logToFile("System restarted by " + myPlayer.UserName, "admin");
             foreach (Connection c in connections)
             {
-                if (c.socket.Connected && c.myPlayer != null)
+                try
                 {
-                    c.Writer.Write(AnsiColour.Colorise("^RSYSTEM IS RESTARTING - BACK IN A JIFFY!\r\n", c.myPlayer.DoColour));
-                    c.Writer.Flush();
-                    c.socket.Close();
+                    if (c.socket.Connected && c.myPlayer != null)
+                    {
+                        c.Writer.Write(AnsiColour.Colorise("^RSYSTEM IS RESTARTING - BACK IN A JIFFY!\r\n", c.myPlayer.DoColour));
+                        c.Writer.Flush();
+                        c.Writer.Close();
+                        c.socket.Close();
+                    }
+                }
+                catch
+                {
+
                 }
             }
             Server.Restart();

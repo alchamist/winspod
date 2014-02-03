@@ -78,6 +78,7 @@
     <Compile Include="ClubChannel.cs" />
     <Compile Include="CommsCommands.cs" />
     <Compile Include="Connection.cs" />
+    <Compile Include="GameCommands.cs" />
     <Compile Include="FileMethods.cs" />
     <Compile Include="Heartbeat.cs" />
     <Compile Include="Mail.cs" />
