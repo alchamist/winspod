@@ -40,6 +40,7 @@ namespace MudServer
                 newObj.Creator = myPlayer.UserName;
                 newObj.Owner = myPlayer.UserName;
                 newObj.Gender = (gender)myPlayer.Gender;
+                newObj.Rank = (Player.Rank)myPlayer.PlayerRank;
 
                 playerObjects.Add(newObj);
                 saveObjects();
@@ -684,9 +685,11 @@ namespace MudServer
                     }
                     else
                     {
-                        if (target.Rank < Player.Rank.Admin)
-                            myPlayer.RemoveFromInventory(target.Name);
                         doObjectCode(target.Name, "drop");
+                        if (myPlayer.PlayerRank < (int)Player.Rank.Admin)
+                            myPlayer.RemoveFromInventory(target.Name);
+                        //if (target.Rank < Player.Rank.Admin)
+                        //    myPlayer.RemoveFromInventory(target.Name);
                     }
                 }
             }

@@ -113,3 +113,4 @@ r85 - Fixed mono crash on quit
 r86 - Fixed issue with ASCII control characters sent in password
 r87 - Implemented Minesweeper game
 r88 - Added Minesweeper stats to player profile
+r89 - Fixed error with drop command
