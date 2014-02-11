@@ -24,7 +24,7 @@ namespace MudServer
         public static int playerCount = 0;
         public static int playerCountToday = 0;
 
-        public static string userFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "winspod");  
+        public static string userFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "winspod");
 
         public struct cmdStats
         {
@@ -104,6 +104,7 @@ namespace MudServer
             server.Bind(new IPEndPoint(IPAddress.Any, PortNumber));
             server.Listen(BacklogSize);
             Console.WriteLine("[" + DateTime.Now.ToShortTimeString() + "] Socket active. Listening for connections on port " + PortNumber.ToString());
+            Console.WriteLine("Application data storage folder: " + userFilePath);
             while (true)
             {
                 Socket conn = server.Accept();

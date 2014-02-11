@@ -123,6 +123,7 @@ namespace MudServer
         {
             List<Room> list = new List<Room>();
             string path = Path.Combine(Server.userFilePath, (@"rooms" + Path.DirectorySeparatorChar));
+            
             if (Directory.Exists(path))
             {
                 DirectoryInfo di = new DirectoryInfo(path);

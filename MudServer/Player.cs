@@ -853,6 +853,7 @@ namespace MudServer
                 bool ret = false;
                
                 string path = Path.Combine(Server.userFilePath, @"players" + Path.DirectorySeparatorChar);
+                
                 string fname = this.username + ".xml";
                 string fpath = path + fname;
                 if (!Directory.Exists(path))
