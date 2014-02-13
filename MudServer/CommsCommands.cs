@@ -267,7 +267,8 @@ namespace MudServer
                         }
                         else
                         {
-                            sendToUser("{bold}{yellow}[" + myPlayer.ColourUserName + "^Y]{reset} " + wibbleText(message, false), c.myPlayer.UserName, true, c.myPlayer.DoColour, c.myPlayer.UserName == myPlayer.UserName ? false : true, true);
+                            //sendToUser("{bold}{yellow}[" + myPlayer.ColourUserName + "^Y]{reset} " + wibbleText(message, false), c.myPlayer.UserName, true, c.myPlayer.DoColour, c.myPlayer.UserName == myPlayer.UserName ? false : true, true);
+                            sendToUser("{bold}{yellow}[" + myPlayer.ColourUserName + "^Y]{reset} " + wibbleText(message, false), c.myPlayer.UserName, true, c.myPlayer.DoColour, false, true);
                         }
                     }
                 }
