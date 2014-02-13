@@ -113,4 +113,9 @@ r85 - Fixed mono crash on quit
 r86 - Fixed issue with ASCII control characters sent in password
 r87 - Implemented Minesweeper game
 r88 - Added Minesweeper stats to player profile
+
+^PWednesday 12th February 2014^N
 r89 - Fixed error with drop command
+
+^PThursday 14th February 2014^N
+r90 - Date format fixing

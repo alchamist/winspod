@@ -1097,7 +1097,7 @@ namespace MudServer
                         TimeSpan rAge = TimeSpan.FromSeconds((DateTime.Now - ex.ResDate).TotalSeconds);
                         int rAgeYears = (int)Math.Floor(rAge.TotalDays/365);
                         int rAgeDays = (int)rAge.TotalDays%365;
-                        output += "{bold}{blue}Resident age {reset}".PadRight(48, ' ') + ": {blue}" + (rAgeYears > 0 ? (rAgeYears.ToString() + " Year, " + (rAgeYears > 1 ? "s" : "")) : "") + rAgeDays.ToString() + " day" + (rAgeDays == 1 ? "" : "s") + " {reset}\r\n";
+                        output += "{bold}{blue}Resident age {reset}".PadRight(48, ' ') + ": {blue}" + (rAgeYears > 0 ? (rAgeYears.ToString() + " Year" + (rAgeYears > 1 ? "s, " : ", ")) : "") + rAgeDays.ToString() + " day" + (rAgeDays == 1 ? "" : "s") + " {reset}\r\n";
                         output += "{bold}{blue}Ressed by {reset}".PadRight(48, ' ') + ": {blue}" + ex.ResBy + "{reset}\r\n";
                     }
 
@@ -1120,7 +1120,7 @@ namespace MudServer
                     if (ex.FacebookPage != "")
                         output += "{bold}{magenta}Facebook Page {reset}".PadRight(51, ' ') + ": {magenta}" + ex.FacebookPage + "{reset}\r\n";
                     if (ex.Twitter != "")
-                        output += "{bold}{magenta}Twitter ID {reset}".PadRight(51, ' ') + ": {magenta}" + ex.Twitter + "{reset}\r\n";
+                        output += "{bold}{magenta}Twitter ID {reset}".PadRight(51, ' ') + ": {magenta}@" + ex.Twitter + "{reset}\r\n";
 
                     for (int i = 0; i < ex.favourites.Count; i++)
                     {
