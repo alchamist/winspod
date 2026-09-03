@@ -101,6 +101,23 @@ namespace MudServer
         // loop is async (see RunAsync below), this is a SemaphoreSlim(1,1) used the same way:
         // exactly one connection's game-state work runs at a time, everything else queues.
         static readonly SemaphoreSlim BigLock = new SemaphoreSlim(1, 1);
+
+        /// <summary>
+        /// Cheap, non-blocking check used by the health/watchdog path to detect a hung
+        /// game loop - e.g. a command handler stuck in an infinite loop while holding
+        /// BigLock. That's the exact failure mode ew-too's angel.c heartbeat existed to
+        /// catch: the process is still running (so a plain "did it exit?" supervisor
+        /// sees nothing wrong), but it's no longer doing useful work. If this can't
+        /// acquire BigLock within <paramref name="timeout"/>, something is stuck.
+        /// </summary>
+        public static async Task<bool> ProbeLivenessAsync(TimeSpan timeout)
+        {
+            if (!await BigLock.WaitAsync(timeout))
+                return false;
+
+            BigLock.Release();
+            return true;
+        }
         public Socket                      socket;
         public StreamReader         Reader;
         public StreamWriter         Writer;

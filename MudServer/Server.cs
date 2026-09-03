@@ -34,6 +34,10 @@ namespace MudServer
 
         public static string userFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "winspod");
 
+        /// <summary>Result of the most recent liveness probe (see Connection.ProbeLivenessAsync), read by /healthz.</summary>
+        public static bool LastLivenessOk { get; private set; } = true;
+        public static DateTime LastLivenessCheck { get; private set; } = DateTime.Now;
+
         public struct cmdStats
         {
             public string cmd;
@@ -81,6 +85,10 @@ namespace MudServer
             Console.WriteLine("[" + DateTime.Now.ToShortTimeString() + "] Socket active. Listening for connections on port " + portNumber.ToString());
             Console.WriteLine("Application data storage folder: " + userFilePath);
 
+            // No-op unless actually running under systemd (NOTIFY_SOCKET set) - tells a
+            // Type=notify unit the service has finished starting.
+            SdNotify.Ready();
+
             int conCount = 0;
 
             // Closing the socket is what unblocks AcceptAsync below when we're asked to stop.
@@ -101,7 +109,11 @@ namespace MudServer
             }
         }
 
-        static void Tick(object sender, ElapsedEventArgs e)
+        // This is `async void`, normally worth avoiding, but it's the standard exception:
+        // a timer event handler has nowhere to hand back a Task to anyway. Any exception
+        // here would otherwise vanish silently, so ProbeLivenessAsync is careful to only
+        // ever return true/false, never throw.
+        static async void Tick(object sender, ElapsedEventArgs e)
         {
             if (shutdownSecs > -1)
             {
@@ -122,6 +134,18 @@ namespace MudServer
                         playerCountToday++;
                 }
             }
+
+            // See Connection.ProbeLivenessAsync: this is the equivalent of ew-too's angel.c
+            // heartbeat - proof the game loop (not just this timer) is actually making
+            // progress, not just that the process hasn't exited. Only pet systemd's
+            // watchdog when the probe succeeds; if it keeps failing, WatchdogSec (see the
+            // sample unit file) will eventually have systemd kill and restart the process,
+            // the same outcome angel.c reached when its own heartbeat went quiet.
+            LastLivenessOk = await Connection.ProbeLivenessAsync(TimeSpan.FromSeconds(2));
+            LastLivenessCheck = DateTime.Now;
+
+            if (LastLivenessOk)
+                SdNotify.Watchdog();
         }
 
         /// <summary>

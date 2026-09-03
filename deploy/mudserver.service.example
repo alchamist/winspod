@@ -1,0 +1,39 @@
+# Example systemd unit for MudServer, replacing ew-too's angel.c.
+#
+# angel.c did two jobs: (1) restart the server if it exited/crashed, with a
+# backoff so it wouldn't fork-bomb on repeated failure, and (2) detect a HUNG
+# process via its own heartbeat socket and kill+restart it. (1) is systemd's
+# job natively (Restart=/StartLimitBurst= below); (2) is what WatchdogSec=
+# plus the app's own sd_notify(WATCHDOG=1) pings (see Server.Tick in
+# Server.cs / SdNotify.cs) give you, without writing a second binary.
+#
+# Copy to /etc/systemd/system/mudserver.service, adjust the paths/user, then:
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now mudserver
+
+[Unit]
+Description=Winspod MudServer
+After=network.target
+
+[Service]
+Type=notify
+WorkingDirectory=/opt/mudserver
+ExecStart=/usr/bin/dotnet /opt/mudserver/MudServer.dll
+User=mudserver
+Restart=on-failure
+
+# If the app stops sending WATCHDOG=1 pings (see Server.Tick) for this long,
+# systemd treats it as hung and kills+restarts it - this is the part a plain
+# "did the process exit?" supervisor (and angel.c's basic crash-restart) can't
+# see on its own. Server.Tick pings roughly once a second when it's healthy,
+# so this gives a wide margin before treating it as stuck.
+WatchdogSec=30
+
+# Crash-loop protection: give up (rather than restart forever) if it fails
+# more than 5 times in 60 seconds - the same guard angel.c had (it gave up
+# after 4 crashes in a 45s window).
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Install]
+WantedBy=multi-user.target

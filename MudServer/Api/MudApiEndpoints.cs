@@ -26,6 +26,27 @@ namespace MudServer.Api
             app.MapGet("/api/who", GetWho);
             app.MapGet("/api/leaderboard", GetLeaderboard);
             app.MapGet("/api/players/{username}", GetPlayer);
+            app.MapGet("/healthz", GetHealth);
+        }
+
+        static IResult GetHealth()
+        {
+            // Reads the result of the same liveness probe (Connection.ProbeLivenessAsync)
+            // that drives the systemd watchdog ping in Server.Tick - this is that signal,
+            // exposed for anything that isn't systemd: Docker's HEALTHCHECK, a load
+            // balancer, external uptime monitoring. "Stale" (no check in the last 10s,
+            // i.e. more than a few missed 1-second ticks) is treated the same as
+            // "unhealthy" - it means the tick loop itself has stopped running.
+            bool fresh = (DateTime.Now - Server.LastLivenessCheck) < TimeSpan.FromSeconds(10);
+            bool healthy = fresh && Server.LastLivenessOk;
+
+            var body = new
+            {
+                status = healthy ? "ok" : "unhealthy",
+                lastCheck = Server.LastLivenessCheck
+            };
+
+            return healthy ? Results.Ok(body) : Results.Json(body, statusCode: 503);
         }
 
         static StatusDto GetStatus()
