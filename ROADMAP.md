@@ -60,7 +60,12 @@ unless noted.
 ## Commands (from the ew-too diff)
 
 Ordered roughly by how much they'd actually change day-to-day play, per the
-comparison against `github.com/talkers/ew-too`'s `clist.h`:
+comparison against `github.com/talkers/ew-too`'s `clist.h`. Verified against
+the live `cmd all` listing (213 commands) and `commands/cmdList.dat` - unlike
+the list subsystem below, none of these five are hiding behind a different
+name or a subcommand of the generic `set` (which only covers social-profile
+fields: jabber/icq/msn/yahoo/skype/email/URLs/jetlag/favourites). Confirmed
+gaps, not diff artifacts:
 
 1. **`converse` mode** — type freely without prefixing every line with
    `'`/`;`. Standout gap for a chat-first talker; no equivalent found in
