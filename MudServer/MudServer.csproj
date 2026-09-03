@@ -7,7 +7,9 @@
     <AssemblyName>MudServer</AssemblyName>
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
-    <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- Culture-aware date/time formatting (dd/MM/yyyy for this UK-run talker) needs real
+         ICU data, so this can't be InvariantGlobalization - see CultureInfo pinning in
+         Program.cs, which is what actually makes the format consistent across hosts. -->
     <!-- Legacy hand-written Properties\AssemblyInfo.cs is kept for its product/copyright
          attributes, so let the SDK skip generating a second one. -->
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
