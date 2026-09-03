@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -95,7 +96,11 @@ namespace MudServer
         }
 
 
-        static object               BigLock = new object();
+        // Was a Monitor (lock(BigLock)) guarding a blocking, one-OS-thread-per-connection
+        // loop. Monitor locks can't be held across an `await`, so now that the per-connection
+        // loop is async (see RunAsync below), this is a SemaphoreSlim(1,1) used the same way:
+        // exactly one connection's game-state work runs at a time, everything else queues.
+        static readonly SemaphoreSlim BigLock = new SemaphoreSlim(1, 1);
         public Socket                      socket;
         public StreamReader         Reader;
         public StreamWriter         Writer;
@@ -154,22 +159,34 @@ namespace MudServer
 
             roomList = loadRooms();
 
-            new Thread(ClientLoop).Start();
+            // Previously: new Thread(ClientLoop).Start() - one live OS thread parked,
+            // blocked, for every connected player for as long as they stayed connected.
+            // RunAsync (below) is started by the caller (Server.ListenAsync) instead;
+            // it awaits socket I/O rather than blocking a thread on it, so an idle
+            // connection costs no thread at all between lines of input.
         }
 
         #region Socket stuff
 
-        void ClientLoop()
+        /// <summary>
+        /// Per-connection I/O loop. Started fire-and-forget by Server.ListenAsync for
+        /// each accepted socket. All mutation of shared game state (player lists, rooms,
+        /// channels, etc.) still happens serialized behind BigLock, exactly as it did
+        /// under the old lock(BigLock) - the only change is that acquiring/releasing it
+        /// is now async-aware so it can wrap `await`-ing the socket for the next line.
+        /// </summary>
+        public async Task RunAsync()
         {
             try
             {
-                lock (BigLock)
-                {
-                    OnConnect();
-                }
+                await BigLock.WaitAsync();
+                try { OnConnect(); }
+                finally { BigLock.Release(); }
+
                 while (true)
                 {
-                    lock (BigLock)
+                    await BigLock.WaitAsync();
+                    try
                     {
                         foreach (Connection conn in connections)
                         {
@@ -183,12 +200,14 @@ namespace MudServer
                             }
                         }
                     }
+                    finally { BigLock.Release(); }
+
                     string line = null;
                     if (socket.Connected && Reader.BaseStream.CanRead)
                     {
                         try
                         {
-                            line = Reader.ReadLine();
+                            line = await Reader.ReadLineAsync();
                         }
                         catch//(Exception e)
                         {
@@ -196,31 +215,38 @@ namespace MudServer
                         }
                     }
                     else
-                        OnDisconnect();
+                    {
+                        await BigLock.WaitAsync();
+                        try { OnDisconnect(); }
+                        finally { BigLock.Release(); }
+                    }
+
                     if (line == null)
                     {
                         break;
                     }
-                    lock (BigLock)
-                    {
-                        try
-                        {
-                            ProcessLine(line);
-                        }
-                        catch
-                        {
 
-                        }
+                    await BigLock.WaitAsync();
+                    try
+                    {
+                        ProcessLine(line);
                     }
+                    catch
+                    {
+
+                    }
+                    finally { BigLock.Release(); }
                 }
             }
             finally
             {
-                lock (BigLock)
+                await BigLock.WaitAsync();
+                try
                 {
                     socket.Close();
                     OnDisconnect();
                 }
+                finally { BigLock.Release(); }
             }
         }
 
@@ -1998,8 +2024,11 @@ namespace MudServer
                 switch (message.ToLower())
                 {
                     case "all":
-                        PerformanceCounter pc = new PerformanceCounter("Memory", "Available Bytes");
-                        long freeMemory = Convert.ToInt64(pc.NextValue());
+                        // PerformanceCounter("Memory", "Available Bytes") is Windows-only (it reads
+                        // Windows perf counters and throws PlatformNotSupportedException elsewhere).
+                        // GC.GetGCMemoryInfo() is the cross-platform equivalent for "how much memory
+                        // is available to this process" and works the same on Windows/Linux/macOS.
+                        long freeMemory = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
 
                         Process proc = Process.GetCurrentProcess();
                         long memused = proc.PrivateMemorySize64;
