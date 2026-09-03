@@ -225,6 +225,39 @@ namespace MudServer
                 movePlayer(AppSettings.Default.DefaultLoginRoom);
         }
 
+        // Per-player login room, overriding the default of resuming wherever they last
+        // logged out from (see the login flow in Connection.cs, around "myState == 9").
+        public void cmdConnectRoom(string message)
+        {
+            string room = message.Trim();
+
+            if (room == "")
+            {
+                if (myPlayer.ConnectRoom == "")
+                    sendToUser("You don't have a connect room set - you'll resume in whatever room you were last in.", true, false, false);
+                else
+                    sendToUser("Your connect room is set to " + getRoomFullName(myPlayer.ConnectRoom) + " - you'll start each session there.", true, false, false);
+            }
+            else if (room.ToLower() == "off" || room.ToLower() == "clear")
+            {
+                myPlayer.ConnectRoom = "";
+                myPlayer.SavePlayer();
+                sendToUser("Connect room cleared - you'll resume in whatever room you were last in.", true, false, false);
+            }
+            else
+            {
+                Room target = getRoom(room);
+                if (target == null)
+                    sendToUser("No such room \"" + room + "\"", true, false, false);
+                else
+                {
+                    myPlayer.ConnectRoom = target.systemName;
+                    myPlayer.SavePlayer();
+                    sendToUser("Your connect room is now set to " + getRoomFullName(target.systemName) + " - you'll start each session there.", true, false, false);
+                }
+            }
+        }
+
         public void cmdLook(string message)
         {
             Room currentRoom = getRoom(myPlayer.UserRoom);

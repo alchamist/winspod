@@ -47,6 +47,7 @@
 "cu","cmdCCSay",1,"channel"
 "cmd","cmdListCommands",0,"system"
 "colour","cmdColour",0,"player"
+"connectroom","cmdConnectRoom",0,"room"
 "create","cmdCreate",1,"builder"
 "dblank","cmdDBlank",3,"staff"
 "delobj","cmdDelObj",1,"builder"

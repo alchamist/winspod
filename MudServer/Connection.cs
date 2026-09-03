@@ -687,6 +687,11 @@ namespace MudServer
 
                             doLAlias();
 
+                            // A connect room (see cmdConnectRoom) overrides resuming wherever they
+                            // last logged out; re-validated here in case the room's since been deleted.
+                            if (myPlayer.ConnectRoom != "" && getRoom(myPlayer.ConnectRoom) != null)
+                                myPlayer.UserRoom = myPlayer.ConnectRoom;
+
                             sendToRoom(myPlayer.UserName + " " + myPlayer.EnterMsg, "", myPlayer.UserRoom, myPlayer.UserName);
                             myPlayer.LoginCount++;
                             myPlayer.SavePlayer();

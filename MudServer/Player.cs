@@ -103,6 +103,7 @@ namespace MudServer
         #region system stuff
 
         private string      room = "Main";                                  // Their current room
+        private string      connectRoom = "";                               // Room to place them in on login, if set (see cmdConnectRoom) - overrides resuming their last room
         private bool        newplayer = true;                               // Are they a new, unsaved player?
         private DateTime    resDate;                                        // Date player was rezzed
         private string      resBy;                                          // Staff member who rezzed them
@@ -262,6 +263,12 @@ namespace MudServer
         {
             get { return room; }
             set { room = value; }
+        }
+
+        public string ConnectRoom
+        {
+            get { return connectRoom; }
+            set { connectRoom = value; }
         }
 
         public string EnterMsg
