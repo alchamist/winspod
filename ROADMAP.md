@@ -68,17 +68,26 @@ comparison against `github.com/talkers/ew-too`'s `clist.h`:
 2. **`linewrap`/`wordwrap`/`set_term_width`** — per-player output width.
    Matters more now that a browser client (#3 above) is on the table, since
    terminal width assumptions get less predictable, not less.
-3. **Named-list subsystem** (`list`/`slist`/`tlist`/`rlist`/`find`/`key`/
-   `block`/`bar`/`invite`) — ew-too's general-purpose "arbitrary named
-   player lists" primitive; Winspod only has the narrower `flist`.
-4. **`connect_room`** — per-player custom login room vs. today's single
+3. **`connect_room`** — per-player custom login room vs. today's single
    system-wide `DefaultLoginRoom`.
-5. **`nopager`** — toggle for disabling output paging on long text; depends
+4. **`nopager`** — toggle for disabling output paging on long text; depends
    on whether Winspod pages long output at all today (needs checking).
-6. **`iacga`** — Telnet IAC Go-Ahead toggle for older/dumb clients. Cheap,
+5. **`iacga`** — Telnet IAC Go-Ahead toggle for older/dumb clients. Cheap,
    low-priority, include if doing a general Telnet-handling pass.
-7. **`site`/`netstat`** (admin) — inspecting/grouping connections by
+6. **`site`/`netstat`** (admin) — inspecting/grouping connections by
    IP/site, beyond today's `ipban`/`ipunban`.
+
+~~Named-list subsystem~~ — **already present**, corrected after actually
+running `flist` in-game rather than trusting the command-name diff alone.
+`list`/`flist` (`Connection.cs:cmdList`) exposes the full per-target flag
+matrix ew-too split across many verbs (`friend`/`find`/`inform`/`noisy`/
+`ignore`/`bar`/`beep`/`block`/`mailblock`/`grab`/`key`), plus the named
+groupings (`All`/`Friends`/`Staff`) ew-too also had; `where <player>` covers
+`find`. The earlier command-name diff missed this because `flist` is one
+`cmdList.dat` entry hiding a whole subsystem behind it — a reminder that
+this diff was done by comparing tables, not by actually exercising the
+commands, so treat the rest of this list the same way: a starting point to
+verify in-game, not a confirmed gap list.
 
 Explicitly **not** planned: ew-too's `malloc`/`dfstats`/`defrag`/`dtb`/`dtk`
 (manual C heap debugging — meaningless under the .NET GC) and `crash`
