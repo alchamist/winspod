@@ -230,9 +230,9 @@ namespace MudServer
                         {
                             line = await ReadBoundedLineAsync();
                         }
-                        catch//(Exception e)
+                        catch (Exception e)
                         {
-                            //logError(e.ToString(), "socket");
+                            logError(e.ToString(), "Socket");
                         }
                     }
                     else
@@ -252,9 +252,9 @@ namespace MudServer
                     {
                         ProcessLine(line);
                     }
-                    catch
+                    catch (Exception e)
                     {
-
+                        logError(e.ToString(), "ProcessLine");
                     }
                     finally { BigLock.Release(); }
                 }

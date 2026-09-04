@@ -77,7 +77,13 @@ namespace MudServer
                 string roomMessage = r.timerFire();
                 if (roomMessage != "")
                 {
-                    sendToRoom("\r\n" + roomMessage, roomMessage, r.systemName, "");
+                    // No real "sender" for an automated room-message tick - passing the
+                    // message as msgToSender too (as this used to) sent it unconditionally
+                    // to whichever connection's heartbeat happened to be ticking, with no
+                    // check that they were actually in room r. The room-scoped loop below
+                    // (msgToOthers, filtered by UserRoom == room) already correctly
+                    // delivers it to this connection too if it does happen to be in r.
+                    sendToRoom("\r\n" + roomMessage, "", r.systemName, "");
                 }
 
             }
