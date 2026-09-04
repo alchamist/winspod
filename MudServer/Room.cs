@@ -117,6 +117,16 @@ namespace MudServer
                     load.exits.RemoveAt(i);
             }
 
+            // Self-heal rooms saved before shortName was reliably set on creation (the
+            // auto-created default "Main" room never had one - see FileMethods.cs).
+            // Persisting the fix here, not just applying it in memory, means this runs
+            // at most once per affected room even though LoadRoom is called constantly.
+            if (load.fullName != null && string.IsNullOrEmpty(load.shortName))
+            {
+                load.shortName = load.systemName;
+                load.SaveRoom();
+            }
+
             return load;
         }
 
