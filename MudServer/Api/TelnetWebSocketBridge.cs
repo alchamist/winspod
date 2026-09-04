@@ -50,7 +50,15 @@ namespace MudServer.Api
 
             try
             {
-                await tcp.ConnectAsync(IPAddress.Loopback, AppSettings.Default.Port);
+                // The internal (loopback-only) listener, not the public telnet port -
+                // it expects one preamble line (the browser player's real IP) before the
+                // normal telnet session starts, so ipban/list ip/connection logging see
+                // the actual visitor instead of this bridge's own loopback address for
+                // every browser player. See Server.ListenInternalAsync.
+                await tcp.ConnectAsync(IPAddress.Loopback, Server.InternalBridgePort);
+                string realIp = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                byte[] preamble = Encoding.UTF8.GetBytes(realIp + "\n");
+                await tcp.GetStream().WriteAsync(preamble, 0, preamble.Length);
             }
             catch (Exception)
             {

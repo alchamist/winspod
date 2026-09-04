@@ -138,6 +138,14 @@ namespace MudServer
         // State for ReadBoundedLineAsync's CRLF handling across reads - see there.
         private bool                pendingLfSkip = false;
 
+        // Set by Server.cs's internal (loopback-only) listener for a connection relayed
+        // through the WebSocket bridge - without this, every bridged player's socket is
+        // the bridge's own loopback connection to the game, so ipban/list ip/connection
+        // logging would all see 127.0.0.1 for every browser player instead of their real
+        // address. Null for a normal telnet/TLS connection, which uses the real socket's
+        // RemoteEndPoint exactly as before.
+        public string                RemoteIpOverride = null;
+
         System.Timers.Timer         heartbeat = new System.Timers.Timer(); // Timer for heartbeat : idle out and hchime etc
         private int                 lastHChimeHour = -1;
 
@@ -397,8 +405,15 @@ namespace MudServer
 
         void OnConnect()
         {
-            connPoint = this.socket.RemoteEndPoint.ToString();
-            connPoint = connPoint.Substring(0, connPoint.IndexOf(":"));
+            if (RemoteIpOverride != null)
+            {
+                connPoint = RemoteIpOverride;
+            }
+            else
+            {
+                connPoint = this.socket.RemoteEndPoint.ToString();
+                connPoint = connPoint.Substring(0, connPoint.IndexOf(":"));
+            }
 
             IPAddress test = null;
 

@@ -29,6 +29,11 @@ namespace MudServer
     {
         const int BacklogSize = 20;
 
+        // Loopback-only, not exposed via Docker/env config - only the WebSocket bridge
+        // (Api/TelnetWebSocketBridge.cs) ever connects here, so it's not something a
+        // deployment needs to configure. See ListenInternalAsync for why this exists.
+        public const int InternalBridgePort = 44100;
+
         public static DateTime startTime = DateTime.Now;
         public static Socket server;
         public static int shutdownSecs = -1;
@@ -74,6 +79,14 @@ namespace MudServer
                 ? ListenTlsAsync(stoppingToken)
                 : Task.CompletedTask;
 
+            // Only needed when the WebSocket bridge itself is active (same condition
+            // Program.cs uses to map it) - the bridge relays through this instead of the
+            // public telnet port specifically so it can pass the browser player's real
+            // IP through (see ListenInternalAsync).
+            Task internalTask = AppSettings.Default.HTTPEnabled
+                ? ListenInternalAsync(stoppingToken)
+                : Task.CompletedTask;
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 using (listenerCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken))
@@ -83,6 +96,76 @@ namespace MudServer
             }
 
             await tlsTask;
+            await internalTask;
+        }
+
+        /// <summary>
+        /// A second telnet-protocol listener, identical to the public one except it's
+        /// bound to loopback only and expects one extra line before the normal telnet
+        /// session starts: the real IP of the browser player the WebSocket bridge is
+        /// relaying for. Without this, every bridged connection is the bridge's own
+        /// loopback socket to the game, so ipban/list ip/connection logging would all
+        /// see 127.0.0.1 for every browser player instead of their actual address.
+        /// Trusted unconditionally - nothing but our own bridge, running in the same
+        /// process, can ever reach a socket bound to loopback only.
+        /// </summary>
+        static async Task ListenInternalAsync(CancellationToken token)
+        {
+            Socket internalServer = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            internalServer.Bind(new IPEndPoint(IPAddress.Loopback, InternalBridgePort));
+            internalServer.Listen(BacklogSize);
+
+            using (token.Register(() => { try { internalServer.Close(); } catch { } }))
+            {
+                try
+                {
+                    while (true)
+                    {
+                        Socket conn = await internalServer.AcceptAsync(token);
+                        _ = HandleInternalConnectionAsync(conn, token);
+                    }
+                }
+                catch (OperationCanceledException) { }
+                catch (ObjectDisposedException) { }
+                catch (SocketException) { }
+            }
+        }
+
+        static async Task HandleInternalConnectionAsync(Socket conn, CancellationToken token)
+        {
+            NetworkStream stream = new NetworkStream(conn, true);
+            string realIp;
+            try
+            {
+                realIp = await ReadBridgePreambleAsync(stream, token);
+            }
+            catch (Exception e)
+            {
+                Connection.logError("Internal bridge connection preamble failed: " + e.Message, "Bridge");
+                try { conn.Close(); } catch { }
+                return;
+            }
+
+            var connection = new Connection(conn, Interlocked.Increment(ref conCount), stream);
+            connection.RemoteIpOverride = realIp;
+            await connection.RunAsync();
+        }
+
+        static async Task<string> ReadBridgePreambleAsync(NetworkStream stream, CancellationToken token)
+        {
+            var sb = new System.Text.StringBuilder();
+            byte[] one = new byte[1];
+            while (sb.Length < 64)
+            {
+                int read = await stream.ReadAsync(one, 0, 1, token);
+                if (read == 0)
+                    throw new IOException("Connection closed before preamble completed");
+                if (one[0] == (byte)'\n')
+                    break;
+                if (one[0] != (byte)'\r')
+                    sb.Append((char)one[0]);
+            }
+            return sb.ToString();
         }
 
         static async Task ListenTlsAsync(CancellationToken token)
