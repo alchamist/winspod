@@ -122,6 +122,17 @@ namespace MudServer
         public static string Colorise(string stringToColour, bool removeColour)
         {
             stringToColour += "{reset}";
+
+            // "^^" is the documented escape for a literal caret (see help/colour.txt,
+            // which explains "the ^^ means you LITERALLY type <shift><6>") - without
+            // this, "^^R" contains "^R" as a substring (starting one character in), so
+            // the ^R replacement below matches it and consumes the R, leaving a bare "^"
+            // with an invisible ANSI code where the literal "^R" text should be. Protect
+            // escaped carets with a placeholder no color identifier can match, then
+            // restore them to a plain "^" once every code's had its turn.
+            const string caretPlaceholder = "\uE000";
+            stringToColour = stringToColour.Replace("^^", caretPlaceholder);
+
             // Loop through our table
             foreach (ColorData colorData in colorTable)
             {
@@ -137,6 +148,8 @@ namespace MudServer
             {
                 stringToColour = stringToColour.Replace(code.Identifier, code.Code);
             }
+
+            stringToColour = stringToColour.Replace(caretPlaceholder, "^");
 
             // Width justification
             int sLen = stringToColour.Length;

@@ -1687,11 +1687,17 @@ namespace MudServer
 
         public void cmdHelp(string message)
         {
+            // Left raw here rather than Colorise()'d immediately - sendToUser() below
+            // colorises the whole assembled message (header + this + footer) itself, and
+            // running Colorise twice over the same text breaks its "^^" literal-caret
+            // escape (see help/colour.txt): the first pass correctly turns "^^R" into
+            // the literal text "^R", but a second pass then sees that literal "^R" and
+            // converts it into a real colour code, undoing the escape.
             string helpfile = null;
             if (message == "")
-                helpfile = AnsiColour.Colorise(loadTextFile(@"help" + Path.DirectorySeparatorChar + "help.txt"));
+                helpfile = loadTextFile(@"help" + Path.DirectorySeparatorChar + "help.txt");
             else
-                helpfile = AnsiColour.Colorise(loadTextFile(@"help" + Path.DirectorySeparatorChar + message.ToLower() + ".txt"));
+                helpfile = loadTextFile(@"help" + Path.DirectorySeparatorChar + message.ToLower() + ".txt");
 
             if (helpfile == "" || helpfile == null || helpfile.Length < 5)
             {
