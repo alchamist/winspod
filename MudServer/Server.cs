@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -48,6 +51,7 @@ namespace MudServer
 
         static CancellationTokenSource listenerCts;
         static readonly System.Timers.Timer tickTimer = new System.Timers.Timer(1000);
+        static int conCount = 0;
 
         static Server()
         {
@@ -62,6 +66,14 @@ namespace MudServer
         /// </summary>
         public static async Task RunAsync(CancellationToken stoppingToken)
         {
+            // TLS-wrapped telnet (see ROADMAP) runs as an additional listener alongside
+            // the plain one, not a replacement - existing telnet clients and the
+            // WebSocket bridge's loopback connection (Api/TelnetWebSocketBridge.cs, which
+            // deliberately stays plain - see its own comments) keep working unchanged.
+            Task tlsTask = AppSettings.Default.TelnetTlsEnabled
+                ? ListenTlsAsync(stoppingToken)
+                : Task.CompletedTask;
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 using (listenerCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken))
@@ -69,6 +81,68 @@ namespace MudServer
                     await ListenAsync(listenerCts.Token);
                 }
             }
+
+            await tlsTask;
+        }
+
+        static async Task ListenTlsAsync(CancellationToken token)
+        {
+            X509Certificate2 cert;
+            try
+            {
+                cert = TlsCertificate.LoadOrCreate();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[" + DateTime.Now.ToShortTimeString() + "] TLS telnet disabled - could not load/create a certificate: " + e.Message);
+                return;
+            }
+
+            int portNumber = AppSettings.Default.TelnetTlsPort;
+            Socket tlsServer = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            tlsServer.Bind(new IPEndPoint(IPAddress.Any, portNumber));
+            tlsServer.Listen(BacklogSize);
+            Console.WriteLine("[" + DateTime.Now.ToShortTimeString() + "] TLS telnet listening on port " + portNumber);
+
+            using (token.Register(() => { try { tlsServer.Close(); } catch { } }))
+            {
+                try
+                {
+                    while (true)
+                    {
+                        Socket conn = await tlsServer.AcceptAsync(token);
+                        _ = HandleTlsConnectionAsync(conn, cert, token);
+                    }
+                }
+                catch (OperationCanceledException) { }
+                catch (ObjectDisposedException) { }
+                catch (SocketException) { }
+            }
+        }
+
+        /// <summary>
+        /// Completes the TLS handshake for one accepted connection, then hands it off to
+        /// a normal Connection exactly like a plain telnet accept would - from that point
+        /// on the game engine has no idea this connection is encrypted.
+        /// </summary>
+        static async Task HandleTlsConnectionAsync(Socket conn, X509Certificate2 cert, CancellationToken token)
+        {
+            SslStream ssl = new SslStream(new NetworkStream(conn, true), false);
+            try
+            {
+                await ssl.AuthenticateAsServerAsync(cert, false, SslProtocols.None, false);
+            }
+            catch (Exception e)
+            {
+                string remote;
+                try { remote = conn.RemoteEndPoint?.ToString() ?? "unknown"; } catch { remote = "unknown"; }
+                Connection.logError("TLS handshake failed from " + remote + ": " + e.Message, "TLS");
+                try { conn.Close(); } catch { }
+                return;
+            }
+
+            var connection = new Connection(conn, Interlocked.Increment(ref conCount), ssl);
+            await connection.RunAsync();
         }
 
         static async Task ListenAsync(CancellationToken token)
@@ -89,8 +163,6 @@ namespace MudServer
             // Type=notify unit the service has finished starting.
             SdNotify.Ready();
 
-            int conCount = 0;
-
             // Closing the socket is what unblocks AcceptAsync below when we're asked to stop.
             using (token.Register(() => { try { server.Close(); } catch { } }))
             {
@@ -99,7 +171,7 @@ namespace MudServer
                     while (true)
                     {
                         Socket conn = await server.AcceptAsync(token);
-                        var connection = new Connection(conn, conCount++);
+                        var connection = new Connection(conn, Interlocked.Increment(ref conCount));
                         _ = connection.RunAsync();
                     }
                 }

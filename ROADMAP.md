@@ -23,18 +23,28 @@ unless noted.
    ports, and that an account survives a full `docker rm` + recreate against
    the same named volume.
 
-3. **Browser access via a WebSocket bridge.** A small piece (WebSocket
-   endpoint on the existing Kestrel host, proxying bytes to/from the telnet
-   socket; `xterm.js` on the front end for a real terminal in a `<canvas>`)
-   that solves two things at once:
-   - Gives non-technical players a "click a link" way in, no client install.
-   - **Fixes the Cloudflare Tunnel gap from earlier** — free `cloudflared`
-     tunnels are HTTP(S)-only; raw TCP telnet needs the paid Spectrum
-     product. A WebSocket is HTTP traffic (an upgraded HTTP connection), so
-     it tunnels through a free Cloudflare Tunnel with no extra product
-     needed. This becomes the actual answer to "how do people reach this
-     without port-forwarding," not just a nice-to-have.
-   Depends on nothing else here; could genuinely happen before Docker.
+3. ~~Browser access via a WebSocket bridge~~ — **done.**
+   `Api/TelnetWebSocketBridge.cs`: a WebSocket endpoint on the existing
+   Kestrel host (`/ws`, only active when `HTTPEnabled`) that proxies bytes to
+   the telnet listener via a plain loopback TCP connection - the game engine
+   (`Connection.cs` and the ~60 places checking `socket.Connected`/`Close`)
+   never has to know a browser is involved. `wwwroot/index.html` is a bare
+   `xterm.js` proof-of-concept: real terminal, real game, line-buffered
+   input, `xterm-addon-fit` for full-screen sizing. Telnet IAC negotiation is
+   stripped entirely before reaching the browser (which doesn't speak
+   Telnet); the echo-off/on sequences `sendEchoOff`/`sendEchoOn` send are
+   translated into an `ECHO-OFF`/`ECHO-ON` text marker the front end watches
+   for to toggle local echo during password entry. Also the actual answer to
+   the Cloudflare Tunnel gap noted below - a WebSocket is HTTP traffic (an
+   upgraded HTTP connection), so it tunnels through a free Cloudflare Tunnel
+   with no paid TCP product needed, unlike raw telnet. The friendlier
+   newcomer wrapper (help sidebar, clickable commands) on top of this bare
+   terminal is still open - a separate, later pass, not part of this item.
+   Gotcha hit and fixed along the way: the echo markers had literal `0x01`
+   bytes embedded in the string literals (invisible in a normal file read,
+   only visible via a raw hex dump), silently breaking the front end's exact
+   string match and leaking passwords in plaintext until caught by testing
+   against a real browser.
 
 4. **SSH access.** A bigger lift than the WebSocket bridge — needs an
    embedded SSH server (e.g. wrapping `SSH.NET`'s server-side pieces, which
@@ -49,12 +59,24 @@ unless noted.
    an SSH *client* but not `telnet`. This is the same shape of upgrade the
    Dominion talker (see below) made, and for the same reasons.
 
-5. **TLS-wrapped telnet, as a lower-effort alternative to #4.** If full SSH
-   is more than you want to build, `telnets`-style (TLS over the same
-   socket) gets you the encryption win without inventing an SSH server —
-   `SslStream` wrapping the existing `NetworkStream` in `Connection.cs` is a
-   much smaller change. Worth doing even if SSH also happens eventually,
-   since it's cheap and closes the cleartext-password gap on its own.
+5. ~~TLS-wrapped telnet, as a lower-effort alternative to #4~~ — **done.**
+   Runs as an *additional* listener (`Server.cs`'s `ListenTlsAsync`) on its
+   own port (`MUD_TLS_PORT`, default 4443), enabled via `MUD_TLS_ENABLED` -
+   not a replacement for plain telnet on 4000, so existing clients and the
+   WebSocket bridge's loopback connection (deliberately left plain - see its
+   own comments) keep working unchanged. `Connection`'s constructor now
+   takes a `Stream` rather than building a `NetworkStream` itself
+   internally, so an already-authenticated `SslStream` slots in exactly like
+   a plain connection everywhere else in the game - no other code needed to
+   change. `TlsCertificate.cs` generates a self-signed certificate once and
+   persists it in the data volume (a real CA-issued cert isn't the point
+   here; a telnet client doing opportunistic TLS won't validate the chain
+   the way a browser does anyway - this is about stopping passive
+   eavesdropping, not proving server identity). Verified end-to-end
+   (TLS 1.3, full registration/login/room-look flow) and confirmed plain
+   telnet on 4000 keeps working unaffected.
+   Full SSH (#4 above) is still on the table if a specific need for it shows
+   up, but this already closes the actual cleartext-password gap.
 
 6. **`System.Threading.Channels`-based command queue**, replacing the
    `SemaphoreSlim` `BigLock`. Only matters if concurrent load becomes real —

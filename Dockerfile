@@ -41,8 +41,10 @@ USER mudserver
 VOLUME ["/home/mudserver/.local/share/winspod"]
 
 # 4000: telnet game port (always listening). 4001: optional JSON API/healthz, only bound
-# when MUD_HTTP_ENABLED=true (see Program.cs's ApplyEnvironmentOverrides).
-EXPOSE 4000 4001
+# when MUD_HTTP_ENABLED=true. 4443: optional TLS-wrapped telnet, only bound when
+# MUD_TLS_ENABLED=true - additional to 4000, not a replacement (see Program.cs's
+# ApplyEnvironmentOverrides and Server.cs's ListenTlsAsync).
+EXPOSE 4000 4001 4443
 
 # Only meaningful with MUD_HTTP_ENABLED=true - without the API listening, there's no HTTP
 # endpoint for curl to poll, so this reports healthy unconditionally in that mode (the

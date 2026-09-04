@@ -69,6 +69,14 @@ static void ApplyEnvironmentOverrides()
     if (int.TryParse(httpPort, out int parsedHttpPort))
         AppSettings.Default.HTTPPort = parsedHttpPort;
 
+    string tlsEnabled = Environment.GetEnvironmentVariable("MUD_TLS_ENABLED");
+    if (bool.TryParse(tlsEnabled, out bool parsedTlsEnabled))
+        AppSettings.Default.TelnetTlsEnabled = parsedTlsEnabled;
+
+    string tlsPort = Environment.GetEnvironmentVariable("MUD_TLS_PORT");
+    if (int.TryParse(tlsPort, out int parsedTlsPort))
+        AppSettings.Default.TelnetTlsPort = parsedTlsPort;
+
     string talkerName = Environment.GetEnvironmentVariable("MUD_TALKER_NAME");
     if (!string.IsNullOrEmpty(talkerName))
         AppSettings.Default.TalkerName = talkerName;

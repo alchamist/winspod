@@ -190,7 +190,31 @@ namespace MudServer {
                 this["HTTPPort"] = value;
             }
         }
-        
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool TelnetTlsEnabled {
+            get {
+                return ((bool)(this["TelnetTlsEnabled"]));
+            }
+            set {
+                this["TelnetTlsEnabled"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("4443")]
+        public int TelnetTlsPort {
+            get {
+                return ((int)(this["TelnetTlsPort"]));
+            }
+            set {
+                this["TelnetTlsPort"] = value;
+            }
+        }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("sitback.dyndns.org")]

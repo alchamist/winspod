@@ -44,6 +44,12 @@
     <Setting Name="HTTPPort" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">4001</Value>
     </Setting>
+    <Setting Name="TelnetTlsEnabled" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="TelnetTlsPort" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">4443</Value>
+    </Setting>
     <Setting Name="TalkerAddress" Type="System.String" Scope="User">
       <Value Profile="(Default)">sitback.dyndns.org</Value>
     </Setting>

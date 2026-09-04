@@ -71,20 +71,60 @@ non-Docker setup uses (under the container's `mudserver` user's `$HOME`).
   cancellable async loop (`RunAsync`), not the `Thread.Abort()`-based loop
   the original used (removed on modern .NET — throws
   `PlatformNotSupportedException`). `Restart()` cancels and reopens just the
-  listening socket; connected players are unaffected.
+  listening socket; connected players are unaffected. Also runs
+  `ListenTlsAsync`, an *additional* listener (not a replacement) for
+  TLS-wrapped telnet when `TelnetTlsEnabled` is set — see the TLS bullet
+  below.
 - **`Connection.cs`** — one instance per connected player, `partial class`
   spread across most other `.cs` files in the project (`AdminCommands.cs`,
   `RoomCommands.cs`, `Mail.cs`, etc. all add methods to it — this is how the
   original codebase organized ~20 command groups, not a refactor artifact).
-  `RunAsync()` is the per-connection I/O loop: async (`ReadLineAsync`), not
-  the original's one-blocked-OS-thread-per-connection model. All game-state
-  mutation is still fully serialized behind a single `BigLock`
+  `RunAsync()` is the per-connection I/O loop: async, not the original's
+  one-blocked-OS-thread-per-connection model. Reads via
+  `ReadBoundedLineAsync`/`SkipTelnetCommandAsync` — a real byte-level Telnet
+  IAC parser (there wasn't one originally; negotiation bytes just flowed
+  into `StreamReader`'s decoding and got crudely patched around) that also
+  caps a line at `MaxLineLength` rather than buffering an unbounded amount
+  waiting for a terminator. `ReadStream`/`Writer` are typed as the base
+  `Stream`/`StreamWriter` classes, not `NetworkStream`-specific, so the same
+  connection code runs identically over plain telnet or a TLS-wrapped
+  `SslStream` (see below) without knowing which. All game-state
+  mutation — including the per-connection heartbeat tick, which runs on its
+  own independent `System.Timers.Timer` thread and used to touch shared
+  state without it — is fully serialized behind a single `BigLock`
   (`SemaphoreSlim(1,1)`, replacing the original `lock`/`Monitor` — Monitor
   locks can't wrap an `await`). This keeps identical single-writer semantics
   to the original; it does **not** add real concurrency, it just stops idle
   connections from parking an OS thread. See ROADMAP.md if genuine
   concurrent processing is ever needed (would mean a
   `System.Threading.Channels`-based single-consumer command queue instead).
+- **TLS-wrapped telnet** (`Server.cs`'s `ListenTlsAsync` + `TlsCertificate.cs`) —
+  an additional listener on `TelnetTlsPort` (default 4443, env
+  `MUD_TLS_PORT`/`MUD_TLS_ENABLED`) alongside the plain telnet port, not a
+  replacement for it. Completes an `SslStream` handshake per connection
+  using a self-signed certificate (`TlsCertificate.cs`, generated once and
+  persisted in the data volume — a real CA-issued cert isn't the point here,
+  since a telnet client doing opportunistic TLS won't validate the chain the
+  way a browser does; this is about stopping passive eavesdropping on
+  cleartext passwords, not proving server identity), then hands the
+  resulting stream to a normal `Connection` exactly like a plain accept
+  would. Plain telnet on the original port and the WebSocket bridge's own
+  loopback connection to it (see `Api/TelnetWebSocketBridge.cs` below,
+  deliberately left plain) are both untouched.
+- **`Api/TelnetWebSocketBridge.cs` + `wwwroot/`** — a WebSocket endpoint
+  (`/ws`, mapped only when `HTTPEnabled`) that proxies a browser connection
+  to the telnet listener via a plain loopback TCP connection, rather than
+  teaching `Connection.cs` (and the ~60 places across the codebase checking
+  `socket.Connected`/`Close` on it) about a second transport — from the game
+  engine's side this is indistinguishable from any other telnet client.
+  Strips Telnet IAC negotiation entirely before forwarding to the browser
+  (which doesn't speak Telnet), translating the `sendEchoOff`/`sendEchoOn`
+  sequences into an `ECHO-OFF`/`ECHO-ON` text marker the front end
+  (`wwwroot/index.html`, a bare `xterm.js` + `xterm-addon-fit` proof of
+  concept) watches for to toggle local echo during password entry. Also
+  solves the free-tier Cloudflare Tunnel gap noted in ROADMAP.md: a
+  WebSocket is HTTP traffic, so it tunnels through a free Cloudflare Tunnel
+  with no paid TCP product needed, unlike raw telnet.
 - **`Api/`** — `MudApiEndpoints.cs` + `Dtos.cs`: an ASP.NET Core minimal API
   on Kestrel, replacing the original hand-rolled `HttpListener` webserver
   (raw HTTP parsing, HTML built by string concatenation — deleted). Publishes
@@ -122,10 +162,13 @@ non-Docker setup uses (under the container's `mudserver` user's `$HOME`).
   `MM/dd/yyyy`-ish format, surfacing as US-style dates in-game. Removed;
   culture is instead pinned explicitly to `en-GB` in `Program.cs` so the
   display is consistent regardless of the deployment host's own locale.
-- Passwords currently transit **in cleartext** over the telnet socket (only
-  local echo is suppressed via IAC WILL/WONT ECHO — this was also true of
-  the original). Worth keeping in mind before exposing this beyond a trusted
-  network; see ROADMAP.md's transport-security items.
+- The **plain telnet port** (4000) still transits passwords in cleartext by
+  design (only local echo is suppressed via IAC WILL/WONT ECHO — this was
+  also true of the original) — that port is kept exactly as-is for backward
+  compatibility. TLS-wrapped telnet (see Architecture above) is available as
+  an *additional* port when you want encryption; it doesn't change 4000.
+  Passwords themselves are hashed at rest (`Player.cs`'s `SetPassword`/
+  `checkPassword`, PBKDF2) — a separate concern from transit encryption.
 - Docker's `VOLUME` instruction creates its mount point owned by `root` if
   the path doesn't already exist in the image — silently denying writes from
   a non-root container user and crashing the game loop on the first incoming
@@ -137,6 +180,21 @@ non-Docker setup uses (under the container's `mudserver` user's `$HOME`).
   `Flush()` a `Writer` that `cmdQuit` already closed, before the connection's
   removed from the broadcast list). Pre-existing ordering issue, already
   caught and logged — not introduced by the port, not yet fixed.
+- A string literal can contain bytes that never show up in a normal file
+  read. The WebSocket bridge's `ECHO-OFF`/`ECHO-ON` marker constants ended
+  up with literal `0x01` bytes wrapped around the text (`"\x01ECHO-OFF\x01"`)
+  from an earlier draft — invisible via `Read`, only visible via a raw byte
+  dump (`cat -A` / hex) — which silently broke the front end's exact string
+  match and leaked passwords in plaintext until caught by testing against a
+  real browser, not just the code.
+- `heartbeat_Elapsed` (`Heartbeat.cs`) runs on its own independent
+  `System.Timers.Timer` thread, once per second per connection, completely
+  unsynchronized with that connection's own async loop — and it was the
+  *only* place in the whole codebase touching shared state (the static
+  `connections` list, other connections' `Writer`, room/player data) without
+  going through `BigLock` first. Reproducibly caused "random" disconnects
+  once a real room layout gave it enough concurrent work to do. Now
+  acquires `BigLock` like everywhere else.
 
 ## Conventions to follow when editing
 

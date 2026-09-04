@@ -120,7 +120,7 @@ namespace MudServer
             return true;
         }
         public Socket                      socket;
-        public NetworkStream        ReadStream;
+        public Stream                ReadStream;
         public StreamWriter         Writer;
         public static ArrayList     connections = new ArrayList();
         private int                 myNum = 0;
@@ -164,13 +164,22 @@ namespace MudServer
         public List<string>         NameBanList = new List<string>();
 
         
-        public Connection(Socket socket, int conNum)
+        public Connection(Socket socket, int conNum) : this(socket, conNum, new NetworkStream(socket, false))
+        {
+        }
+
+        // Used for a TLS-wrapped telnet connection (Server.cs's TLS listener): stream is
+        // an already-authenticated SslStream instead of a plain NetworkStream. Everything
+        // else about the connection - game logic, command dispatch, BigLock - is identical
+        // either way; only the transport underneath ReadStream/Writer differs, and both
+        // are typed as the base Stream/StreamWriter classes so neither cares which.
+        public Connection(Socket socket, int conNum, Stream stream)
         {
             myNum = conNum;
             //myPlayer = new Player(conNum);
             this.socket = socket;
-            ReadStream = new NetworkStream(socket, false);
-            Writer = new StreamWriter(new NetworkStream(socket, true));
+            ReadStream = stream;
+            Writer = new StreamWriter(stream);
 
             heartbeat.Interval = 1000;
             heartbeat.Elapsed += new System.Timers.ElapsedEventHandler(heartbeat_Elapsed);
