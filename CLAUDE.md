@@ -108,23 +108,32 @@ non-Docker setup uses (under the container's `mudserver` user's `$HOME`).
   way a browser does; this is about stopping passive eavesdropping on
   cleartext passwords, not proving server identity), then hands the
   resulting stream to a normal `Connection` exactly like a plain accept
-  would. Plain telnet on the original port and the WebSocket bridge's own
-  loopback connection to it (see `Api/TelnetWebSocketBridge.cs` below,
-  deliberately left plain) are both untouched.
+  would. Plain telnet on the original port, and the WebSocket bridge's own
+  loopback connection to its separate internal port (see
+  `Api/TelnetWebSocketBridge.cs` below, deliberately left plain), are both
+  untouched.
 - **`Api/TelnetWebSocketBridge.cs` + `wwwroot/`** — a WebSocket endpoint
   (`/ws`, mapped only when `HTTPEnabled`) that proxies a browser connection
-  to the telnet listener via a plain loopback TCP connection, rather than
-  teaching `Connection.cs` (and the ~60 places across the codebase checking
-  `socket.Connected`/`Close` on it) about a second transport — from the game
-  engine's side this is indistinguishable from any other telnet client.
-  Strips Telnet IAC negotiation entirely before forwarding to the browser
-  (which doesn't speak Telnet), translating the `sendEchoOff`/`sendEchoOn`
-  sequences into an `ECHO-OFF`/`ECHO-ON` text marker the front end
-  (`wwwroot/index.html`, a bare `xterm.js` + `xterm-addon-fit` proof of
-  concept) watches for to toggle local echo during password entry. Also
-  solves the free-tier Cloudflare Tunnel gap noted in ROADMAP.md: a
-  WebSocket is HTTP traffic, so it tunnels through a free Cloudflare Tunnel
-  with no paid TCP product needed, unlike raw telnet.
+  to the game via a plain loopback TCP connection to `Server.InternalBridgePort`
+  (not the public telnet port), rather than teaching `Connection.cs` (and the
+  ~60 places across the codebase checking `socket.Connected`/`Close` on it)
+  about a second transport — from the game engine's side this is
+  indistinguishable from any other telnet client. It connects to its own
+  internal, loopback-only port rather than the public one specifically so it
+  can send one preamble line first: the browser player's real IP
+  (`context.Connection.RemoteIpAddress`), which `Server.ListenInternalAsync`
+  reads and sets as `Connection.RemoteIpOverride` before the normal telnet
+  session starts — without this, every bridged player's socket is the
+  bridge's own loopback connection, so `ipban`/`list ip`/connection logging
+  would see 127.0.0.1 for every browser player instead of their actual
+  address. Strips Telnet IAC negotiation entirely before forwarding to the
+  browser (which doesn't speak Telnet), translating the
+  `sendEchoOff`/`sendEchoOn` sequences into an `ECHO-OFF`/`ECHO-ON` text
+  marker the front end (`wwwroot/index.html`, a bare `xterm.js` +
+  `xterm-addon-fit` proof of concept) watches for to toggle local echo
+  during password entry. Also solves the free-tier Cloudflare Tunnel gap
+  noted in ROADMAP.md: a WebSocket is HTTP traffic, so it tunnels through a
+  free Cloudflare Tunnel with no paid TCP product needed, unlike raw telnet.
 - **`Api/`** — `MudApiEndpoints.cs` + `Dtos.cs`: an ASP.NET Core minimal API
   on Kestrel, replacing the original hand-rolled `HttpListener` webserver
   (raw HTTP parsing, HTML built by string concatenation — deleted). Publishes
