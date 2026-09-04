@@ -28,8 +28,8 @@ namespace MudServer.Api
         // (Outputs.cs). A browser has no telnet client to interpret these, so they're
         // translated into a small marker the front end watches for to toggle local echo
         // during password entry, instead of being forwarded as raw bytes it can't use.
-        private const string EchoOffMarker = "ECHO-OFF";
-        private const string EchoOnMarker = "ECHO-ON";
+        private const string EchoOffMarker = "ECHO-OFF";
+        private const string EchoOnMarker = "ECHO-ON";
 
         public static void Map(WebApplication app)
         {
