@@ -44,7 +44,25 @@ unchanged).
 The web API (see below) is off by default. Toggle `HTTPEnabled` in
 `MudServer/app.config` (`True`/`False`) and rebuild — it's read into
 `MudServer.dll.config` at build time, so a config-only edit needs a rebuild
-to take effect, not just a restart.
+to take effect, not just a restart. (Under Docker, use `MUD_HTTP_ENABLED`
+instead — see below — which takes effect at container start, no rebuild.)
+
+### Docker
+
+```bash
+docker compose up --build
+```
+
+No Docker Desktop needed on macOS — `brew install colima docker` +
+`colima start` gives a CLI-only engine, which is what this was built and
+verified against (no GUI installed on this dev machine).
+`MUD_PORT`/`MUD_HTTP_ENABLED`/`MUD_HTTP_PORT`/`MUD_TALKER_NAME`/
+`MUD_TALKER_ADDRESS`/`MUD_TALKER_EMAIL` env vars override the equivalent
+`app.config` settings at startup (`Program.cs`'s `ApplyEnvironmentOverrides`)
+— deliberately just those six, not a general mechanism, since those are what
+actually vary per-deployment. Player data persists via the named volume in
+`docker-compose.yml`, mounted at the same `LocalApplicationData` path the
+non-Docker setup uses (under the container's `mudserver` user's `$HOME`).
 
 ## Architecture
 
@@ -108,6 +126,17 @@ to take effect, not just a restart.
   local echo is suppressed via IAC WILL/WONT ECHO — this was also true of
   the original). Worth keeping in mind before exposing this beyond a trusted
   network; see ROADMAP.md's transport-security items.
+- Docker's `VOLUME` instruction creates its mount point owned by `root` if
+  the path doesn't already exist in the image — silently denying writes from
+  a non-root container user and crashing the game loop on the first incoming
+  connection (`UnauthorizedAccessException` in `Room.SaveRoom`). The
+  `Dockerfile` creates and `chown`s the data directory before declaring
+  `VOLUME`; if that ordering ever gets "cleaned up," this comes back.
+- A player who logs off with `quit` triggers a harmless but noisy
+  `ObjectDisposedException` (`Connection.RunAsync` line ~212, trying to
+  `Flush()` a `Writer` that `cmdQuit` already closed, before the connection's
+  removed from the broadcast list). Pre-existing ordering issue, already
+  caught and logged — not introduced by the port, not yet fixed.
 
 ## Conventions to follow when editing
 

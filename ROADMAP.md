@@ -9,13 +9,19 @@ unless noted.
 1. **Push to GitHub.** Currently only local commits. Everything else here
    assumes the remote is caught up.
 
-2. **Docker.** Straightforward — multi-stage build (`sdk:8.0` to build,
-   `aspnet:8.0` to run), volume-mount the `LocalApplicationData/winspod` data
-   dir so player data survives container recreation, `HEALTHCHECK` wired to
-   `/healthz` (already built). Main design decision: move `app.config`
-   settings (port, talker name, etc.) to environment-variable overrides so
-   the same image works across deployments without a rebuild — small change,
-   worth doing as part of this rather than before it.
+2. ~~Docker~~ — **done.** `Dockerfile`/`docker-compose.yml`, multi-stage
+   build, `HEALTHCHECK` wired to `/healthz`, and `MUD_PORT`/`MUD_HTTP_ENABLED`/
+   `MUD_HTTP_PORT`/`MUD_TALKER_NAME`/`MUD_TALKER_ADDRESS`/`MUD_TALKER_EMAIL`
+   environment-variable overrides (`Program.cs`) so the same image works
+   across deployments without a rebuild. Built and run for real (colima on
+   this dev machine, since no Docker was installed) — hit one real bug along
+   the way: `VOLUME` creates its mount point owned by `root` if the path
+   doesn't already exist in the image first, which denied writes from the
+   non-root container user and crashed on the first connection. Fixed by
+   creating and `chown`ing the data directory before the `VOLUME`
+   instruction. Verified telnet login, the API/`/healthz` through mapped
+   ports, and that an account survives a full `docker rm` + recreate against
+   the same named volume.
 
 3. **Browser access via a WebSocket bridge.** A small piece (WebSocket
    endpoint on the existing Kestrel host, proxying bytes to/from the telnet
@@ -73,8 +79,13 @@ gaps, not diff artifacts:
 2. **`linewrap`/`wordwrap`/`set_term_width`** — per-player output width.
    Matters more now that a browser client (#3 above) is on the table, since
    terminal width assumptions get less predictable, not less.
-3. **`connect_room`** — per-player custom login room vs. today's single
-   system-wide `DefaultLoginRoom`.
+3. ~~`connect_room`~~ — **done**, as `connectroom` (Winspod's commands don't
+   use underscores — `roomadd`, `roomlock`, `logonmsg`, etc. — so it follows
+   that style rather than ew-too's). `connectroom <room>`/`connectroom`/
+   `connectroom off` (`RoomCommands.cs`), applied at login. Verified against
+   a real room; an initial test against "jail" looked broken but turned out
+   to be `Heartbeat.cs`'s pre-existing auto-release-from-jail logic correctly
+   ejecting a non-jailed player, unrelated to this feature.
 4. **`nopager`** — toggle for disabling output paging on long text; depends
    on whether Winspod pages long output at all today (needs checking).
 5. **`iacga`** — Telnet IAC Go-Ahead toggle for older/dumb clients. Cheap,
