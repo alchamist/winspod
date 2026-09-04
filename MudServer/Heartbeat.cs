@@ -8,7 +8,35 @@ namespace MudServer
     public partial class Connection
     {
 
+        // System.Timers.Timer raises Elapsed on a ThreadPool thread, one per connection,
+        // completely independent of that connection's own async RunAsync loop - and
+        // every other connection's heartbeat is doing the same, concurrently. This body
+        // touches exactly the shared, non-thread-safe state BigLock exists to serialize
+        // (the static connections list, other connections' Writer via sendToRoom/
+        // sendToStaff, player/room data) without ever having acquired it - the only spot
+        // in the whole codebase that doesn't. Wrapping the tick in BigLock brings it into
+        // the same discipline as the read loop; the try/catch stops one connection's tick
+        // throwing from propagating onto a bare ThreadPool thread.
         void heartbeat_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            if (!BigLock.Wait(TimeSpan.FromSeconds(2)))
+                return; // BigLock is busy (e.g. a slow roomimport) - skip this tick, try again next second
+
+            try
+            {
+                heartbeatTick();
+            }
+            catch (Exception ex)
+            {
+                logError(ex.ToString(), "Heartbeat");
+            }
+            finally
+            {
+                BigLock.Release();
+            }
+        }
+
+        void heartbeatTick()
         {
             if ((myPlayer == null || myState <= 4) && connectTime.AddMinutes(10) <= DateTime.Now)
             {
