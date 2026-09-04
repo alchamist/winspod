@@ -1,0 +1,22 @@
+services:
+  mudserver:
+    build: .
+    ports:
+      - "4000:4000"   # telnet
+      - "4001:4001"   # JSON API + /healthz (only listens if MUD_HTTP_ENABLED=true)
+    environment:
+      MUD_PORT: "4000"
+      MUD_HTTP_ENABLED: "true"
+      MUD_HTTP_PORT: "4001"
+      MUD_TALKER_NAME: "Homelands Uni"
+      # MUD_TALKER_ADDRESS / MUD_TALKER_EMAIL: set these once there's a real public
+      # host/address to advertise in the API's /api/status and the connect footer.
+    volumes:
+      # Player/room/log data - named volume so it survives `docker compose down` and
+      # image rebuilds. Path matches Server.userFilePath under the container's
+      # mudserver user (see Dockerfile's ENV HOME).
+      - mudserver-data:/home/mudserver/.local/share/winspod
+    restart: unless-stopped
+
+volumes:
+  mudserver-data:

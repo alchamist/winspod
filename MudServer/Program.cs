@@ -19,6 +19,8 @@ using MudServer.Api;
 CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-GB");
 CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-GB");
 
+ApplyEnvironmentOverrides();
+
 // The telnet game loop (Server.RunAsync, driven by TelnetHostedService) always runs.
 // The JSON web API is entirely optional and only binds a port when HTTPEnabled is set
 // in app.config - same toggle the old HttpListener-based webserver used.
@@ -41,4 +43,38 @@ else
 
     var host = builder.Build();
     await host.RunAsync();
+}
+
+// app.config's ApplicationSettingsBase settings are baked in at build time - fine for a
+// bare-metal/systemd deployment where editing app.config and rebuilding is normal, but
+// the wrong shape for a container image, which should be configurable per-deployment
+// without a rebuild. This overrides the handful of settings that actually vary between
+// deployments (network config, talker identity) from environment variables when present;
+// everything else still comes from app.config as before. Deliberately not a general
+// "any setting via env var" mechanism - only what Docker actually needs.
+static void ApplyEnvironmentOverrides()
+{
+    string port = Environment.GetEnvironmentVariable("MUD_PORT");
+    if (int.TryParse(port, out int parsedPort))
+        AppSettings.Default.Port = parsedPort;
+
+    string httpEnabled = Environment.GetEnvironmentVariable("MUD_HTTP_ENABLED");
+    if (bool.TryParse(httpEnabled, out bool parsedHttpEnabled))
+        AppSettings.Default.HTTPEnabled = parsedHttpEnabled;
+
+    string httpPort = Environment.GetEnvironmentVariable("MUD_HTTP_PORT");
+    if (int.TryParse(httpPort, out int parsedHttpPort))
+        AppSettings.Default.HTTPPort = parsedHttpPort;
+
+    string talkerName = Environment.GetEnvironmentVariable("MUD_TALKER_NAME");
+    if (!string.IsNullOrEmpty(talkerName))
+        AppSettings.Default.TalkerName = talkerName;
+
+    string talkerAddress = Environment.GetEnvironmentVariable("MUD_TALKER_ADDRESS");
+    if (!string.IsNullOrEmpty(talkerAddress))
+        AppSettings.Default.TalkerAddress = talkerAddress;
+
+    string talkerEmail = Environment.GetEnvironmentVariable("MUD_TALKER_EMAIL");
+    if (!string.IsNullOrEmpty(talkerEmail))
+        AppSettings.Default.TalkerEmail = talkerEmail;
 }
