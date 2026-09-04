@@ -287,15 +287,6 @@ namespace MudServer
             }
         }
 
-        // Thin wrapper so listObjects is reachable as its own top-level command - it was
-        // previously only reachable via the generic "list o" dispatch (Connection.cs),
-        // gated at Guide rank even though creating/interacting with objects is Member
-        // rank, so a plain builder couldn't list their own objects.
-        public void cmdListObj(string message)
-        {
-            listObjects(message);
-        }
-
         public void listObjects(string message)
         {
             playerObjects = loadObjects();

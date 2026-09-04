@@ -1,4 +1,4 @@
-﻿﻿﻿".","cmdTell",0,"comms"
+﻿﻿﻿﻿".","cmdTell",0,"comms"
 ">","cmdTell",0,"comms"
 "'","cmdSay",0,"comms"
 "`","cmdSay",0,"comms"
@@ -62,7 +62,6 @@
 "echo","cmdEcho",1,"comms"
 "edump","cmdEDump",4,"admin"
 "edobj","cmdEdObj",1,"builder"
-"listobj","cmdListObj",1,"builder"
 "edweight","cmdEdWeight",4,"admin"
 "edtime","cmdEdtime",4,"admin"
 "emote","cmdEmote",0,"comms"
