@@ -157,11 +157,19 @@ namespace MudServer
                         continue;
                     }
 
-                    Room room = new Room(entry.ShortName.ToLower(), myPlayer.UserName, true);
+                    // roomimport-created rooms use a fixed "system." prefix rather than
+                    // the creating admin's username (unlike roomadd #<name>, deliberately
+                    // left as-is). This marks a room as shared/imported layout rather
+                    // than anyone's personal room, and gives every import a single
+                    // collision-checked namespace regardless of which admin runs it.
+                    Room existing = Room.LoadRoom("system." + entry.ShortName.ToLower());
+                    bool alreadyExisted = existing != null && existing.fullName != null;
+
+                    Room room = new Room(entry.ShortName.ToLower(), "System", true);
                     ApplyRoomFields(room, entry);
                     room.SaveRoom();
                     keyToSystemName[entry.Key] = room.systemName;
-                    applied.Add(entry.Key + " -> " + room.systemName);
+                    applied.Add(entry.Key + " -> " + room.systemName + (alreadyExisted ? " (updated)" : " (created)"));
                 }
             }
 
