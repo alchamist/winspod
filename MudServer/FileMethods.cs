@@ -282,6 +282,8 @@ namespace MudServer
                         {
                             found = true;
                             string showLog = loadTextFile(Path.Combine(Server.userFilePath, @"logs" + Path.DirectorySeparatorChar + f.Name));
+                            if (message.ToLower() == "error")
+                                showLog = SimplifyErrorLog(showLog);
                             sendToUser(("{bold}{cyan}---[{red}Log: " + f.Name.Replace(f.Extension, "") + "{cyan}]").PadRight(103, '-') + "{reset}\r\n" + showLog + "\r\n{bold}{cyan}" + "".PadRight(80, '-') + "{reset}", true, false, false);
                         }
                     }
@@ -294,6 +296,38 @@ namespace MudServer
                 sendToUser("No logs available to view", true, false, false);
             }
 
+        }
+
+        /// <summary>
+        /// error.log entries are the raw multi-line Exception.ToString() output.
+        /// Every command dispatches via reflection (see ProcessLine), so a command
+        /// throwing always wraps the real exception in a boilerplate
+        /// TargetInvocationException and a stack of internal reflection-invoker
+        /// frames that are never the actual bug - combined with a telnet client's
+        /// own line-wrapping at whatever width it uses (there's no server-side
+        /// line-wrap awareness yet - see ROADMAP's linewrap/set_term_width item),
+        /// that noise reads as a near-illegible staircase. This strips it down to
+        /// the timestamp, the real exception type/message, and the actual
+        /// MudServer.* call site.
+        /// </summary>
+        private string SimplifyErrorLog(string log)
+        {
+            string[] lines = log.Replace("\r\n", "\n").Split('\n');
+            List<string> kept = new List<string>();
+
+            foreach (string rawLine in lines)
+            {
+                string line = rawLine.Replace("System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation.", "").Trim();
+
+                if (line == "")
+                    continue;
+                if (line.StartsWith("at System.Reflection.") || line.StartsWith("at System.RuntimeMethodHandle") || line.StartsWith("--- End of inner exception stack trace ---"))
+                    continue;
+
+                kept.Add(line);
+            }
+
+            return kept.Count > 0 ? string.Join("\r\n", kept) : log;
         }
 
         public void cmdDlog(string message)

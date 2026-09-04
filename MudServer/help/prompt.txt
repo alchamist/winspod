@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Nprompt <text>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Sets your command prompt to the given text (up to 20 characters, colour codes included). Leave <text> blank to reset it to the default.
+
+^RRestrictions:^N
+
+None
