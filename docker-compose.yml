@@ -1,6 +1,7 @@
 services:
   mudserver:
     build: .
+    pull_policy: build
     ports:
       - "4000:4000"   # telnet
       - "4001:4001"   # JSON API + /healthz (only listens if MUD_HTTP_ENABLED=true)
