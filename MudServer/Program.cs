@@ -31,7 +31,10 @@ if (AppSettings.Default.HTTPEnabled)
     builder.Services.AddHostedService<TelnetHostedService>();
 
     var app = builder.Build();
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
     MudApiEndpoints.Map(app);
+    TelnetWebSocketBridge.Map(app);
 
     Console.WriteLine("[" + DateTime.Now.ToShortTimeString() + "] HTTP API listening on port " + AppSettings.Default.HTTPPort);
     await app.RunAsync();
