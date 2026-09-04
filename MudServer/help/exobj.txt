@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Nexobj <object name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Shows the full details of an object: owner, weight, uniqueness flags, description, and every scripted action set on it.
+
+^RRestrictions:^N
+
+Player must be a resident and have builder privs

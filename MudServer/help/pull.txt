@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Npull <object name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Pulls an object in your inventory, running its scripted "pull" action if it has one.
+
+^RRestrictions:^N
+
+None

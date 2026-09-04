@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Nexamine <object name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Examines an object in your inventory, running its scripted "examine" action if it has one.
+
+^RRestrictions:^N
+
+None

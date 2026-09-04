@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Nplay <object name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Plays with an object in your inventory, running its scripted "play" action if it has one.
+
+^RRestrictions:^N
+
+None

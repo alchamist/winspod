@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Nshake <object name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Shakes an object in your inventory, running its scripted "shake" action if it has one.
+
+^RRestrictions:^N
+
+None

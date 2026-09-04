@@ -1,0 +1,18 @@
+1
+^YSyntax: ^Nedobj <object name> <part> <action/value>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Edits an object. <part> is one of:
+
+drop/eat/drink/examine/get/give/pick/play/poke/pull/push/shake/take/throw/use/wield - sets the scripted action run when a player does that to the object (see help object for the scripting language). Leave <action/value> blank to remove it.
+desc <text> - sets the object's description
+weight <number> - sets the object's weight (0 or more)
+punique - toggles whether a player may only ever hold one at a time
+sunique - toggles whether only one may exist across the whole system
+candrop - toggles whether the object can be dropped on the floor of a room
+
+^RRestrictions:^N
+
+Player must be a resident and have builder privs

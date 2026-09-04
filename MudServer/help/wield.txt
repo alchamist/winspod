@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Nwield <object name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Wields (or stops wielding, if already wielded) an object in your inventory, running its scripted "wield" action when you start wielding it.
+
+^RRestrictions:^N
+
+None

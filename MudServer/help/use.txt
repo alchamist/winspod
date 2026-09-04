@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Nuse <object name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Uses an object in your inventory, running its scripted "use" action if it has one.
+
+^RRestrictions:^N
+
+None

@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Nget <object name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Picks up an object, adding it to your inventory. Objects that are unique to a player can only be held one at a time, and you cannot exceed your maximum carry weight.
+
+^RRestrictions:^N
+
+None

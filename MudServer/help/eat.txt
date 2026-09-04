@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Neat <object name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Eats an object in your inventory, running its scripted "eat" action if it has one.
+
+^RRestrictions:^N
+
+None

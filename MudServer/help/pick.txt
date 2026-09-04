@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Npick <object name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Picks at an object in your inventory, running its scripted "pick" action if it has one.
+
+^RRestrictions:^N
+
+None

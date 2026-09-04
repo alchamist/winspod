@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
@@ -50,19 +51,46 @@ namespace MudServer
 
         public void cmdEdObj(string message)
         {
-            string[] split = message.Split(new char[] { ' ' }, 3);
             if (!myPlayer.SpecialPrivs.builder)
                 sendToUser("Sorry, you need builder privs for this command", true, false, false);
-            else if (message == "" || split.Length < 2)
+            else if (message == "")
                 sendToUser("Syntax: edobj <object name> <command part> <action>", true, false, false);
             else
             {
                 playerObjects = loadObjects();
-                for (int i = playerObjects.Count - 1; i >= 0; i--)
+
+                // Object names can contain spaces (see cmdCreate, e.g. "Da Thing"), so
+                // splitting on the first space would cut a multi-word name in half.
+                // Match against the longest existing object name the message actually
+                // starts with instead, then split whatever's left into part/value.
+                int matchIndex = -1;
+                int matchLength = -1;
+                for (int i = 0; i < playerObjects.Count; i++)
                 {
-                    if (playerObjects[i].Name.ToLower() == split[0].ToLower())
+                    string name = playerObjects[i].Name;
+                    if (name.Length > matchLength &&
+                        (message.Equals(name, StringComparison.OrdinalIgnoreCase) ||
+                         message.StartsWith(name + " ", StringComparison.OrdinalIgnoreCase)))
                     {
-                        objects temp = playerObjects[i];
+                        matchIndex = i;
+                        matchLength = name.Length;
+                    }
+                }
+
+                string[] split = matchIndex == -1
+                    ? new string[0]
+                    : new string[] { playerObjects[matchIndex].Name }
+                        .Concat((message.Length > matchLength ? message.Substring(matchLength + 1) : "").Split(new char[] { ' ' }, 2))
+                        .ToArray();
+
+                if (matchIndex == -1)
+                    sendToUser("Object \"" + message + "\" not found", true, false, false);
+                else if (split.Length < 2 || split[1] == "")
+                    sendToUser("Syntax: edobj <object name> <command part> <action>", true, false, false);
+                else
+                {
+                    {
+                        objects temp = playerObjects[matchIndex];
                         switch (split[1].ToLower())
                         {
                             case "drop":
@@ -155,7 +183,7 @@ namespace MudServer
                                 sendToUser("You " + (temp.Unique.ToPlayer ? "set" : "remove") + " the Unique for player flag for object \"" + temp.Name + "\"", true, false, false);
                                 break;
                             case "sunique":
-                                temp.Unique.ToSystem = !temp.Unique.ToPlayer;
+                                temp.Unique.ToSystem = !temp.Unique.ToSystem;
                                 sendToUser("You " + (temp.Unique.ToSystem ? "set" : "remove") + " the Unique for whole system flag for object \"" + temp.Name + "\"", true, false, false);
                                 break;
                             case "candrop":
@@ -166,12 +194,10 @@ namespace MudServer
                                 sendToUser("Syntax: edobj <object name> <command part> <action>", true, false, false);
                                 break;
                         }
-                        playerObjects[i] = temp;
+                        playerObjects[matchIndex] = temp;
                         saveObjects();
-                        return;
                     }
                 }
-                sendToUser("Object \"" + split[0] + "\" not found", true, false, false);
             }
         }
 
@@ -259,6 +285,15 @@ namespace MudServer
                 }
                 sendToUser("Object \"" + message + "\" not found", true, false, false);
             }
+        }
+
+        // Thin wrapper so listObjects is reachable as its own top-level command - it was
+        // previously only reachable via the generic "list o" dispatch (Connection.cs),
+        // gated at Guide rank even though creating/interacting with objects is Member
+        // rank, so a plain builder couldn't list their own objects.
+        public void cmdListObj(string message)
+        {
+            listObjects(message);
         }
 
         public void listObjects(string message)

@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Ndrink <object name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Drinks an object in your inventory, running its scripted "drink" action if it has one.
+
+^RRestrictions:^N
+
+None

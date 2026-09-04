@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Ncreate <object name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Creates a new object with the given name. You become its creator and owner. Use edobj to give it a description, weight, and scripted actions.
+
+^RRestrictions:^N
+
+Player must be a resident and have builder privs

@@ -40,10 +40,9 @@ Objects have their own scripting language. As with aliases, multiple commands ca
 ^G%stp^N - ^BAll^N - Send to player
 ^G%str^N - ^BAll^N - Send to room
 ^G%sta^N - ^BAdm^N - Send to all
-^G%rmv^N - ^BAll^N - Remove object from player inventory
 ^G%wld^N - ^BAll^N - Wield object
 ^G%trn^N - ^BAdm^N - Transport player
 ^G%wib^N - ^BAdm^N - Wibble player
-^G%jal^N - ^BAdm^N - Jail player (not yet implimented)
+^G%jal^N - ^BAdm^N - Jail player
 ^G%bmp^N - ^BAdm^N - Bump player
 ^G%drp^N = ^BAdm^N - Drop item on floor (lower ranks automatically drop item if it can be)

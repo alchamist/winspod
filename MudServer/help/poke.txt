@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Npoke <object name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Pokes an object in your inventory, running its scripted "poke" action if it has one.
+
+^RRestrictions:^N
+
+None

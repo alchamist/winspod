@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Ninventory
+^YAliases: ^Ni
+
+^PEffect:^N
+
+Lists the objects you are currently carrying, their quantities, and your total carried weight against your maximum.
+
+^RRestrictions:^N
+
+None

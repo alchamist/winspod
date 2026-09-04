@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Npush <object name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Pushes an object in your inventory, running its scripted "push" action if it has one.
+
+^RRestrictions:^N
+
+None

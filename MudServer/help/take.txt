@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Ntake <object name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Takes an object lying on the floor of the current room and adds it to your inventory. Objects that are unique to a player can only be held one at a time, and you cannot exceed your maximum carry weight.
+
+^RRestrictions:^N
+
+None

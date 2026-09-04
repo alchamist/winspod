@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Nthrow <object name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Throws an object from your inventory, running its scripted "throw" action if it has one.
+
+^RRestrictions:^N
+
+None

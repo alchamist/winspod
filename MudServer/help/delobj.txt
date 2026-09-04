@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Ndelobj <object name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Marks an object as deleted. It can no longer be created, taken or found, but copies already held by players are unaffected.
+
+^RRestrictions:^N
+
+Player must be a resident, have builder privs, and be the object's creator

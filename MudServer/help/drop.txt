@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Ndrop <object name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Drops an object from your inventory. If the object allows it, it is left on the floor of the current room for others to take; otherwise it is simply removed.
+
+^RRestrictions:^N
+
+None
