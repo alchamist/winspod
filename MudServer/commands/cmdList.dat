@@ -1,4 +1,4 @@
-﻿".","cmdTell",0,"comms"
+﻿﻿".","cmdTell",0,"comms"
 ">","cmdTell",0,"comms"
 "'","cmdSay",0,"comms"
 "`","cmdSay",0,"comms"
@@ -166,6 +166,7 @@
 "roomedit","cmdRoomEdit",1,"room"
 "roomemsg","cmdRoomEnterMsg",1,"room"
 "roomfname","cmdRoomFullName",1,"room"
+"roomimport","cmdRoomImport",4,"room"
 "roomsname","cmdRoomShortName",4,"room"
 "roomlink","cmdRoomLink",1,"room"
 "roomlist","cmdRoomList",4,"room"

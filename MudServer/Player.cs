@@ -218,6 +218,7 @@ namespace MudServer
         private bool        inDescriptionEditor = false;                    // Are they editing their description?
 
         private bool        inRoomEditor = false;                           // Are they editing a room description?
+        private bool        inRoomImport = false;                          // Are they pasting a roomimport definition?
         private int         maxRooms = 3;                                   // How many rooms are they allowed?
 
         //public List<string> friends = new List<string>();                   // Friends list - set to public so can be manipulated
@@ -765,9 +766,15 @@ namespace MudServer
             set { inRoomEditor = value; }
         }
 
+        public bool InRoomImport
+        {
+            get { return inRoomImport; }
+            set { inRoomImport = value; }
+        }
+
         public bool InEditor
         {
-            get { return inMailEditor || inDescriptionEditor || inRoomEditor; }
+            get { return inMailEditor || inDescriptionEditor || inRoomEditor || inRoomImport; }
         }
 
         public List<alias> AliasList

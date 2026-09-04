@@ -143,6 +143,7 @@ namespace MudServer
                 // There are no rooms, so we need to create a default one!
                 Room newRoom = new Room();
                 newRoom.systemName = "Main";
+                newRoom.shortName = "Main";
                 newRoom.fullName = "The default room";
                 newRoom.description = "A very basic room. Not much to see here";
                 newRoom.systemRoom = true;

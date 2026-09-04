@@ -120,7 +120,7 @@ namespace MudServer
             return true;
         }
         public Socket                      socket;
-        public StreamReader         Reader;
+        public NetworkStream        ReadStream;
         public StreamWriter         Writer;
         public static ArrayList     connections = new ArrayList();
         private int                 myNum = 0;
@@ -169,7 +169,7 @@ namespace MudServer
             myNum = conNum;
             //myPlayer = new Player(conNum);
             this.socket = socket;
-            Reader = new StreamReader(new NetworkStream(socket, false));
+            ReadStream = new NetworkStream(socket, false);
             Writer = new StreamWriter(new NetworkStream(socket, true));
 
             heartbeat.Interval = 1000;
@@ -224,7 +224,7 @@ namespace MudServer
                     finally { BigLock.Release(); }
 
                     string line = null;
-                    if (socket.Connected && Reader.BaseStream.CanRead)
+                    if (socket.Connected && ReadStream.CanRead)
                     {
                         try
                         {
@@ -278,41 +278,112 @@ namespace MudServer
         // This caps a single line at MaxLineLength and disconnects (returns null, same
         // as EOF) rather than buffering forever. Mirrors ReadLine's own \r / \n / \r\n
         // terminator handling without ever calling the blocking StreamReader.Peek().
+        //
+        // Also strips Telnet IAC option negotiation at the byte level (there was
+        // previously no real IAC parser at all - see cleanLine's old hardcoded-garbage
+        // .Replace() - which meant a client that sends its negotiation burst eagerly on
+        // connect, e.g. PuTTY offering terminal-type/NAWS/etc. immediately, could have
+        // that arrive interleaved with the very first typed line (the username prompt)
+        // and fail the alphanumeric-only check.
         private const int MaxLineLength = 8192;
+
+        private const byte TelnetIAC  = 0xFF;
+        private const byte TelnetDONT = 0xFE;
+        private const byte TelnetDO   = 0xFD;
+        private const byte TelnetWONT = 0xFC;
+        private const byte TelnetWILL = 0xFB;
+        private const byte TelnetSB   = 0xFA;
+        private const byte TelnetSE   = 0xF0;
 
         private async Task<string> ReadBoundedLineAsync()
         {
-            StringBuilder sb = new StringBuilder();
-            char[] buf = new char[1];
+            List<byte> line = new List<byte>();
+            byte[] buf = new byte[1];
 
             while (true)
             {
-                int read = await Reader.ReadAsync(buf, 0, 1);
+                int read = await ReadStream.ReadAsync(buf, 0, 1);
                 if (read == 0)
-                    return sb.Length > 0 ? sb.ToString() : null;
+                    return line.Count > 0 ? Encoding.UTF8.GetString(line.ToArray()) : null;
 
-                char c = buf[0];
+                byte b = buf[0];
+
+                if (b == TelnetIAC)
+                {
+                    (bool ok, byte? literal) = await SkipTelnetCommandAsync();
+                    if (!ok)
+                        return null; // connection closed mid-negotiation
+
+                    if (literal.HasValue)
+                        b = literal.Value; // IAC IAC - an escaped literal 0xFF data byte
+                    else
+                        continue; // negotiation/subnegotiation fully consumed, nothing to add
+                }
 
                 if (pendingLfSkip)
                 {
                     pendingLfSkip = false;
-                    if (c == '\n')
+                    if (b == (byte)'\n')
                         continue; // this \n belongs to the \r that ended the previous line
                 }
 
-                if (c == '\n')
-                    return sb.ToString();
+                if (b == (byte)'\n')
+                    return Encoding.UTF8.GetString(line.ToArray());
 
-                if (c == '\r')
+                if (b == (byte)'\r')
                 {
                     pendingLfSkip = true;
-                    return sb.ToString();
+                    return Encoding.UTF8.GetString(line.ToArray());
                 }
 
-                sb.Append(c);
-                if (sb.Length > MaxLineLength)
+                line.Add(b);
+                if (line.Count > MaxLineLength)
                     return null; // oversized line - drop the connection rather than keep buffering
             }
+        }
+
+        /// <summary>
+        /// Consumes and discards the Telnet command that follows an IAC byte already
+        /// read by the caller: a 2-byte command, a 3-byte option negotiation
+        /// (WILL/WONT/DO/DONT + option), or a variable-length subnegotiation block
+        /// (SB ... IAC SE). Returns ok=false if the connection closed mid-sequence, or
+        /// literal set to the escaped data byte for an "IAC IAC" pair (the Telnet-spec
+        /// way to send a literal 0xFF byte of actual data).
+        /// </summary>
+        private async Task<(bool ok, byte? literal)> SkipTelnetCommandAsync()
+        {
+            byte[] buf = new byte[1];
+            if (await ReadStream.ReadAsync(buf, 0, 1) == 0)
+                return (false, null);
+            byte command = buf[0];
+
+            if (command == TelnetIAC)
+                return (true, TelnetIAC);
+
+            if (command == TelnetWILL || command == TelnetWONT || command == TelnetDO || command == TelnetDONT)
+            {
+                if (await ReadStream.ReadAsync(buf, 0, 1) == 0)
+                    return (false, null); // the option byte
+                return (true, null);
+            }
+
+            if (command == TelnetSB)
+            {
+                byte prev = 0;
+                while (true)
+                {
+                    if (await ReadStream.ReadAsync(buf, 0, 1) == 0)
+                        return (false, null);
+                    byte cur = buf[0];
+                    if (prev == TelnetIAC && cur == TelnetSE)
+                        return (true, null);
+                    prev = cur;
+                }
+            }
+
+            // Other 2-byte commands (NOP, AYT, EL, EC, GA, DM, BRK, IP, AO) - already
+            // fully consumed by reading the command byte itself.
+            return (true, null);
         }
 
         void OnConnect()
@@ -787,6 +858,11 @@ namespace MudServer
                 {
                     myPlayer.LastActive = DateTime.Now;
                     roomEdit(line);
+                }
+                else if (myPlayer.InRoomImport)
+                {
+                    myPlayer.LastActive = DateTime.Now;
+                    roomImport(line);
                 }
                 else if (cmd != "")
                 {
