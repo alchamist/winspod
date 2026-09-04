@@ -501,11 +501,17 @@ namespace MudServer
                 if (message.StartsWith("#") && myPlayer.PlayerRank >= (int)Player.Rank.Admin)
                     sysroom = true;
 
-                if (!sysroom && roomCount() >= myPlayer.MaxRooms && myPlayer.PlayerRank < (int)Player.Rank.Admin)
+                string shortName = sysroom ? message.Substring(1) : message;
+
+                if (Regex.Replace(shortName, @"\W*", "") != shortName || shortName == "")
+                {
+                    sendToUser("Sorry, room system names can only contain alphanumeric characters and no spaces", true, false, false);
+                }
+                else if (!sysroom && roomCount() >= myPlayer.MaxRooms && myPlayer.PlayerRank < (int)Player.Rank.Admin)
                     sendToUser("Sorry, you have reached your maximum number of rooms", true, false, false);
                 else
                 {
-                    Room newRoom = new Room(sysroom ? message.Substring(1).ToLower() : message.ToLower(), myPlayer.UserName, sysroom);
+                    Room newRoom = new Room(shortName.ToLower(), myPlayer.UserName, sysroom);
                     newRoom.SaveRoom();
                     roomList = loadRooms();
                     sendToUser("Room \"" + newRoom.shortName + "\" (" + newRoom.systemName + ") created. Remember to link the room somewhere!", true, false, false);

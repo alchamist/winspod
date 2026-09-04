@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Diagnostics;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using System.Collections.Generic;
@@ -212,25 +213,30 @@ namespace MudServer
 
         private string cleanLine(string line)
         {
-            string ret = "";
+            // StringBuilder rather than repeated string += - the latter is O(n^2) to
+            // rebuild a line one char at a time, which matters now that MaxLineLength
+            // (Connection.ReadBoundedLineAsync) caps a line at several KB rather than
+            // being unbounded.
+            StringBuilder sb = new StringBuilder(line.Length);
             char[] pLine = line.ToCharArray();
             foreach (char c in pLine)
             {
                 switch (c)
                 {
                     case '\r':
-                        ret += Convert.ToString("\r\n");
+                        sb.Append("\r\n");
                         break;
                     case '\n':
                         break;
                     case '\b':
-                        if (ret.Length > 0) ret = ret.Remove(ret.Length - 1, 1);
+                        if (sb.Length > 0) sb.Remove(sb.Length - 1, 1);
                         break;
                     default:
-                        ret += Convert.ToString(c);
+                        sb.Append(c);
                         break;
                 }
             }
+            string ret = sb.ToString();
             // Strip out echo off and on commands
             ret = ret.Replace("��", "").Replace("��", "");
             return ret;

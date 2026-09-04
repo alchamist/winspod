@@ -294,6 +294,8 @@ namespace MudServer
                     sendToUser("Bored of your own name, eh?", true, false, false);
                 else if (AnsiColour.Colorise(split[1], true) != split[1])
                     sendToUser("Names cannot contain colour codes or dynamic text", true, false, false);
+                else if (Regex.Replace(split[1], @"\W*", "") != split[1])
+                    sendToUser("Sorry, only alphanumeric characters allowed in usernames", true, false, false);
                 else if (check.Length > 0)
                     sendToUser("Username \"" + split[1] + "\" already exists", true, false, false);
                 else

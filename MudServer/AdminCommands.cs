@@ -618,7 +618,7 @@ namespace MudServer
                 // Should be good to go
                 Player newPlayer = new Player();
                 newPlayer.UserName = split[0];
-                newPlayer.Password = split[1];
+                newPlayer.SetPassword(split[1]);
                 if (split.Length == 3)
                     newPlayer.EmailAddress = split[2];
                 newPlayer.ResBy = myPlayer.UserName;

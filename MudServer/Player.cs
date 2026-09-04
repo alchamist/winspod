@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 
 namespace MudServer
 {
@@ -98,7 +99,7 @@ namespace MudServer
         #region attributes
 
         private string      username;                                       // Players username
-        private string      password;                                       // Players password - MD5 hashed
+        private string      password;                                       // Salted/hashed via HashPassword() - see SetPassword()/checkPassword() below
 
         #region system stuff
 
@@ -301,6 +302,9 @@ namespace MudServer
             set { logonRoom = value; }
         }
 
+        // Raw storage the XmlSerializer reads/writes directly - already-hashed on disk.
+        // Application code setting a new plaintext password should call SetPassword()
+        // instead, which hashes it first; assigning here directly would store it raw.
         public string Password
         {
             get { return password; }
@@ -877,9 +881,28 @@ namespace MudServer
                 return false;
         }
 
+        /// <summary>
+        /// Same alphanumeric-only rule enforced at registration time (Connection.cs's
+        /// username prompt). Centralized here so every path that turns a name into a
+        /// players\&lt;name&gt;.xml file path enforces it, not just the telnet login flow -
+        /// notably Api/MudApiEndpoints.cs's unauthenticated GET /api/players/{username}
+        /// route, which used to pass the raw route value straight through, allowing a
+        /// name containing path separators to escape the players directory.
+        /// </summary>
+        public static bool IsValidUsername(string name)
+        {
+            return !string.IsNullOrEmpty(name) && Regex.Replace(name, @"\W*", "") == name;
+        }
+
         public static Player LoadPlayer(string name, int userConn)
         {
             Player load = new Player();
+
+            if (!IsValidUsername(name))
+            {
+                load.NewPlayer = true;
+                return load;
+            }
 
             try
             {
@@ -930,6 +953,9 @@ namespace MudServer
 
         public static void RemovePlayerFile(string name)
         {
+            if (!IsValidUsername(name))
+                return;
+
             //string path = Path.Combine(Server.userFilePath,("players" + Path.DirectorySeparatorChar + name.Substring(0, 1).ToUpper() + Path.DirectorySeparatorChar + name.ToLower() + ".xml"));
             string path = Path.Combine(Server.userFilePath, ("players" + Path.DirectorySeparatorChar + name.ToLower() + ".xml"));
 
@@ -952,16 +978,43 @@ namespace MudServer
 
         #region Password Stuff
 
-        public static string md5Encrypt(string inputString)
+        private const string PasswordHashPrefix = "PBKDF2";
+        private const int PasswordHashIterations = 100_000;
+        private const int PasswordSaltBytes = 16;
+        private const int PasswordHashBytes = 32;
+
+        /// <summary>
+        /// Hashes a new plaintext password for storage. Call this (not the Password
+        /// property setter, which is raw passthrough for the XmlSerializer) whenever
+        /// a player is choosing/being given a new password.
+        /// </summary>
+        public void SetPassword(string plaintext)
         {
-            byte[] input = Encoding.UTF8.GetBytes(inputString);
-            byte[] output = MD5.Create().ComputeHash(input);
-            return Convert.ToBase64String(output);
+            byte[] salt = RandomNumberGenerator.GetBytes(PasswordSaltBytes);
+            byte[] hash = Rfc2898DeriveBytes.Pbkdf2(Encoding.UTF8.GetBytes(plaintext), salt, PasswordHashIterations, HashAlgorithmName.SHA256, PasswordHashBytes);
+            password = string.Join("$", PasswordHashPrefix, PasswordHashIterations, Convert.ToBase64String(salt), Convert.ToBase64String(hash));
         }
 
         public bool checkPassword(string testPassword)
         {
-            return (testPassword == password);
+            string[] parts = password != null ? password.Split('$') : null;
+            if (parts != null && parts.Length == 4 && parts[0] == PasswordHashPrefix)
+            {
+                int iterations = int.Parse(parts[1]);
+                byte[] salt = Convert.FromBase64String(parts[2]);
+                byte[] expected = Convert.FromBase64String(parts[3]);
+                byte[] actual = Rfc2898DeriveBytes.Pbkdf2(Encoding.UTF8.GetBytes(testPassword), salt, iterations, HashAlgorithmName.SHA256, expected.Length);
+                return CryptographicOperations.FixedTimeEquals(actual, expected);
+            }
+
+            // Legacy plaintext password from before hashing was added. Verify directly,
+            // then transparently upgrade it to a proper hash so it stops being stored in
+            // the clear - the caller's next SavePlayer() (already called on every
+            // successful login/password-change path) persists the upgrade.
+            bool legacyMatch = testPassword == password;
+            if (legacyMatch)
+                SetPassword(testPassword);
+            return legacyMatch;
         }
 
         #endregion

@@ -486,7 +486,7 @@ namespace MudServer
                 else
                 {
                     Player targ = Player.LoadPlayer(target[0], 0);
-                    targ.Password = split[1];
+                    targ.SetPassword(split[1]);
                     targ.SavePlayer();
                     sendToUser("Password updated for player \"" + targ.ColourUserName + "\"", true, false, false);
                 }

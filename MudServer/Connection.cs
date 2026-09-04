@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using System.Collections.Generic;
@@ -134,6 +135,9 @@ namespace MudServer
         private byte[]              echoOff = new byte[] { 0xFF, 0xFB, 0x01 };
         private byte[]              echoOn = new byte[] { 0xFF, 0xFC, 0x01 };
 
+        // State for ReadBoundedLineAsync's CRLF handling across reads - see there.
+        private bool                pendingLfSkip = false;
+
         System.Timers.Timer         heartbeat = new System.Timers.Timer(); // Timer for heartbeat : idle out and hchime etc
         private int                 lastHChimeHour = -1;
 
@@ -224,7 +228,7 @@ namespace MudServer
                     {
                         try
                         {
-                            line = await Reader.ReadLineAsync();
+                            line = await ReadBoundedLineAsync();
                         }
                         catch//(Exception e)
                         {
@@ -264,6 +268,50 @@ namespace MudServer
                     OnDisconnect();
                 }
                 finally { BigLock.Release(); }
+            }
+        }
+
+        // Plain StreamReader.ReadLineAsync() buffers indefinitely until it sees a line
+        // terminator, so a client that sends data with no newline (accidentally or
+        // deliberately) grows this connection's memory without limit, and every player
+        // sitting behind BigLock waits on this one connection's read the whole time.
+        // This caps a single line at MaxLineLength and disconnects (returns null, same
+        // as EOF) rather than buffering forever. Mirrors ReadLine's own \r / \n / \r\n
+        // terminator handling without ever calling the blocking StreamReader.Peek().
+        private const int MaxLineLength = 8192;
+
+        private async Task<string> ReadBoundedLineAsync()
+        {
+            StringBuilder sb = new StringBuilder();
+            char[] buf = new char[1];
+
+            while (true)
+            {
+                int read = await Reader.ReadAsync(buf, 0, 1);
+                if (read == 0)
+                    return sb.Length > 0 ? sb.ToString() : null;
+
+                char c = buf[0];
+
+                if (pendingLfSkip)
+                {
+                    pendingLfSkip = false;
+                    if (c == '\n')
+                        continue; // this \n belongs to the \r that ended the previous line
+                }
+
+                if (c == '\n')
+                    return sb.ToString();
+
+                if (c == '\r')
+                {
+                    pendingLfSkip = true;
+                    return sb.ToString();
+                }
+
+                sb.Append(c);
+                if (sb.Length > MaxLineLength)
+                    return null; // oversized line - drop the connection rather than keep buffering
             }
         }
 
@@ -509,7 +557,7 @@ namespace MudServer
                             if (testEmailRegex(line.Trim()))
                             {
                                 myPlayer.UserName = newUser.username;
-                                myPlayer.Password = newUser.tPassword;
+                                myPlayer.SetPassword(newUser.tPassword);
                                 myPlayer.CurrentIP = connPoint;
                                 myPlayer.CurrentLogon = DateTime.Now;
                                 myPlayer.LastActive = DateTime.Now;
@@ -603,7 +651,7 @@ namespace MudServer
                     sendToUser("Blank passwords are not allowed\r\nPassword: ");
                 else
                 {
-                    myPlayer.Password = pword;
+                    myPlayer.SetPassword(pword);
                     myState = 7;
                     sendToUser("Please re-enter your password: ");
                 }
@@ -904,7 +952,7 @@ namespace MudServer
                 if (line.Trim() == pwChange)
                 {
                     // Passwords match - update user
-                    myPlayer.Password = pwChange;
+                    myPlayer.SetPassword(pwChange);
                     myPlayer.SavePlayer();
                     sendToUser("\r\nPassword successfully updated", true, false, false);
                 }
