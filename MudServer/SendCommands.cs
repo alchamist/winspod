@@ -26,7 +26,7 @@ namespace MudServer
                     try
                     {
                         if (conn.myPlayer.CanHear(myPlayer.UserName))
-                            conn.Writer.Write(AnsiColour.Colorise(msg, !conn.myPlayer.DoColour));
+                            conn.Writer.Write(AnsiColour.Colorise(msg, !conn.myPlayer.DoColour, conn.TermWidth));
                     }
                     catch (Exception ex)
                     {
@@ -84,9 +84,9 @@ namespace MudServer
                             if (conn.myPlayer != null && conn.lastSent == conn.myPlayer.Prompt && !msg.StartsWith(conn.myPlayer.Prompt) && conn.myPlayer.UserName != myPlayer.UserName)
                                 prefix = "\r\n";
                             if (newline)
-                                conn.Writer.WriteLine(prefix + AnsiColour.Colorise(msg, (removeColour || !conn.myPlayer.DoColour)));
+                                conn.Writer.WriteLine(prefix + AnsiColour.Colorise(msg, (removeColour || !conn.myPlayer.DoColour), conn.TermWidth));
                             else
-                                conn.Writer.Write(prefix + AnsiColour.Colorise(msg, (removeColour || !conn.myPlayer.DoColour)));
+                                conn.Writer.Write(prefix + AnsiColour.Colorise(msg, (removeColour || !conn.myPlayer.DoColour), conn.TermWidth));
 
                             conn.Writer.Flush();
 

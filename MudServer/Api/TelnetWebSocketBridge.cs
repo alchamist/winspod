@@ -31,6 +31,14 @@ namespace MudServer.Api
         private const string EchoOffMarker = "ECHO-OFF";
         private const string EchoOnMarker = "ECHO-ON";
 
+        // Sent by wwwroot/index.html (not through its normal line-buffered typed-input
+        // path, so it never mixes with what the player actually types) whenever
+        // xterm-addon-fit resizes the terminal. Translated into a real Telnet NAWS
+        // subnegotiation for the game, rather than teaching the game a browser-specific
+        // "resize" concept - see Connection.cs's SkipTelnetCommandAsync, which already
+        // parses NAWS from any client, real telnet ones included.
+        private const string SizeMarkerPrefix = "SIZE ";
+
         public static void Map(WebApplication app)
         {
             app.UseWebSockets();
@@ -184,12 +192,60 @@ namespace MudServer.Api
                     WebSocketReceiveResult result = await ws.ReceiveAsync(buf, token);
                     if (result.MessageType == WebSocketMessageType.Close)
                         break;
-                    if (result.Count > 0)
-                        await stream.WriteAsync(buf, 0, result.Count, token);
+                    if (result.Count <= 0)
+                        continue;
+
+                    if (result.MessageType == WebSocketMessageType.Text)
+                    {
+                        string text = Encoding.UTF8.GetString(buf, 0, result.Count);
+                        if (text.StartsWith(SizeMarkerPrefix))
+                        {
+                            await SendNawsAsync(stream, text, token);
+                            continue;
+                        }
+                    }
+
+                    await stream.WriteAsync(buf, 0, result.Count, token);
                 }
             }
             catch (OperationCanceledException) { }
             catch (Exception) { }
+        }
+
+        /// <summary>
+        /// Builds and sends a real "IAC SB NAWS &lt;cols&gt; &lt;rows&gt; IAC SE" subnegotiation,
+        /// exactly as a real telnet client resizing its window would - the game's own
+        /// NAWS parsing (Connection.cs) doesn't know or care this came from a browser.
+        /// </summary>
+        static async Task SendNawsAsync(NetworkStream stream, string message, CancellationToken token)
+        {
+            string[] parts = message.Substring(SizeMarkerPrefix.Length).Trim().Split(' ');
+            if (parts.Length != 2 || !int.TryParse(parts[0], out int cols) || !int.TryParse(parts[1], out int rows))
+                return;
+
+            cols = Math.Clamp(cols, 1, 65535);
+            rows = Math.Clamp(rows, 1, 65535);
+
+            List<byte> bytes = new List<byte> { 0xFF, 0xFA, 0x1F }; // IAC SB NAWS
+            AppendNawsValue(bytes, cols);
+            AppendNawsValue(bytes, rows);
+            bytes.Add(0xFF);
+            bytes.Add(0xF0); // IAC SE
+
+            byte[] payload = bytes.ToArray();
+            await stream.WriteAsync(payload, 0, payload.Length, token);
+        }
+
+        static void AppendNawsValue(List<byte> bytes, int value)
+        {
+            byte hi = (byte)((value >> 8) & 0xFF);
+            byte lo = (byte)(value & 0xFF);
+            foreach (byte b in new[] { hi, lo })
+            {
+                bytes.Add(b);
+                if (b == 0xFF)
+                    bytes.Add(0xFF); // escape a literal 0xFF within the subnegotiation payload
+            }
         }
     }
 }

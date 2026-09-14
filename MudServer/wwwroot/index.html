@@ -23,13 +23,30 @@
   term.loadAddon(fitAddon);
   term.open(document.getElementById("terminal"));
   fitAddon.fit();
-  window.addEventListener("resize", () => fitAddon.fit());
 
   const ECHO_OFF = "ECHO-OFF";
   const ECHO_ON = "ECHO-ON";
 
   const proto = location.protocol === "https:" ? "wss:" : "ws:";
   const ws = new WebSocket(proto + "//" + location.host + "/ws");
+
+  // Reports the terminal's current size to the bridge (Api/TelnetWebSocketBridge.cs),
+  // which translates it into a real Telnet NAWS subnegotiation for the game - not sent
+  // through the line-buffered typed-input path below, so it never mixes with what the
+  // player actually types. fitAddon.fit() may run before the socket has opened (e.g.
+  // the very first call above), so the initial size is (re-)reported on ws.onopen too.
+  function reportSize() {
+    if (ws.readyState === WebSocket.OPEN)
+      ws.send("SIZE " + term.cols + " " + term.rows);
+  }
+  ws.onopen = () => reportSize();
+
+  let resizeTimer = null;
+  window.addEventListener("resize", () => {
+    fitAddon.fit();
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(reportSize, 300);
+  });
 
   let echoEnabled = true;
   let lineBuffer = "";

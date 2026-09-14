@@ -311,6 +311,17 @@ namespace MudServer
         private const byte TelnetWILL = 0xFB;
         private const byte TelnetSB   = 0xFA;
         private const byte TelnetSE   = 0xF0;
+        private const byte TelnetNAWS = 0x1F;
+
+        // Per-connection, not persisted on Player - NAWS renegotiates fresh every
+        // session anyway (real clients resend it on connect and on window resize), and
+        // the WebSocket bridge does the equivalent for a browser player (see
+        // Api/TelnetWebSocketBridge.cs). 80 is the same default the rest of the
+        // codebase's hardcoded formatting already assumes, so a client that never
+        // negotiates NAWS at all (most bare `nc`-style tools, though not real telnet
+        // clients) sees unchanged behaviour.
+        public int TermWidth = 80;
+        public int TermHeight = 24;
 
         private async Task<string> ReadBoundedLineAsync()
         {
@@ -386,16 +397,50 @@ namespace MudServer
 
             if (command == TelnetSB)
             {
-                byte prev = 0;
+                if (await ReadStream.ReadAsync(buf, 0, 1) == 0)
+                    return (false, null);
+                byte option = buf[0];
+
+                // Only NAWS's payload (window width/height, RFC 1073) is worth keeping -
+                // everything else about a subnegotiation is still discarded, same as
+                // before this method knew NAWS existed.
+                List<byte> payload = option == TelnetNAWS ? new List<byte>() : null;
+                bool sawIac = false;
+
                 while (true)
                 {
                     if (await ReadStream.ReadAsync(buf, 0, 1) == 0)
                         return (false, null);
                     byte cur = buf[0];
-                    if (prev == TelnetIAC && cur == TelnetSE)
-                        return (true, null);
-                    prev = cur;
+
+                    if (sawIac)
+                    {
+                        sawIac = false;
+                        if (cur == TelnetSE)
+                            break;
+                        if (cur == TelnetIAC)
+                            payload?.Add(TelnetIAC); // escaped literal 0xFF within the payload
+                        else
+                            payload?.Add(cur); // malformed, but don't lose sync over it
+                        continue;
+                    }
+
+                    if (cur == TelnetIAC)
+                    {
+                        sawIac = true;
+                        continue;
+                    }
+
+                    payload?.Add(cur);
                 }
+
+                if (payload != null && payload.Count >= 4)
+                {
+                    TermWidth = (payload[0] << 8) | payload[1];
+                    TermHeight = (payload[2] << 8) | payload[3];
+                }
+
+                return (true, null);
             }
 
             // Other 2-byte commands (NOP, AYT, EL, EC, GA, DM, BRK, IP, AO) - already
@@ -405,6 +450,12 @@ namespace MudServer
 
         void OnConnect()
         {
+            // Invite the client to report (and keep reporting, on resize) its window
+            // size - see SkipTelnetCommandAsync's NAWS handling above. No-op for a
+            // client that doesn't support it (most just ignore an option request they
+            // don't recognise); TermWidth/TermHeight simply stay at their defaults.
+            try { socket.Send(new byte[] { TelnetIAC, TelnetDO, TelnetNAWS }); } catch { }
+
             if (RemoteIpOverride != null)
             {
                 connPoint = RemoteIpOverride;

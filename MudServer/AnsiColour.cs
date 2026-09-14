@@ -119,8 +119,16 @@ namespace MudServer
             return Colorise(stringToColour, false);
         }
 
-        public static string Colorise(string stringToColour, bool removeColour)
+        // width defaults to 80 (the value every call site used before this parameter
+        // existed) so nothing already calling Colorise(string, bool) changes behaviour -
+        // only sendToUser/sendToAll (SendCommands.cs), which know which connection
+        // they're writing to, pass a specific value (Connection.TermWidth, set via NAWS -
+        // see Connection.cs's SkipTelnetCommandAsync).
+        public static string Colorise(string stringToColour, bool removeColour, int width = 80)
         {
+            if (width < 40)
+                width = 40; // guard against a degenerate/misreported width wrapping every word
+
             stringToColour += "{reset}";
 
             // "^^" is the documented escape for a literal caret (see help/colour.txt,
@@ -155,7 +163,7 @@ namespace MudServer
             int sLen = stringToColour.Length;
             string output = "";
 
-            if (sLen > 80)
+            if (sLen > width)
             {
                 int len = 0;
                 for (int i = 0; i < sLen; i++)
@@ -171,7 +179,7 @@ namespace MudServer
                     else
                         len++;
 
-                    if (len > 73 && test == " " && stringToColour.IndexOf(" ", i) > 80)
+                    if (len > width - 7 && test == " " && stringToColour.IndexOf(" ", i) > width)
                     {
                         //Debug.Print(len.ToString() + ":" + stringToColour.IndexOf(" ", i).ToString());
                         Debug.Print(len.ToString());
