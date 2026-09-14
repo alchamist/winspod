@@ -98,9 +98,23 @@ gaps, not diff artifacts:
 1. **`converse` mode** — type freely without prefixing every line with
    `'`/`;`. Standout gap for a chat-first talker; no equivalent found in
    Winspod's command list.
-2. **`linewrap`/`wordwrap`/`set_term_width`** — per-player output width.
-   Matters more now that a browser client (#3 above) is on the table, since
-   terminal width assumptions get less predictable, not less.
+2. **`linewrap`/`wordwrap`/`set_term_width`** — **foundation done, decorative
+   elements still open.** Real Telnet NAWS (RFC 1073) negotiation
+   (`Connection.cs`'s `SkipTelnetCommandAsync` + `OnConnect`'s `IAC DO NAWS`)
+   now drives `AnsiColour.Colorise`'s prose-wrapping width per connection -
+   chosen over a game-level command specifically because it works below the
+   login state machine, so it can't corrupt the username/password prompts
+   the way sending a command too early could. The WebSocket bridge
+   translates a browser-reported size into the same real NAWS bytes
+   (`wwwroot/index.html`'s `xterm-addon-fit` → a `SIZE <cols> <rows>` message
+   → `Api/TelnetWebSocketBridge.cs`), so real telnet clients that already
+   send NAWS on resize (PuTTY does) and the browser client both get
+   width-aware wrapping. Still open: the ~50+ hardcoded 80-column decorative
+   elements (header/footer dashes, centered titles) scattered across the
+   codebase don't adapt yet - only prose does, so a narrow terminal still
+   shows those wrapping oddly mid-word. Matters more now that a browser
+   client (#3 above) and mobile are both on the table, since terminal width
+   assumptions get less predictable, not less.
 3. ~~`connect_room`~~ — **done**, as `connectroom` (Winspod's commands don't
    use underscores — `roomadd`, `roomlock`, `logonmsg`, etc. — so it follows
    that style rather than ew-too's). `connectroom <room>`/`connectroom`/
