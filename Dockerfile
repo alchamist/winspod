@@ -4,6 +4,11 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
+# git isn't in the base SDK image - only needed here to read the commit below.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/*
+
 # Restore first, in its own layer, so editing game source doesn't invalidate the
 # (much slower) NuGet restore on every rebuild.
 COPY MudServer/MudServer.csproj MudServer/
@@ -11,6 +16,16 @@ RUN dotnet restore MudServer/MudServer.csproj
 
 COPY MudServer/ MudServer/
 RUN dotnet publish MudServer/MudServer.csproj -c Release -o /app --no-restore
+
+# Record the exact commit this image was built from. AssemblyVersion (see
+# AssemblyInfo.cs) is hardcoded and never bumped, so it can't answer "did a
+# deploy actually pick up my latest push?" - this can, via the in-game
+# `version` command and /api/status (Server.cs reads this file at startup).
+# Only .git is copied here (not the working tree, which is already in
+# MudServer/ above), and only into this throwaway build stage - the final
+# runtime image below never sees it.
+COPY .git /src/.git
+RUN git -C /src rev-parse --short HEAD > /app/gitsha.txt 2>/dev/null || echo unknown > /app/gitsha.txt
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 

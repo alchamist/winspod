@@ -58,6 +58,7 @@ namespace MudServer.Api
             return new StatusDto
             {
                 TalkerName = AppSettings.Default.TalkerName,
+                GitCommit = Server.GitCommit,
                 UptimeSeconds = (long)uptime.TotalSeconds,
                 ResidentCount = playerList.Count,
                 PlayersConnectedTotal = Server.playerCount,

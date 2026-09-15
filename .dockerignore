@@ -1,6 +1,10 @@
 **/bin/
 **/obj/
-.git/
+# .git is needed by the Dockerfile's build stage (git rev-parse --short HEAD),
+# baked into the image so the in-game `version` command and /api/status can
+# confirm which commit a running deploy actually came from. Only the build
+# stage ever sees it - COPY --from=build in the runtime stage only copies
+# /app, not /src, so it never reaches the final image.
 .gitignore
 *.md
 *.sln

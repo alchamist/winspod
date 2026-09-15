@@ -1161,6 +1161,12 @@ namespace MudServer
 
         #region Misc Methods
 
+        public void cmdVersion(string message)
+        {
+            Version vrs = Assembly.GetExecutingAssembly().GetName().Version;
+            sendToUser("^YVersion: ^N" + vrs.Major + "." + vrs.Minor + " Build: " + vrs.Build + " Revision: " + vrs.Revision + "\r\n^YCommit: ^N" + Server.GitCommit + "\r\n^YServer started: ^N" + Server.startTime.ToString(), true, false, false);
+        }
+
         public void cmdListCommands(string message)
         {
             message = message.ToLower();

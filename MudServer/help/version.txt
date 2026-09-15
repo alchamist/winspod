@@ -1,13 +1,11 @@
 0
-^G&v for Windows^N
+^YSyntax: ^Nversion
+^YAliases: ^NNone
 
-Created by:
-  Julian Eames
-  http://sitback.dyndns.org
+^PEffect:^N
 
-Code by:
-  Julian Eames
+Shows the running build: the assembly version, the exact git commit it was built from (set at image build time - "dev" outside Docker), and when the server process last started. Use this to confirm a deploy actually picked up a given push. See help credits for who wrote the original codebase.
 
-Copyright (c) 2002-2010 Julian Eames. All rights reserved.
+^RRestrictions:^N
 
-^HMany thanks to the beta testers, especially Boltar - we wish you luck with Nuts 4!^N
+None

@@ -216,6 +216,7 @@
 "unpropose","cmdUnpropose",1,"player"
 "unsell","cmdUnsell",1,"player"
 "use","cmdUse",1,"player"
+"version","cmdVersion",0,"system"
 "vlog","cmdVlog",4,"admin"
 "w","cmdWho",0,"system"
 "wall","cmdWall",3,"staff"

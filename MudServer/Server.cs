@@ -42,6 +42,26 @@ namespace MudServer
 
         public static string userFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "winspod");
 
+        // Written by the Dockerfile's build stage (git rev-parse --short HEAD) so a
+        // deploy can actually be confirmed - AssemblyVersion below is hardcoded and never
+        // bumped, so it can't tell two builds apart. Absent under a plain `dotnet run`
+        // (nothing writes the file there), which is fine - that's a dev build, not a
+        // deploy anyone needs to verify.
+        public static readonly string GitCommit = LoadGitCommit();
+
+        static string LoadGitCommit()
+        {
+            try
+            {
+                string path = Path.Combine(AppContext.BaseDirectory, "gitsha.txt");
+                return File.Exists(path) ? File.ReadAllText(path).Trim() : "dev";
+            }
+            catch
+            {
+                return "dev";
+            }
+        }
+
         /// <summary>Result of the most recent liveness probe (see Connection.ProbeLivenessAsync), read by /healthz.</summary>
         public static bool LastLivenessOk { get; private set; } = true;
         public static DateTime LastLivenessCheck { get; private set; } = DateTime.Now;

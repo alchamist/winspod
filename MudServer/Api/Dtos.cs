@@ -5,6 +5,7 @@ namespace MudServer.Api
     public class StatusDto
     {
         public string TalkerName { get; set; }
+        public string GitCommit { get; set; }
         public long UptimeSeconds { get; set; }
         public int ResidentCount { get; set; }
         public int PlayersConnectedTotal { get; set; }
