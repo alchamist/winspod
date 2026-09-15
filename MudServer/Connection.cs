@@ -539,13 +539,15 @@ namespace MudServer
             {
                 logConnection(myPlayer.UserName, myPlayer.CurrentIP, DateTime.Now);
 
-                // Was only written in cmdQuit, so any session ending any other way (idle
-                // kick, a dropped socket, a crash) left it stale indefinitely - this runs
-                // for every disconnect regardless of cause, quit included, so it's the
-                // one place this belongs. cmdQuit's own SavePlayer() (for LastIP/
-                // TotalOnlineTime/LongestLogin) still runs first on that path - this is a
-                // harmless redundant save there, not a missing one.
+                // Session-end bookkeeping - runs for every disconnect regardless of cause
+                // (idle kick, a dropped socket, a crash, or a clean quit), unlike the
+                // cmdQuit-only version this replaced: anything that ended a session another
+                // way left LastLogon/LastIP stale and never counted that session's time.
+                myPlayer.TotalOnlineTime += Convert.ToInt16((DateTime.Now - myPlayer.CurrentLogon).TotalSeconds);
                 myPlayer.LastLogon = DateTime.Now;
+                myPlayer.LastIP = myPlayer.CurrentIP;
+                int longCheck = (int)(DateTime.Now - myPlayer.CurrentLogon).TotalSeconds;
+                if (longCheck > myPlayer.LongestLogin) myPlayer.LongestLogin = longCheck;
                 myPlayer.SavePlayer();
             }
 
@@ -2200,12 +2202,10 @@ namespace MudServer
             else
                 sendToRoom(myPlayer.UserName + " leaves for normality", null);
 
-            myPlayer.TotalOnlineTime += Convert.ToInt16((DateTime.Now - myPlayer.CurrentLogon).TotalSeconds);
-            myPlayer.LastIP = myPlayer.CurrentIP;
-            int longCheck = (int)(DateTime.Now - myPlayer.CurrentLogon).TotalSeconds;
-            if (longCheck > myPlayer.LongestLogin) myPlayer.LongestLogin = longCheck;
-
-            myPlayer.SavePlayer();
+            // LastLogon/LastIP/TotalOnlineTime/LongestLogin are all handled by
+            // OnDisconnect instead (called from RunAsync's finally block once this
+            // method returns and the socket closes below) - that runs for every
+            // disconnect, not just this one path.
 
             try
             {
