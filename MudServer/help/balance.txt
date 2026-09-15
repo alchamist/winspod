@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Nbalance
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Shows how many credits you currently have.
+
+^RRestrictions:^N
+
+None

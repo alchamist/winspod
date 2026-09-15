@@ -1,0 +1,24 @@
+1
+^YSocials Help^N
+
+Socials are player-created verbs - like "smile" or "wave" - that become their own bare command once created, broadcasting a message to the room the way emote does, but with fixed wording set in advance. Built with createsoc, edited with setsoc, previewed with xs, removed with delsoc.
+
+^PTypes^N
+
+simple    - never takes a target, eg flavour text like "goes afk."
+complex   - target is optional - works both as "smile" and "smile bob"
+private   - target is required - refuses to run with a message telling you so if you leave it out
+
+^PMessage fields ^N^p(set with setsoc)^N
+
+room         - to the room, no target
+self         - to you, no target
+roomtarget   - to the room, target given ("%s" becomes the target's name)
+selftarget   - to you, target given ("%s" becomes the target's name)
+needstarget  - private only: shown to you if you leave the target out
+
+^PRandom phrasing^N
+
+Wrap alternatives in curly braces, separated by a pipe: "grins {evilly|happily|wickedly}." picks one at random each time it's used - the same syntax aliases use for random text (see help alias).
+
+See help createsoc, help setsoc, help delsoc and help xs for the individual commands.

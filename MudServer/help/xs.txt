@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Nxs <social name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Shows the wording of a social - its type, creator, and all of its room/self messages, both with and without a target - without actually triggering it. Use this to check how a social reads before using it on someone.
+
+^RRestrictions:^N
+
+None

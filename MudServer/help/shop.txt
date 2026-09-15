@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Nshop
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Shows everything currently listed for sale in the current room, along with its price and seller. See help sell to list something, help buy to purchase something.
+
+^RRestrictions:^N
+
+None

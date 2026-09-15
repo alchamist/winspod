@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Nsell <object name> <price>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Lists an object from your inventory for sale in the current room at the given price. Unlike drop, you keep ownership until someone actually buys it - use unsell to take it off the market again. See help shop to see what's for sale in a room, and help buy to purchase something.
+
+^RRestrictions:^N
+
+None

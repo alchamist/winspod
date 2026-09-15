@@ -234,6 +234,7 @@ namespace MudServer
 
         private List<inventory> inventoryList = new List<inventory>();      // Inventory list!
         private int         maxWeight = 50;                                 // Maximum weight they can carry
+        private int         credits = 0;                                    // Currency balance
 
         #endregion
 
@@ -811,6 +812,12 @@ namespace MudServer
         {
             get { return maxWeight; }
             set { maxWeight = value; }
+        }
+
+        public int Credits
+        {
+            get { return credits; }
+            set { credits = value; }
         }
 
         #endregion

@@ -96,6 +96,38 @@ namespace MudServer
             Female
         }
 
+        // A player-creatable, freeform social verb - e.g. "smile"/"wave" - typed bare at
+        // the prompt like any other command, not a fixed command with a hardcoded meaning.
+        // Modelled on Playground+'s "kRad Soshuls" (src/socials.c/socials.h in the
+        // talkers/pgplus repo), translated onto this codebase's persistence/struct style.
+        public struct social
+        {
+            public string     Name;
+            public string     Creator;
+            public DateTime   Created;
+            public SocialType Type;
+
+            public bool        Deleted;
+
+            public messages    Messages;
+
+            public struct messages
+            {
+                public string ToRoom;          // broadcast to room, no target given
+                public string ToSelf;          // shown to actor, no target given
+                public string ToRoomTargeted;  // broadcast to room, target given ("%s" is replaced with the target's name)
+                public string ToSelfTargeted;  // shown to actor, target given ("%s" is replaced with the target's name)
+                public string NeedsTarget;     // Private only: shown to actor if invoked with no target
+            }
+        }
+
+        public enum SocialType
+        {
+            Simple,   // never takes a target - always ToRoom/ToSelf
+            Complex,  // target optional - ToRoom/ToSelf if none given, ToRoomTargeted/ToSelfTargeted if given
+            Private   // target required - NeedsTarget if none given, ToRoomTargeted/ToSelfTargeted if given
+        }
+
 
         // Was a Monitor (lock(BigLock)) guarding a blocking, one-OS-thread-per-connection
         // loop. Monitor locks can't be held across an `await`, so now that the per-connection
@@ -160,6 +192,8 @@ namespace MudServer
         public List<message>        mail = new List<message>();
 
         public List<objects>        playerObjects = new List<objects>();
+
+        public List<social>         playerSocials = new List<social>();
 
         public message              editMail = new message();
         public string               editText = "";
@@ -1048,6 +1082,9 @@ namespace MudServer
                             }
                         }
                     }
+                    if (!found)
+                        found = tryRunSocial(firstWord, message, adminIdle, noAlias);
+
                     if (!found && !noAlias)
                         found = doAlias(cmd);
 

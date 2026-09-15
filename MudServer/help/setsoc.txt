@@ -1,0 +1,20 @@
+1
+^YSyntax: ^Nsetsoc <name> <field> <text>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Sets one message field on a social created with createsoc. <field> is one of:
+
+room - shown to the room when used with no target
+self - shown to you when used with no target
+roomtarget - shown to the room when used with a target ("%s" is replaced with the target's name)
+selftarget - shown to you when used with a target ("%s" is replaced with the target's name)
+needstarget - private socials only: shown to you if used with no target
+type - changes the social's type (simple/complex/private)
+
+Leave <text> blank to clear a field. Wrap alternatives in curly braces separated by a pipe, eg {grins|smirks|beams}, to have one picked at random each time - see help socials.
+
+^RRestrictions:^N
+
+Player must be a resident and have builder privs

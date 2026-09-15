@@ -599,8 +599,13 @@ namespace MudServer
 
         private int getInventoryWeight()
         {
+            return getInventoryWeight(myPlayer);
+        }
+
+        private int getInventoryWeight(Player player)
+        {
             int totalWeight = 0;
-            List<Player.inventory> inventory = myPlayer.Inventory;
+            List<Player.inventory> inventory = player.Inventory;
             foreach (Player.inventory i in inventory)
             {
                 objects inv = getObject(i.name);
@@ -716,6 +721,56 @@ namespace MudServer
                             myPlayer.RemoveFromInventory(target.Name);
                         //if (target.Rank < Player.Rank.Admin)
                         //    myPlayer.RemoveFromInventory(target.Name);
+                    }
+                }
+            }
+        }
+
+        public void cmdGive(string message)
+        {
+            string[] split = message.Split(new char[] { ' ' });
+            if (message == "" || split.Length != 2)
+                sendToUser("Syntax: give <object name> <player>", true, false, false);
+            else
+            {
+                objects target = getObject(split[0]);
+                if (target.Name == null || target.Name == "")
+                    sendToUser("Object \"" + split[0] + "\" not found", true, false, false);
+                else if (myPlayer.InInventory(target.Name) == 0)
+                    sendToUser("You don't have " + (isVowel(target.Name.Substring(0, 1)) ? "an " : "a ") + target.Name);
+                else
+                {
+                    string[] targPlayer = matchPartial(split[1]);
+                    if (targPlayer.Length == 0)
+                        sendToUser("Player \"" + split[1] + "\" not found", true, false, false);
+                    else if (targPlayer.Length > 1)
+                        sendToUser("Multiple matches found: " + targPlayer.ToString() + " - Please use more letters", true, false, false);
+                    else if (!isOnline(targPlayer[0]))
+                        sendToUser("Player \"" + targPlayer[0] + "\" is not online", true, false, false);
+                    else if (targPlayer[0].ToLower() == myPlayer.UserName.ToLower())
+                        sendToUser("You can't give something to yourself!", true, false, false);
+                    else
+                    {
+                        foreach (Connection c in connections)
+                        {
+                            if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName.ToLower() == targPlayer[0].ToLower())
+                            {
+                                if (getInventoryWeight(c.myPlayer) + target.Weight > c.myPlayer.MaxWeight)
+                                    sendToUser(c.myPlayer.ColourUserName + " cannot carry any more weight", true, false, false);
+                                else if (c.myPlayer.InInventory(target.Name) > 0 && target.Unique.ToPlayer)
+                                    sendToUser(c.myPlayer.ColourUserName + " can only have one of those", true, false, false);
+                                else
+                                {
+                                    bool moreThanOne = myPlayer.InInventory(target.Name) > 1;
+                                    myPlayer.RemoveFromInventory(target.Name);
+                                    c.myPlayer.AddToInventory(target.Name);
+
+                                    sendToUser("You give " + (moreThanOne ? "one of your " : "your ") + target.Name + (target.Name.ToLower().EndsWith("s") ? "" : (moreThanOne ? "s" : "")) + " to " + c.myPlayer.ColourUserName, true, false, false);
+                                    c.sendToUser("\r\n" + myPlayer.ColourUserName + " gives you " + (isVowel(target.Name.Substring(0, 1)) ? "an " : "a ") + target.Name, true, true, false);
+                                }
+                                return;
+                            }
+                        }
                     }
                 }
             }

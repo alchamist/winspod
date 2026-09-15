@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Ndelsoc <name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Marks a social as deleted. It can no longer be triggered, edited with setsoc, or previewed with xs.
+
+^RRestrictions:^N
+
+Player must be a resident, have builder privs, and be the social's creator (or be an admin)

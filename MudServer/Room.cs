@@ -58,6 +58,16 @@ namespace MudServer
             public int              count;  // How many of the object is there?
         }
 
+        // A player-run shop listing, distinct from roomObjects/roomContents - those are
+        // free floor items anyone can take, these stay owned by the seller until someone
+        // actually pays for them via buy.
+        public struct shopListing
+        {
+            public string           seller;
+            public string           objectName;
+            public int              price;
+        }
+
         
         public string               systemName;
         public string               shortName;
@@ -70,6 +80,7 @@ namespace MudServer
         public string               roomOwner = null;
         public roomMessages         roomMessage;
         public List<roomObjects>    roomContents = new List<roomObjects>(); // List of objects in a room
+        public List<shopListing>    shopListings = new List<shopListing>(); // Objects listed for sale in this room
 
         public Room()
         {
@@ -244,6 +255,30 @@ namespace MudServer
                 }
             }
             return 0;
+        }
+
+        public void addListing(string seller, string objectName, int price)
+        {
+            shopListing temp = new shopListing();
+            temp.seller = seller;
+            temp.objectName = objectName;
+            temp.price = price;
+
+            shopListings.Add(temp);
+            SaveRoom();
+        }
+
+        public void removeListing(string seller, string objectName)
+        {
+            for (int i = shopListings.Count - 1; i >= 0; i--)
+            {
+                if (shopListings[i].seller.ToLower() == seller.ToLower() && shopListings[i].objectName.ToLower() == objectName.ToLower())
+                {
+                    shopListings.RemoveAt(i);
+                    SaveRoom();
+                    return;
+                }
+            }
         }
     }
 }

@@ -1,0 +1,11 @@
+4
+^YSyntax: ^Naward <player> <amount>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Grants a player some credits out of nowhere, whether or not they're online. Use this to seed the economy - regular currency transfers between players should use pay instead.
+
+^RRestrictions:^N
+
+Player must be a resident and have admin privs

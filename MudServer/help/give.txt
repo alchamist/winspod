@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Ngive <object name> <player>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Gives an object from your inventory to another player, wherever they are on the system, as long as they are online. Objects that are unique to a player can only be held one at a time, and the recipient cannot exceed their maximum carry weight.
+
+^RRestrictions:^N
+
+None

@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Nunsell <object name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Takes one of your own listings off the market in the current room and returns the object to your inventory.
+
+^RRestrictions:^N
+
+None

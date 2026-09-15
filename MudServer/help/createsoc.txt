@@ -1,0 +1,17 @@
+1
+^YSyntax: ^Ncreatesoc <name> <type>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Creates a new social with the given name. <type> is one of:
+
+simple - never takes a target
+complex - target is optional
+private - target is required
+
+The name cannot match an existing command or another social, must start with a letter, be at least 3 characters long, and may otherwise only contain letters, numbers, and _ - ~. Use setsoc to fill in its messages. See help socials for the full reference.
+
+^RRestrictions:^N
+
+Player must be a resident and have builder privs

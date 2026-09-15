@@ -145,3 +145,59 @@ Explicitly **not** planned: ew-too's `malloc`/`dfstats`/`defrag`/`dtb`/`dtk`
 (manual C heap debugging — meaningless under the .NET GC) and `crash`
 (a test hook for exercising `angel.c`, which we're not reinventing — see
 `SdNotify.cs`/`deploy/mudserver.service.example` instead).
+
+## Economy — **done.**
+
+Scoped down from an initial "currency for everything" idea to just what's
+actually wanted: object trading via player-run shops. Minigames stay
+play-from-anywhere with no currency tie-in (`msweep`'s `won`/`lost`/`drawn` on
+`Player.gamestats` stays a pure scoreboard — see `GameCommands.cs`), and
+there's no prestige/leaderboard angle.
+
+1. ~~Currency field on `Player`~~ — **done.** `Player.Credits`
+   (`private int credits`, same private-field-plus-property pattern as
+   `MaxWeight`), serialized automatically by the existing `XmlSerializer` over
+   `Player`. `balance` (`EconomyCommands.cs`) shows it.
+
+2. ~~`pay <player> <amount>`~~ — **done.** Direct player-to-player currency
+   transfer, the currency equivalent of `give` (`ObjectCommands.cs`'s
+   `cmdGive`) — same `matchPartial`/`isOnline` targeting, self-pay guard, and
+   works regardless of room, matching `give`'s behaviour.
+
+3. ~~Player-run shops, built on the existing `objects` system~~ — **done.**
+   `objects` already carried `Owner`/`Creator` and rooms already carried
+   `roomOwner` — a shop is a price tag on an object you own, listed in a
+   room via a new parallel list (`Room.shopListings`, deliberately separate
+   from `roomContents` — those are free-to-take floor items, a listing stays
+   owned by the seller until paid for):
+   - `sell <object name> <price>` — lists an object from your inventory.
+   - `shop` — shows what's listed for sale in the current room (not in the
+     original plan, added alongside `sell`/`buy` the same way `balance` was
+     added alongside `pay` — a command with nothing to check its own output
+     against isn't usable).
+   - `buy <object name>` — transfers `price` credits from buyer to seller and
+     the object from seller to buyer, reusing `give`'s weight-capacity and
+     `Unique.ToPlayer` checks. Pays the seller whether or not they're online
+     (`Player.LoadPlayer` for the offline case, same pattern as `grant`).
+   - `unsell <object name>` — pulls your own listing back into your
+     inventory.
+   - No NPC vendors or admin-curated catalog, as planned.
+
+4. ~~Admin currency seeding~~ — **done**, as its own command rather than a
+   `grant` sub-option: `award <player> <amount>` (`AdminCommands.cs`-style
+   admin gate, works online or offline like `grant`). Kept separate from
+   `grant` since `grant` is a fixed on/off priv toggle and `award` is the
+   only numeric one — folding it in would've been the odd one out.
+
+Verified end-to-end against a live server: registration, the `res` residency
+flow (`sell`/`buy`/`pay`/`balance`/`award` are all Member-rank+, matching the
+existing `get`/`take`/`drop`/`give` newbie restriction — a fresh Newbie can't
+use them until sponsored), `create`/`sell`/`shop` listing, `award`, `buy`
+transferring both credits and the object correctly with live notifications
+to both parties, post-trade balances and inventory, the listing disappearing
+after purchase, and the guard rails (self-buy, buying a nonexistent listing,
+negative price, insufficient funds).
+
+Not planned unless priorities change: minigame payouts (deliberately
+excluded — see above), NPC vendors/admin-curated catalogs, and any
+prestige/leaderboard use of currency.

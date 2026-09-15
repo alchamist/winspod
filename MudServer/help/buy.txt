@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Nbuy <object name>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Buys an object listed for sale in the current room (see help shop). The price is deducted from your credits and paid to the seller, whether or not they're currently online. Objects that are unique to a player can only be held one at a time, and you cannot exceed your maximum carry weight.
+
+^RRestrictions:^N
+
+None

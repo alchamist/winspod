@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Npay <player> <amount>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Pays another player some of your credits, wherever they are on the system, as long as they are online. See help balance to check how many you have.
+
+^RRestrictions:^N
+
+None
