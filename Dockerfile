@@ -4,11 +4,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# git isn't in the base SDK image - only needed here to read the commit below.
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends git \
-    && rm -rf /var/lib/apt/lists/*
-
 # Restore first, in its own layer, so editing game source doesn't invalidate the
 # (much slower) NuGet restore on every rebuild.
 COPY MudServer/MudServer.csproj MudServer/
@@ -22,16 +17,19 @@ RUN dotnet publish MudServer/MudServer.csproj -c Release -o /app --no-restore
 # deploy actually pick up my latest push?" - this can, via the in-game
 # `version` command and /api/status (Server.cs reads this file at startup).
 #
-# COPY . (the whole build context, honouring .dockerignore) rather than
-# COPY .git specifically - a COPY of an exact path that turns out missing
-# fails the whole build immediately, and this needs to degrade gracefully
-# instead: some build environments hand Docker a context without .git at
-# all (a tarball snapshot rather than a real clone), and that must still
-# produce a working image, just with an "unknown" commit. Into its own
-# throwaway directory, decoupled from the actual app source tree above -
-# the final runtime image below only ever sees /app, never this.
-COPY . /gitcontext
-RUN git -C /gitcontext rev-parse --short HEAD > /app/gitsha.txt 2>/dev/null || echo unknown > /app/gitsha.txt
+# Reads it from the GitHub API instead of local .git: tried COPY .git +
+# `git rev-parse` first, but the build context this Dockerfile actually
+# gets handed (a Portainer git-backed stack redeploy) doesn't include
+# .git, so that always came back empty. The API call only needs outbound
+# internet, which the build already requires anyway (pulling this base
+# image, restoring NuGet packages) - hardcoded to master since that's the
+# only branch this ever deploys from.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+RUN SHA=$(curl -s https://api.github.com/repos/alchamist/winspod/commits/master 2>/dev/null \
+       | grep -m1 '"sha"' | sed -E 's/.*"sha": *"([0-9a-f]{40})".*/\1/' | cut -c1-7); \
+    if [ -n "$SHA" ]; then echo "$SHA" > /app/gitsha.txt; else echo unknown > /app/gitsha.txt; fi
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 
