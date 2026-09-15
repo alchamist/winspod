@@ -21,11 +21,17 @@ RUN dotnet publish MudServer/MudServer.csproj -c Release -o /app --no-restore
 # AssemblyInfo.cs) is hardcoded and never bumped, so it can't answer "did a
 # deploy actually pick up my latest push?" - this can, via the in-game
 # `version` command and /api/status (Server.cs reads this file at startup).
-# Only .git is copied here (not the working tree, which is already in
-# MudServer/ above), and only into this throwaway build stage - the final
-# runtime image below never sees it.
-COPY .git /src/.git
-RUN git -C /src rev-parse --short HEAD > /app/gitsha.txt 2>/dev/null || echo unknown > /app/gitsha.txt
+#
+# COPY . (the whole build context, honouring .dockerignore) rather than
+# COPY .git specifically - a COPY of an exact path that turns out missing
+# fails the whole build immediately, and this needs to degrade gracefully
+# instead: some build environments hand Docker a context without .git at
+# all (a tarball snapshot rather than a real clone), and that must still
+# produce a working image, just with an "unknown" commit. Into its own
+# throwaway directory, decoupled from the actual app source tree above -
+# the final runtime image below only ever sees /app, never this.
+COPY . /gitcontext
+RUN git -C /gitcontext rev-parse --short HEAD > /app/gitsha.txt 2>/dev/null || echo unknown > /app/gitsha.txt
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 
