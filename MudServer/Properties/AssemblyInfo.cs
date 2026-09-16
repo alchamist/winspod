@@ -46,6 +46,6 @@ using System.Runtime.InteropServices;
 // a per-change counter - the git commit shown alongside it (Server.GitCommit, `version`
 // command, /api/status) is what answers "is this the exact build I just pushed", which
 // this number was never suited for anyway.
-[assembly: AssemblyVersion("2.5.3.0")]
-[assembly: AssemblyFileVersion("2.5.3.0")]
+[assembly: AssemblyVersion("2.5.4.0")]
+[assembly: AssemblyFileVersion("2.5.4.0")]
 
