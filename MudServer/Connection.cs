@@ -162,6 +162,13 @@ namespace MudServer
         private ArrayList           cmds = new ArrayList();
         public string               lastSent;
         public createUser           newUser = new createUser();
+
+        // Pager state - deliberately kept here on Connection, not Player: unlike
+        // InMailEditor/InDescriptionEditor/etc. (which do live on Player, and so get
+        // serialized with it), this shouldn't survive a reconnect. Player.NoPager is the
+        // actual persisted preference; this is just "which lines are queued right now".
+        private List<string>        pagerLines = new List<string>();
+        private bool                inPager = false;
         public DateTime             connectTime = DateTime.Now; // used for tracking how long they have been at the prompt ...
 
         private byte[]              echoOff = new byte[] { 0xFF, 0xFB, 0x01 };
@@ -220,6 +227,10 @@ namespace MudServer
             myNum = conNum;
             //myPlayer = new Player(conNum);
             this.socket = socket;
+            // Wrapped once here rather than instrumenting every Writer.Write/
+            // ReadStream.ReadAsync call site - see CountingStream's own comment. Feeds
+            // Server.bytesIn/Out for the `netstat` admin command.
+            stream = new CountingStream(stream);
             ReadStream = stream;
             Writer = new StreamWriter(stream);
 
@@ -978,7 +989,17 @@ namespace MudServer
                 string cmd = line.Trim();
                 bool adminIdle = false;
 
-                if (myPlayer.InMailEditor)
+                if (inPager)
+                {
+                    // Checked first, ahead of the editors below - any input while a page
+                    // is pending means "continue", not "run this as a command/editor
+                    // line". Deliberately doesn't gate on cmd != "" like the dispatch
+                    // branch further down does, so a bare Enter (the normal "more"
+                    // gesture) reaches continuePager instead of being silently dropped.
+                    myPlayer.LastActive = DateTime.Now;
+                    continuePager(line);
+                }
+                else if (myPlayer.InMailEditor)
                 {
                     myPlayer.LastActive = DateTime.Now;
                     mailEdit(line);
@@ -2366,6 +2387,26 @@ namespace MudServer
                         break;
                 }
             }
+        }
+
+        public void cmdNetstat(string message)
+        {
+            double uptimeSecs = (DateTime.Now - Server.startTime).TotalSeconds;
+            if (uptimeSecs < 1)
+                uptimeSecs = 1;
+
+            long bytesIn = Server.bytesIn;
+            long bytesOut = Server.bytesOut;
+            long packetsIn = Server.packetsIn;
+            long packetsOut = Server.packetsOut;
+
+            string output = "";
+            output += centerText("Total bytes         : (In) " + bytesIn + "  (Out) " + bytesOut) + "\r\n";
+            output += centerText("Bytes per second    : (In) " + Math.Round(bytesIn / uptimeSecs, 1) + "  (Out) " + Math.Round(bytesOut / uptimeSecs, 1)) + "\r\n";
+            output += centerText("Average bytes/packet: (In) " + (packetsIn > 0 ? Math.Round((double)bytesIn / packetsIn, 1) : 0) + "  (Out) " + (packetsOut > 0 ? Math.Round((double)bytesOut / packetsOut, 1) : 0)) + "\r\n";
+            output += centerText("Total packets       : (In) " + packetsIn + "  (Out) " + packetsOut) + "\r\n";
+            output += centerText("Packets per second  : (In) " + Math.Round(packetsIn / uptimeSecs, 1) + "  (Out) " + Math.Round(packetsOut / uptimeSecs, 1)) + "\r\n";
+            sendToUser(headerLine("Netstat") + "\r\n" + output + "\r\n" + centerText("\"Packets\" here means read/write calls, not literal network packets - see help netstat") + "\r\n" + footerLine(), true, false, false);
         }
 
 

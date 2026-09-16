@@ -1,0 +1,11 @@
+4
+^YSyntax: ^Nnetstat
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Shows cumulative network traffic since the server last started: total bytes and "packets" in/out, and their rates. "Packets" means read/write calls on a connection's underlying stream, not literal network packets - .NET's stream API has no visibility below that, unlike the raw socket send()/recv() counts the original codebase this is modelled on could see directly. Counted once per connection at the point its stream is wrapped (see CountingStream), so this covers all Telnet/TLS traffic, not any one player.
+
+^RRestrictions:^N
+
+Player must be a resident and have admin privs

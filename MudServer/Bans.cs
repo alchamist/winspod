@@ -16,6 +16,65 @@ namespace MudServer
     public partial class Connection
     {
 
+        public void cmdSite(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: site <player> or site <ip prefix>", true, false, false);
+            else
+            {
+                string prefix;
+
+                if (char.IsDigit(message[0]))
+                {
+                    // A raw prefix, taken as typed - "site 82.19" matches anyone whose IP
+                    // starts with that, no need to pad it out to full octets.
+                    prefix = message;
+                }
+                else
+                {
+                    string[] target = matchPartial(message);
+                    if (target.Length == 0)
+                    {
+                        sendToUser("Player \"" + message + "\" not found", true, false, false);
+                        return;
+                    }
+                    else if (target.Length > 1)
+                    {
+                        sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                        return;
+                    }
+
+                    Player targ = null;
+                    foreach (Player p in getPlayers())
+                    {
+                        if (p.UserName.ToLower() == target[0].ToLower())
+                            targ = p;
+                    }
+
+                    if (targ == null || string.IsNullOrEmpty(targ.CurrentIP))
+                    {
+                        sendToUser(target[0] + " has no known IP address on record", true, false, false);
+                        return;
+                    }
+
+                    // Drop to the first two octets, same as ew-too's "site <player>" did -
+                    // a /16-ish match wide enough to catch a dynamic-IP reconnect, not just
+                    // an exact repeat.
+                    string[] octets = targ.CurrentIP.Split('.');
+                    prefix = octets.Length >= 2 ? octets[0] + "." + octets[1] + "." : targ.CurrentIP;
+                }
+
+                string output = "";
+                foreach (Player p in getPlayers())
+                {
+                    if (!string.IsNullOrEmpty(p.CurrentIP) && p.CurrentIP.StartsWith(prefix))
+                        output += "\r\n" + p.ColourUserName.PadRight(40 + (p.ColourUserName.Length - p.UserName.Length), ' ') + ": " + p.CurrentIP + (isOnline(p.UserName) ? " (online)" : "");
+                }
+
+                sendToUser(headerLine("People from \"" + prefix + "\"") + (output == "" ? "\r\nNo matches found" : output) + "\r\n" + footerLine(), true, false, false);
+            }
+        }
+
         public void cmdIpBan(string message)
         {
             IPAddress ban = null;

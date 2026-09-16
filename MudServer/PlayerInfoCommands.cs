@@ -234,6 +234,20 @@ namespace MudServer
             myPlayer.SavePlayer();
         }
 
+        public void cmdIacGA(string message)
+        {
+            myPlayer.IacGA = !myPlayer.IacGA;
+            sendToUser("You " + (myPlayer.IacGA ? "en" : "dis") + "able the Telnet Go-Ahead signal after your prompts", true, false, false);
+            myPlayer.SavePlayer();
+        }
+
+        public void cmdNoPager(string message)
+        {
+            myPlayer.NoPager = !myPlayer.NoPager;
+            sendToUser("You " + (myPlayer.NoPager ? "disable" : "enable") + " paging of long output", true, false, false);
+            myPlayer.SavePlayer();
+        }
+
         public void cmdPrefix(string message)
         {
             if (message == "" || AnsiColour.Colorise(message, true) == "")

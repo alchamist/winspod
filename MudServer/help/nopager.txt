@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Nnopager
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Toggles paging of long output. When on (the default), anything longer than one screen pauses with a "-- More --" prompt - press enter to see the next page, or type q to stop and discard the rest. Uses your terminal's reported height (NAWS), same as line wrapping uses its reported width.
+
+^RRestrictions:^N
+
+None

@@ -83,12 +83,22 @@ namespace MudServer
                             string prefix = "";
                             if (conn.myPlayer != null && conn.lastSent == conn.myPlayer.Prompt && !msg.StartsWith(conn.myPlayer.Prompt) && conn.myPlayer.UserName != myPlayer.UserName)
                                 prefix = "\r\n";
-                            if (newline)
-                                conn.Writer.WriteLine(prefix + AnsiColour.Colorise(msg, (removeColour || !conn.myPlayer.DoColour), conn.TermWidth));
-                            else
-                                conn.Writer.Write(prefix + AnsiColour.Colorise(msg, (removeColour || !conn.myPlayer.DoColour), conn.TermWidth));
 
-                            conn.Writer.Flush();
+                            string colorised = prefix + AnsiColour.Colorise(msg, (removeColour || !conn.myPlayer.DoColour), conn.TermWidth);
+
+                            // Already mid-page (paging brand new output in on top would lose
+                            // track of what's queued) or opted out - falls through to the
+                            // plain write exactly as before either way.
+                            bool paged = !conn.inPager && !conn.myPlayer.NoPager && conn.beginPager(colorised);
+                            if (!paged)
+                            {
+                                if (newline)
+                                    conn.Writer.WriteLine(colorised);
+                                else
+                                    conn.Writer.Write(colorised);
+
+                                conn.Writer.Flush();
+                            }
 
                             conn.lastSent = msg;
 
@@ -99,7 +109,10 @@ namespace MudServer
                                     conn.history.RemoveAt(0);
                             }
 
-                            if (sendPrompt)
+                            // beginPager already showed its own "-- More --" prompt in
+                            // place of the normal one - doPrompt runs later, once
+                            // continuePager clears inPager.
+                            if (sendPrompt && !paged)
                                 doPrompt(user);
                             break;
                         }

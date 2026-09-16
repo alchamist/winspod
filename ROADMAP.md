@@ -122,12 +122,46 @@ gaps, not diff artifacts:
    a real room; an initial test against "jail" looked broken but turned out
    to be `Heartbeat.cs`'s pre-existing auto-release-from-jail logic correctly
    ejecting a non-jailed player, unrelated to this feature.
-4. **`nopager`** — toggle for disabling output paging on long text; depends
-   on whether Winspod pages long output at all today (needs checking).
-5. **`iacga`** — Telnet IAC Go-Ahead toggle for older/dumb clients. Cheap,
-   low-priority, include if doing a general Telnet-handling pass.
-6. **`site`/`netstat`** (admin) — inspecting/grouping connections by
-   IP/site, beyond today's `ipban`/`ipunban`.
+4. ~~`nopager`~~ — **done**, and turned out to need more than a toggle:
+   Winspod didn't page output at all (confirmed by checking, per the note
+   this item used to have), so this built the pager itself first. `TermHeight`
+   (NAWS-reported, alongside the `TermWidth` linewrap already uses - see
+   #2 above) now drives a second dimension of chunking on top of the
+   existing width-wrap: the core `sendToUser` (`SendCommands.cs`) hands
+   already-colorised text over to `beginPager` (`Pager.cs`) when it's
+   taller than one screen and the recipient hasn't opted out, which shows
+   a page at a time with a "-- More --" prompt. Continuation is line-based
+   (press enter, or `q` to stop) rather than raw-keystroke, matching how
+   every other multi-step interaction in this codebase already works
+   (`InMailEditor`/`InDescriptionEditor`/etc.) - `ProcessLine` checks a new
+   `inPager` connection field ahead of those. `nopager` (`PlayerInfoCommands.cs`)
+   toggles `Player.NoPager`, paging on by default. Verified live: `cmd all`
+   (232 commands, taller than the default 24-row screen) pages correctly,
+   `q` stops early and hands control straight back to normal command
+   dispatch, and `nopager` on makes the same output print in one go.
+5. ~~`iacga`~~ — **done.** `Player.IacGA` toggle (`iacga` command); when set,
+   `doPrompt` sends a raw Telnet IAC GA (`0xFF 0xF9`) after a player's own
+   prompt, the same raw-byte-send pattern `sendEchoOff`/`sendEchoOn` already
+   used. Off by default - modern clients and the WebSocket bridge (which
+   strips Telnet entirely) just ignore it either way.
+6. ~~`site`/`netstat`~~ (admin) — **done**, as two separate commands: ew-too's
+   own source (`talkers/ew-too`) turned out to treat these as unrelated
+   despite this roadmap line originally bundling them.
+   - `site <player>` / `site <ip prefix>` (`Bans.cs`) — lists every
+     resident, online or not, sharing an IP prefix (first two octets when
+     given a player name, matching ew-too's own `/16`-ish match; taken
+     as-is when given a raw prefix), reusing `getPlayers()` rather than
+     Winspod's existing `ipban`'s exact-match-only IP handling.
+   - `netstat` (admin) — cumulative bytes/"packets" in/out and their rates
+     since the server started. ew-too tracked this at the raw socket
+     send()/recv() level; the closest equivalent here is `CountingStream`
+     (new), a pass-through `Stream` decorator that `Connection`'s
+     constructor wraps every connection's stream in once, feeding
+     `Server.bytesIn`/`bytesOut` - one chokepoint instead of instrumenting
+     every `Writer.Write`/`ReadStream.ReadAsync` call site individually.
+     "Packets" means read/write calls, not literal network packets (a
+     `Stream` has no visibility below that), which both the command's own
+     output and its help text say plainly.
 
 ~~Named-list subsystem~~ — **already present**, corrected after actually
 running `flist` in-game rather than trusting the command-name diff alone.

@@ -203,6 +203,8 @@ namespace MudServer
         private bool        canShout = true;                                // Can they shout?
         private string      prompt = AppSettings.Default.TalkerName + ">";  // Their own personal prompt
         private bool        timeStampPrompt = false;                        // Do they want a timestamp with their prompt?
+        private bool        iacGA = false;                                  // Send Telnet IAC GA after prompts, for old half-duplex clients?
+        private bool        noPager = false;                                // Skip the "-- More --" pause on long output?
         private bool        wibbled;                                        // Has the user been wibbled?
         private string      wibbledBy;                                      // Who wibbled them
         private bool        isGit = false;                                  // Is the user a git?
@@ -353,6 +355,18 @@ namespace MudServer
         {
             get { return timeStampPrompt; }
             set { timeStampPrompt = value; }
+        }
+
+        public bool IacGA
+        {
+            get { return iacGA; }
+            set { iacGA = value; }
+        }
+
+        public bool NoPager
+        {
+            get { return noPager; }
+            set { noPager = value; }
         }
 
         public bool Wibbled

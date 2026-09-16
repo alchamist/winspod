@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Niacga
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Toggles whether the server sends a Telnet Go-Ahead signal (IAC GA) after your prompts. Only useful for old half-duplex terminals that wait for it before sending anything back - modern clients, and the browser client, both ignore it. Off by default.
+
+^RRestrictions:^N
+
+None

@@ -40,6 +40,15 @@ namespace MudServer
         public static int playerCount = 0;
         public static int playerCountToday = 0;
 
+        // Fed by CountingStream, wrapped around every connection's Stream in Connection's
+        // constructor - see its own comment for why that single chokepoint was used
+        // instead of instrumenting individual Writer.Write/ReadStream.ReadAsync calls.
+        // "Packets" means read/write calls, not literal network packets (see cmdNetstat).
+        public static long bytesIn = 0;
+        public static long bytesOut = 0;
+        public static long packetsIn = 0;
+        public static long packetsOut = 0;
+
         public static string userFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "winspod");
 
         // Written by the Dockerfile's build stage (git rev-parse --short HEAD) so a

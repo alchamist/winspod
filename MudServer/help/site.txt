@@ -1,0 +1,11 @@
+4
+^YSyntax: ^Nsite <player> or site <ip prefix>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Lists every resident (online or not) whose recorded IP address matches. Given a player name, matches anyone sharing the first two octets of their IP - wide enough to catch a dynamic-IP reconnect, not just an exact repeat. Given a raw prefix (eg "82.19") instead, matches that exactly as typed.
+
+^RRestrictions:^N
+
+Player must be a resident and have admin privs

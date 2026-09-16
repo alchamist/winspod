@@ -128,7 +128,11 @@ namespace MudServer
         private void doPrompt(string user)
         {
             if (user == myPlayer.UserName)
+            {
                 sendToUser("\r" + (myPlayer.InEditor ? "> " : (myPlayer.TimeStampPrompt ? DateTime.Now.ToShortTimeString() + ":" : "") + myPlayer.Prompt.Replace("%t", DateTime.Now.ToShortTimeString()).Replace("%d", DateTime.Now.ToShortDateString())), false, false, false);
+                if (myPlayer.IacGA)
+                    sendGoAhead();
+            }
             else
             {
                 foreach (Connection c in connections)
@@ -136,6 +140,8 @@ namespace MudServer
                     if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName == user)
                     {
                         sendToUser("\r" + (c.myPlayer.InEditor ? "> " : (c.myPlayer.TimeStampPrompt ? DateTime.Now.ToShortTimeString() + ":" : "") + c.myPlayer.Prompt.Replace("%t", DateTime.Now.ToShortTimeString()).Replace("%d", DateTime.Now.ToShortDateString())), c.myPlayer.UserName, false, c.myPlayer.DoColour, false, false);
+                        if (c.myPlayer.IacGA)
+                            c.sendGoAhead();
                     }
                 }
             }
@@ -344,6 +350,16 @@ namespace MudServer
         {
             this.socket.Send(echoOn);
 
+        }
+
+        // Old half-duplex terminals wait for this before sending anything back - modern
+        // clients (and the WebSocket bridge, which strips Telnet entirely) just ignore it,
+        // so this only goes out when a player has explicitly opted in via `iacga`.
+        private static readonly byte[] iacGoAhead = new byte[] { 0xFF, 0xF9 };
+
+        private void sendGoAhead()
+        {
+            try { socket.Send(iacGoAhead); } catch { }
         }
 
         private void flushSocket()
