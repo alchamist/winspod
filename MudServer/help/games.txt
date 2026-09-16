@@ -1,0 +1,26 @@
+0
+^YGames Help^N
+
+Five minigames, all playable from anywhere - no need to be in any particular room. Try "^Gcmd games^N" for the one-line command list.
+
+^PSolo^N
+
+^Gmsweep^N    - text-based Minesweeper (help msweep)
+^Gslots^N     - a slot machine with real stakes: 5 credits a pull into a shared, server-wide jackpot pot (help slots)
+^Gblackjack^N - a hand against the dealer, no stakes (help blackjack)
+
+^PTwo-player^N
+
+^Gttt^N       - tic-tac-toe: challenge another online player (help ttt)
+^Grps^N       - rock-paper-scissors: challenge another online player (help rps)
+
+For the two-player games, "<command> <player>" challenges them - or, if they've already challenged you, accepts instead. There's no separate accept/decline command.
+
+^PRecords^N
+
+Win/loss/draw for everything except slots shows up on "examine" once you've played at least once. Slots is left off - pure chance isn't much of a record to keep.
+
+
+^RRestrictions:^N
+
+None
