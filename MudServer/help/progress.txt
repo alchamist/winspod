@@ -129,5 +129,7 @@ r90 - Date format fixing
 ^PWednesday 16th September 2026^N
 - Added iacga, site/netstat, and a real pager (see help nopager) - the last of the ew-too command-diff gaps except converse mode
 - Added four minigames: slots and blackjack (solo), tic-tac-toe and rock-paper-scissors (challenge another online player) - see help on each. Win/loss/draw records for all but slots show up on "examine"
+- Fixed slots comparing the wrong thing (random indices, not the symbols they picked) so a real three-of-a-kind could still say "no match" - caught live by testing
+- Gave slots real stakes: a 5 credit wager into a shared pot that grows on a loss and pays out (whole/half/quarter depending on what comes up) on a win, matching Playground+'s actual slots.c rather than the flat no-stakes version this started as
 - Fixed the MOTD running straight on from the password prompt instead of starting its own line
 - Fixed "none"/neutral gender using "it/its" pronouns instead of singular "they/them" - object scripting's %psp/%pop/%pap/%ppn, the "away" message, and the unused-until-now getGender helper all had the same mismatch

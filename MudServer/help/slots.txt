@@ -4,7 +4,15 @@
 
 ^PEffect:^N
 
-Pulls the lever on the slot machine. Three symbols are drawn at random - match all three and you win (three 7s is the jackpot). No credits are staked or won, just bragging rights.
+Pulls the lever on the slot machine. Costs 5 credits to play, into a shared pot that grows every time someone doesn't win:
+
+Two matching symbols     - your 5 credits back
+Three 7s                 - the whole pot
+Three cherries            - half the pot
+Three of anything else   - a quarter of the pot
+No match                 - your 5 credits join the pot
+
+The pot is shared across everyone playing - see how much is in it (and your own balance) after every pull. Wins/losses don't show up on "examine" - slots is pure chance, not a record worth keeping.
 
 
 ^RRestrictions:^N

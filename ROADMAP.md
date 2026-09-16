@@ -232,6 +232,11 @@ to both parties, post-trade balances and inventory, the listing disappearing
 after purchase, and the guard rails (self-buy, buying a nonexistent listing,
 negative price, insufficient funds).
 
-Not planned unless priorities change: minigame payouts (deliberately
-excluded — see above), NPC vendors/admin-curated catalogs, and any
-prestige/leaderboard use of currency.
+Not planned unless priorities change: NPC vendors/admin-curated catalogs,
+and any prestige/leaderboard use of currency.
+
+Minigame payouts were revisited since — `slots` (see Commands' minigames
+entry below) does stake and pay out real credits, modelled on Playground+'s
+own slots.c rather than invented from scratch. The other three minigames
+(blackjack/tic-tac-toe/rock-paper-scissors) stayed as originally planned:
+play-from-anywhere, no currency involved, pure win/loss/draw records.

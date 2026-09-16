@@ -49,6 +49,16 @@ namespace MudServer
         public static long packetsIn = 0;
         public static long packetsOut = 0;
 
+        // The slots progressive jackpot (see cmdSlots) - modelled on Playground+'s slots.c,
+        // which keeps this server-wide rather than per-player: it grows every time someone
+        // loses and pays out (fully or partially) on a win. In-memory only, same as the
+        // counters above - resets on restart rather than adding a whole persisted-file
+        // subsystem just for one number. Mutated only from cmdSlots, which - like every
+        // other command - only ever runs with BigLock held, so this doesn't need the
+        // Interlocked treatment bytesIn/Out above do (those are touched from CountingStream,
+        // which runs outside BigLock).
+        public static int slotsPot = 0;
+
         public static string userFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "winspod");
 
         // Written by the Dockerfile's build stage (git rev-parse --short HEAD) so a

@@ -243,8 +243,24 @@ namespace MudServer
         private static readonly string[] slotSymbols = { "BAR", "BAR", "BAR", "BEL", "BEL", "BEL", "CHY", "CHY", "CHY", "CHY", "LEM", "LEM", "LEM", "LEM", "7" };
         private static readonly string[] slotColours = { "^Y", "^Y", "^Y", "^G", "^G", "^G", "^R", "^R", "^R", "^R", "^P", "^P", "^P", "^P", "^C" };
 
+        private const int slotsWager = 5;
+
+        // Payout structure and flavour lifted from Playground+'s slots.c (talkers/pgplus) -
+        // a fixed wager into a server-wide pot (Server.slotsPot) that grows on a loss and
+        // pays out on a win: the whole pot for three 7s, half for three cherries, a quarter
+        // for any other three-of-a-kind, and a plain refund for just two matching. Simplified
+        // from pgplus's multi-line ASCII-art reels down to the single-line bracket display
+        // the rest of this codebase uses, but the actual stakes/tiers are the real thing.
         public void cmdSlots(string message)
         {
+            if (myPlayer.Credits < slotsWager)
+            {
+                sendToUser("Sorry, you don't have enough credits to play (you need at least " + slotsWager + ").", true, false, false);
+                return;
+            }
+
+            myPlayer.Credits -= slotsWager;
+
             Random r = new Random();
             int[] pick = new int[3];
             string reels = "";
@@ -253,19 +269,49 @@ namespace MudServer
                 pick[i] = r.Next(slotSymbols.Length);
                 reels += "[ " + slotColours[pick[i]] + slotSymbols[pick[i]].PadLeft(3) + "^N ] ";
             }
+            string s0 = slotSymbols[pick[0]], s1 = slotSymbols[pick[1]], s2 = slotSymbols[pick[2]];
 
+            sendToUser("You feed " + slotsWager + " credits into the machine and pull the lever...", true, false, false);
             sendToUser(reels.Trim(), true, false, false);
 
-            if (pick[0] == pick[1] && pick[1] == pick[2])
+            if (s0 == s1 && s1 == s2)
             {
-                sendToUser(slotSymbols[pick[0]] == "7" ? "^Y*** JACKPOT! ***^N" : "^GYou win!^N", true, false, false);
+                int payout;
+                string flavour;
+                if (s0 == "7")
+                {
+                    payout = Server.slotsPot;
+                    flavour = "^Y*** JACKPOT! The whole pot is yours! ***^N";
+                }
+                else if (s0 == "CHY")
+                {
+                    payout = Server.slotsPot / 2;
+                    flavour = "^GCherries! Half the pot is yours!^N";
+                }
+                else
+                {
+                    payout = Server.slotsPot / 4;
+                    flavour = "^GA match! A quarter of the pot is yours!^N";
+                }
+                Server.slotsPot -= payout;
+                myPlayer.Credits += payout;
+                sendToUser(flavour + " You win " + payout + " credit" + (payout == 1 ? "" : "s") + ".", true, false, false);
                 myPlayer.slots.won++;
+            }
+            else if (s0 == s1 || s1 == s2 || s0 == s2)
+            {
+                myPlayer.Credits += slotsWager;
+                sendToUser("Not too bad - you get your " + slotsWager + " credits back.", true, false, false);
             }
             else
             {
-                sendToUser("No match - try again", true, false, false);
+                Server.slotsPot += slotsWager;
+                sendToUser("No match - better luck next time.", true, false, false);
                 myPlayer.slots.lost++;
             }
+
+            sendToUser("^NYour credits: " + myPlayer.Credits + " | Pot: " + Server.slotsPot, true, false, false);
+            myPlayer.SavePlayer();
         }
 
         #endregion
