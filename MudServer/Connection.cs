@@ -554,6 +554,18 @@ namespace MudServer
             myPlayer = null;
             myState = -1;
             Console.WriteLine("[" + DateTime.Now.ToShortTimeString() + "] Disconnect: " + connPoint);
+
+            // Closed here, not by whatever command ended the session (cmdQuit used to do
+            // this itself) - closing and de-listing together, in the same BigLock-guarded
+            // step, means no other connection's periodic flush loop (RunAsync's `foreach
+            // (connections) conn.Writer.Flush()`) can ever land on a Writer that's already
+            // closed but still in the list. That race was throwing a harmless but noisy
+            // ObjectDisposedException on every quit - twice, in fact: once here via that
+            // cross-connection flush, and once in this same connection's own ProcessLine,
+            // whose trailing Writer.Flush() ran straight into the Close() cmdQuit had just
+            // done moments earlier.
+            try { Writer.Close(); } catch (Exception e) { logError(e.ToString(), "Socket"); }
+
             connections.Remove(this);
 
         }
@@ -2192,7 +2204,8 @@ namespace MudServer
         {
             Writer.WriteLine(AnsiColour.Colorise("Thanks for visiting &t. Goodbye", myPlayer.DoColour));
             Writer.Flush();
-            Writer.Close();
+            // Not Writer.Close() here - OnDisconnect does that now, at the same moment it
+            // removes this connection from the global list (see its comment for why).
             heartbeat.Stop();
             
             Console.WriteLine("[" + DateTime.Now.ToShortTimeString() + "] Logout: " + myPlayer.UserName);
