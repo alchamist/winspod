@@ -45,17 +45,19 @@ namespace MudServer
 
         private string getGender(string type)
         {
+            // Gender 0 is "none"/neutral (see cmdGender) - singular "they", not "it",
+            // which is for objects, not people.
             string ret;
             switch (type)
             {
                 case "self":
-                    ret = (myPlayer.Gender == 0 ? "itself" : (myPlayer.Gender == 1 ? "himself" : "herself"));
+                    ret = (myPlayer.Gender == 0 ? "themselves" : (myPlayer.Gender == 1 ? "himself" : "herself"));
                     break;
                 case "poss":
-                    ret = (myPlayer.Gender == 0 ? "its" : (myPlayer.Gender == 1 ? "his" : "her"));
+                    ret = (myPlayer.Gender == 0 ? "their" : (myPlayer.Gender == 1 ? "his" : "her"));
                     break;
                 default:
-                    ret = (myPlayer.Gender == 0 ? "it" : (myPlayer.Gender == 1 ? "he" : "she"));
+                    ret = (myPlayer.Gender == 0 ? "they" : (myPlayer.Gender == 1 ? "he" : "she"));
                     break;
             }
             return ret;

@@ -28,10 +28,10 @@ Objects have their own scripting language. As with aliases, multiple commands ca
 ^G%onm^N - Object owner's name
 ^G%cnm^N - Object creator's name
 ^G%obn^N - Object's name
-^Y%psp^N - Player subject pronoun (he/she)
-^Y%pop^N - Player object pronoun (him/her)
-^Y%pap^N - Player attributive pronoun (his/her)
-^Y%ppn^N - Player possesive pronoun (his/hers)
+^Y%psp^N - Player subject pronoun (they/he/she)
+^Y%pop^N - Player object pronoun (them/him/her)
+^Y%pap^N - Player attributive pronoun (their/his/her)
+^Y%ppn^N - Player possesive pronoun (theirs/his/hers)
 
 
 ^PCommands ^N^p(Must be at the start or directly after an if statement)

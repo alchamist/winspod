@@ -1,0 +1,14 @@
+0
+^YSyntax: ^Nblackjack <hit/stand>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Play a hand of blackjack against the dealer. "^Gblackjack^N" on its own deals a new hand (two cards for you, one shown for the dealer) if you don't already have one in progress. "^Gblackjack hit^N" draws another card; "^Gblackjack stand^N" stops there and lets the dealer play out their hand (drawing to 17 or more).
+
+Closest to 21 without going over wins. No credits are staked - your record shows up on "examine" once you've played a hand.
+
+
+^RRestrictions:^N
+
+None

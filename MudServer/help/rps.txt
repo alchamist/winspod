@@ -1,0 +1,14 @@
+0
+^YSyntax: ^Nrps <player> or rps rock/paper/scissors
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Challenges another online player to rock-paper-scissors.
+
+"^Grps <player>^N" challenges them; if they've already challenged you, the same command accepts instead. Once a game is under way, "^Grps rock^N" / "^Grps paper^N" / "^Grps scissors^N" (or just the first letter) makes your choice - both choices stay hidden until your opponent has also chosen, then both are revealed together. Your record shows up on "examine" once you've played a game.
+
+
+^RRestrictions:^N
+
+None

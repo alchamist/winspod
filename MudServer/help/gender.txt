@@ -1,0 +1,11 @@
+1
+^YSyntax: ^Ngender <male/female/none>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Sets the pronouns used for you in object scripting (%psp/%pop/%pap/%ppn - see help object) and a handful of other messages (eg "away"). Male uses he/him/his, female uses she/her/hers, and "none" uses singular they/them/their/theirs - not "it", which is for objects, not people.
+
+^RRestrictions:^N
+
+None

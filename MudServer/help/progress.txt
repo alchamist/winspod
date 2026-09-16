@@ -125,3 +125,9 @@ r90 - Date format fixing
 - Added a player-created socials subsystem (createsoc/setsoc/delsoc/xs) - freeform verbs like "smile" that work as their own commands, modelled on Playground+'s "kRad Soshuls"
 - Added a player-run economy: Credits, pay, and shops (sell/buy/unsell/shop) built on the existing objects system, plus admin currency seeding (award)
 - Added a "version" command and matching /api/status field showing the exact git commit a running build was deployed from, so a Portainer auto-update can actually be confirmed in-game instead of guessed at
+
+^PWednesday 16th September 2026^N
+- Added iacga, site/netstat, and a real pager (see help nopager) - the last of the ew-too command-diff gaps except converse mode
+- Added four minigames: slots and blackjack (solo), tic-tac-toe and rock-paper-scissors (challenge another online player) - see help on each. Win/loss/draw records for all but slots show up on "examine"
+- Fixed the MOTD running straight on from the password prompt instead of starting its own line
+- Fixed "none"/neutral gender using "it/its" pronouns instead of singular "they/them" - object scripting's %psp/%pop/%pap/%ppn, the "away" message, and the unused-until-now getGender helper all had the same mismatch

@@ -560,6 +560,35 @@ namespace MudServer
                 int longCheck = (int)(DateTime.Now - myPlayer.CurrentLogon).TotalSeconds;
                 if (longCheck > myPlayer.LongestLogin) myPlayer.LongestLogin = longCheck;
                 myPlayer.SavePlayer();
+
+                // Leave an in-progress two-player game abandoned rather than stuck - the
+                // opponent's own tttGame/rpsGame reference would otherwise never clear
+                // (pending challenges don't need this: matchPartial/isOnline already
+                // re-validate the challenger is still around before an accept goes through).
+                if (tttGame != null)
+                {
+                    foreach (Connection c in connections)
+                    {
+                        if (c != this && c.tttGame == tttGame)
+                        {
+                            c.sendToUser("\r\n" + myPlayer.UserName + " has disconnected - the game is abandoned", true, true, false);
+                            c.tttGame = null;
+                        }
+                    }
+                    tttGame = null;
+                }
+                if (rpsGame != null)
+                {
+                    foreach (Connection c in connections)
+                    {
+                        if (c != this && c.rpsGame == rpsGame)
+                        {
+                            c.sendToUser("\r\n" + myPlayer.UserName + " has disconnected - the game is abandoned", true, true, false);
+                            c.rpsGame = null;
+                        }
+                    }
+                    rpsGame = null;
+                }
             }
 
             myPlayer = null;
@@ -941,6 +970,11 @@ namespace MudServer
                         if (!reconnect)
                         {
                             Console.WriteLine("[" + DateTime.Now.ToShortTimeString() + "] Login: " + myPlayer.UserName);
+                            // The password prompt (sent with Write, not WriteLine, so the
+                            // echo-suppressed input lands right after it) never got its own
+                            // newline - without this, the MOTD header ran on straight after
+                            // "Please enter your password: " instead of starting its own line.
+                            Writer.WriteLine();
                             showMOTD(false);
                             if (myPlayer.PlayerRank >= (int)Player.Rank.Admin)
                                 cmdCheckLogs("");
@@ -1510,6 +1544,15 @@ namespace MudServer
                     if (ex.minesweeper.won > 0 || ex.minesweeper.lost > 0)
                         output += "{bold}{green}Minesweeper {reset}".PadRight(49, ' ') + ": {green}Won " + ex.minesweeper.won + ", Lost " + ex.minesweeper.lost + "{reset}\r\n";
 
+                    if (ex.blackjack.won > 0 || ex.blackjack.lost > 0 || ex.blackjack.drawn > 0)
+                        output += "{bold}{green}Blackjack {reset}".PadRight(49, ' ') + ": {green}Won " + ex.blackjack.won + ", Lost " + ex.blackjack.lost + ", Drawn " + ex.blackjack.drawn + "{reset}\r\n";
+
+                    if (ex.tictactoe.won > 0 || ex.tictactoe.lost > 0 || ex.tictactoe.drawn > 0)
+                        output += "{bold}{green}Tic-tac-toe {reset}".PadRight(49, ' ') + ": {green}Won " + ex.tictactoe.won + ", Lost " + ex.tictactoe.lost + ", Drawn " + ex.tictactoe.drawn + "{reset}\r\n";
+
+                    if (ex.rps.won > 0 || ex.rps.lost > 0 || ex.rps.drawn > 0)
+                        output += "{bold}{green}Rock-paper-scissors {reset}".PadRight(49, ' ') + ": {green}Won " + ex.rps.won + ", Lost " + ex.rps.lost + ", Drawn " + ex.rps.drawn + "{reset}\r\n";
+
                     if (myPlayer.PlayerRank >= (int)Player.Rank.Staff)
                     {
                         output += "{bold}{red}Kicked {reset}".PadRight(47, ' ') + ": {red}" + ex.KickedCount.ToString() + "{reset}\r\n";
@@ -1586,7 +1629,7 @@ namespace MudServer
         public void cmdAway(string message)
         {
             sendToUser("You mark yourself as away", true, false, false);
-            sendToRoom(myPlayer.ColourUserName + " sets " + (myPlayer.Gender == 0  ? "it's self" : (myPlayer.Gender == 1 ? "himself" : "herself")) + " as away","", false, true);
+            sendToRoom(myPlayer.ColourUserName + " sets " + (myPlayer.Gender == 0 ? "themselves" : (myPlayer.Gender == 1 ? "himself" : "herself")) + " as away", "", false, true);
             myPlayer.Away = true;
         }
 

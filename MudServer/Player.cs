@@ -213,6 +213,10 @@ namespace MudServer
         private int         logons;                                         // Number of times they have logged on
 
         public gamestats    minesweeper;                                    // Minesweeper game stats
+        public gamestats    slots;                                          // Slots game stats
+        public gamestats    blackjack;                                      // Blackjack game stats
+        public gamestats    tictactoe;                                      // Tic-tac-toe game stats
+        public gamestats    rps;                                            // Rock-paper-scissors game stats
 
         #endregion
 

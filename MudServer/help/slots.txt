@@ -1,0 +1,12 @@
+0
+^YSyntax: ^Nslots
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Pulls the lever on the slot machine. Three symbols are drawn at random - match all three and you win (three 7s is the jackpot). No credits are staked or won, just bragging rights.
+
+
+^RRestrictions:^N
+
+None

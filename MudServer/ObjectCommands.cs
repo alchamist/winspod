@@ -439,10 +439,13 @@ namespace MudServer
                                 split[i] = split[i].Replace("%cnm", o.Creator); // Creator name
                                 split[i] = split[i].Replace("%obn", o.Name); // Object name
 
-                                split[i] = split[i].Replace("%psp", (myPlayer.Gender == 0 ? "it" : (myPlayer.Gender == 1 ? "he" : "she"))); // Player subject pronoun (he/she)
-                                split[i] = split[i].Replace("%pop", (myPlayer.Gender == 0 ? "it" : (myPlayer.Gender == 1 ? "him" : "her"))); // Player object pronoun (him/her)
-                                split[i] = split[i].Replace("%pap", (myPlayer.Gender == 0 ? "its" : (myPlayer.Gender == 1 ? "his" : "her"))); // Player attributive pronoun (his/her)
-                                split[i] = split[i].Replace("%ppn", (myPlayer.Gender == 0 ? "its" : (myPlayer.Gender == 1 ? "his" : "hers"))); // Player possesove pronoun (his/hers)
+                                // Gender 0 is "none"/neutral (see cmdGender) - "it/its" is for
+                                // objects, not people, so the neutral case uses singular
+                                // "they" instead, matching what cmdGender already calls it.
+                                split[i] = split[i].Replace("%psp", (myPlayer.Gender == 0 ? "they" : (myPlayer.Gender == 1 ? "he" : "she"))); // Player subject pronoun (they/he/she)
+                                split[i] = split[i].Replace("%pop", (myPlayer.Gender == 0 ? "them" : (myPlayer.Gender == 1 ? "him" : "her"))); // Player object pronoun (them/him/her)
+                                split[i] = split[i].Replace("%pap", (myPlayer.Gender == 0 ? "their" : (myPlayer.Gender == 1 ? "his" : "her"))); // Player attributive pronoun (their/his/her)
+                                split[i] = split[i].Replace("%ppn", (myPlayer.Gender == 0 ? "theirs" : (myPlayer.Gender == 1 ? "his" : "hers"))); // Player possessive pronoun (theirs/his/hers)
                             }
 
                             #endregion

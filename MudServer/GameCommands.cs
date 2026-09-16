@@ -236,6 +236,186 @@ namespace MudServer
             }
         }
 
-        
+        #region Slots
+
+        // Weighted so the jackpot symbol (7) is rare - duplicated entries is a simple way
+        // to weight a flat Random.Next pick without a separate cumulative-probability table.
+        private static readonly string[] slotSymbols = { "BAR", "BAR", "BAR", "BEL", "BEL", "BEL", "CHY", "CHY", "CHY", "CHY", "LEM", "LEM", "LEM", "LEM", "7" };
+        private static readonly string[] slotColours = { "^Y", "^Y", "^Y", "^G", "^G", "^G", "^R", "^R", "^R", "^R", "^P", "^P", "^P", "^P", "^C" };
+
+        public void cmdSlots(string message)
+        {
+            Random r = new Random();
+            int[] pick = new int[3];
+            string reels = "";
+            for (int i = 0; i < 3; i++)
+            {
+                pick[i] = r.Next(slotSymbols.Length);
+                reels += "[ " + slotColours[pick[i]] + slotSymbols[pick[i]].PadLeft(3) + "^N ] ";
+            }
+
+            sendToUser(reels.Trim(), true, false, false);
+
+            if (pick[0] == pick[1] && pick[1] == pick[2])
+            {
+                sendToUser(slotSymbols[pick[0]] == "7" ? "^Y*** JACKPOT! ***^N" : "^GYou win!^N", true, false, false);
+                myPlayer.slots.won++;
+            }
+            else
+            {
+                sendToUser("No match - try again", true, false, false);
+                myPlayer.slots.lost++;
+            }
+        }
+
+        #endregion
+
+        #region Blackjack
+
+        // Rank only - suit doesn't affect blackjack value, so there's no point tracking it.
+        // 1-9 are their face value, 10-13 (10/J/Q/K) are all worth 10, 1 is the ace.
+        private List<int> bjPlayerHand;
+        private List<int> bjDealerHand;
+        private bool bjInGame = false;
+
+        private int cardValue(int rank)
+        {
+            return Math.Min(rank, 10);
+        }
+
+        private int handValue(List<int> hand)
+        {
+            int total = 0;
+            int aces = 0;
+            foreach (int rank in hand)
+            {
+                total += cardValue(rank);
+                if (rank == 1)
+                    aces++;
+            }
+            // Aces start counted as 1 (cardValue's Math.Min already does that); upgrade one
+            // at a time to 11 as long as it doesn't bust, same "soft ace" rule as the real
+            // game.
+            while (aces > 0 && total + 10 <= 21)
+            {
+                total += 10;
+                aces--;
+            }
+            return total;
+        }
+
+        private string cardName(int rank)
+        {
+            switch (rank)
+            {
+                case 1: return "Ace";
+                case 11: return "Jack";
+                case 12: return "Queen";
+                case 13: return "King";
+                default: return rank.ToString();
+            }
+        }
+
+        private string handText(List<int> hand)
+        {
+            List<string> names = new List<string>();
+            foreach (int rank in hand)
+                names.Add(cardName(rank));
+            return string.Join(", ", names) + " (" + handValue(hand) + ")";
+        }
+
+        public void cmdBlackjack(string message)
+        {
+            Random r = new Random();
+            message = message.Trim().ToLower();
+
+            if (!bjInGame)
+            {
+                if (message != "" && message != "deal")
+                {
+                    sendToUser("Syntax: blackjack [hit/stand] - deals a new hand if you don't have one in progress", true, false, false);
+                    return;
+                }
+
+                bjPlayerHand = new List<int> { r.Next(1, 14), r.Next(1, 14) };
+                bjDealerHand = new List<int> { r.Next(1, 14), r.Next(1, 14) };
+                bjInGame = true;
+
+                sendToUser("Your hand: " + handText(bjPlayerHand), true, false, false);
+                sendToUser("Dealer shows: " + cardName(bjDealerHand[0]), true, false, false);
+
+                if (handValue(bjPlayerHand) == 21)
+                {
+                    sendToUser("^YBlackjack!^N", true, false, false);
+                    bjResolve(true, false);
+                }
+                else
+                {
+                    sendToUser("blackjack hit, or blackjack stand?", true, false, false);
+                }
+            }
+            else if (message == "hit")
+            {
+                bjPlayerHand.Add(r.Next(1, 14));
+                sendToUser("Your hand: " + handText(bjPlayerHand), true, false, false);
+
+                if (handValue(bjPlayerHand) > 21)
+                {
+                    sendToUser("^RBust!^N", true, false, false);
+                    bjResolve(false, true);
+                }
+                else
+                {
+                    sendToUser("blackjack hit, or blackjack stand?", true, false, false);
+                }
+            }
+            else if (message == "stand")
+            {
+                while (handValue(bjDealerHand) < 17)
+                    bjDealerHand.Add(r.Next(1, 14));
+
+                sendToUser("Dealer's hand: " + handText(bjDealerHand), true, false, false);
+
+                int player = handValue(bjPlayerHand);
+                int dealer = handValue(bjDealerHand);
+
+                if (dealer > 21 || player > dealer)
+                {
+                    sendToUser(dealer > 21 ? "^GDealer busts - you win!^N" : "^GYou win!^N", true, false, false);
+                    bjResolve(true, false);
+                }
+                else if (dealer > player)
+                {
+                    sendToUser("^RDealer wins^N", true, false, false);
+                    bjResolve(false, true);
+                }
+                else
+                {
+                    sendToUser("Push - it's a draw", true, false, false);
+                    bjResolve(false, false);
+                }
+            }
+            else
+            {
+                sendToUser("You're already mid-hand - blackjack hit, or blackjack stand?", true, false, false);
+            }
+        }
+
+        private void bjResolve(bool won, bool lost)
+        {
+            if (won)
+                myPlayer.blackjack.won++;
+            else if (lost)
+                myPlayer.blackjack.lost++;
+            else
+                myPlayer.blackjack.drawn++;
+
+            bjInGame = false;
+            bjPlayerHand = null;
+            bjDealerHand = null;
+        }
+
+        #endregion
+
     }
 }
