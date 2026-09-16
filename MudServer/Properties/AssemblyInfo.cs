@@ -25,13 +25,23 @@ using System.Runtime.InteropServices;
 // Version information for an assembly consists of the following four values:
 //
 //      Major Version
-//      Minor Version 
+//      Minor Version
 //      Build Number
 //      Revision
 //
-// You can specify all the values or you can default the Build and Revision Numbers 
+// You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+//
+// Left at the project template's default "1.0.0.0" since 2009 and never corrected,
+// despite AssemblyProduct/AssemblyDescription above both already saying "Winspod II" /
+// "the second generation" - this codebase is that second generation (a full C# rewrite
+// of the original VB one), so 1.x was always wrong for what's actually running. Bumped
+// to 2.0 here to match reality; there's no automation keeping this current going
+// forward (there wasn't before either), so treat it as a manually-maintained "which era
+// of the codebase is this" marker, not a per-change counter - the git commit shown
+// alongside it (Server.GitCommit, `version` command, /api/status) is what answers "is
+// this the exact build I just pushed", which this number was never suited for anyway.
+[assembly: AssemblyVersion("2.0.0.0")]
+[assembly: AssemblyFileVersion("2.0.0.0")]
 
