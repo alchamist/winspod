@@ -52,7 +52,7 @@ namespace MudServer
                 else
                 {
                     string[] options = toReplace.Substring(1, toReplace.Length - 2).Split(new char[] { '|' });
-                    preText = preText.Replace(toReplace, options[new Random().Next(options.Length)]);
+                    preText = preText.Replace(toReplace, options[Random.Shared.Next(options.Length)]);
                 }
 
             }

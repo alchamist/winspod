@@ -28,8 +28,8 @@ namespace MudServer
                     }
                 }
 
-                // Put some bombs in ... 
-                Random r = new Random();
+                // Put some bombs in ...
+                Random r = Random.Shared;
                 int x;
                 int y;
                 int count = 0;
@@ -261,7 +261,7 @@ namespace MudServer
 
             myPlayer.Credits -= slotsWager;
 
-            Random r = new Random();
+            Random r = Random.Shared;
             int[] pick = new int[3];
             string reels = "";
             for (int i = 0; i < 3; i++)
@@ -372,7 +372,7 @@ namespace MudServer
 
         public void cmdBlackjack(string message)
         {
-            Random r = new Random();
+            Random r = Random.Shared;
             message = message.Trim().ToLower();
 
             if (!bjInGame)

@@ -172,7 +172,7 @@ namespace MudServer
             rm.maxTime = maxTime;
             rm.isRandom = isRandom;
             if (isRandom)
-                rm.nextFire = DateTime.Now.AddSeconds(new Random().Next(minTime, maxTime));
+                rm.nextFire = DateTime.Now.AddSeconds(Random.Shared.Next(minTime, maxTime));
             else
                 rm.nextFire = DateTime.Now.AddSeconds((double)minTime);
 
@@ -189,7 +189,7 @@ namespace MudServer
                 {
                     ret = roomMessage.message;
                     if (roomMessage.isRandom)
-                        roomMessage.nextFire = DateTime.Now.AddSeconds(new Random().Next(roomMessage.minTime, roomMessage.maxTime));
+                        roomMessage.nextFire = DateTime.Now.AddSeconds(Random.Shared.Next(roomMessage.minTime, roomMessage.maxTime));
                     else
                         roomMessage.nextFire = DateTime.Now.AddSeconds((double)roomMessage.minTime);
                 }
