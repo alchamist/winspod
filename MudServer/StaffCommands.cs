@@ -303,8 +303,10 @@ namespace MudServer
                     // We should be good to go
                     Player rename = Player.LoadPlayer(target[0], 0);
                     Player.RemovePlayerFile(target[0]);
+                    RemoveCachedPlayerName(target[0]);
                     rename.UserName = split[1];
                     rename.SavePlayer();
+                    AddCachedPlayerName(rename.UserName);
 
                     // Iterate through messages and change To and From as required in messages
                     messages = loadMessages();

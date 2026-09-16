@@ -553,6 +553,10 @@ namespace MudServer
                     }
                 }
 
+                // Deletion is the one room-cache change that needs an explicit removal
+                // (see Room.LoadRoom's comment) - loadRooms() alone won't drop it, since
+                // the room cache is only ever built once, not re-scanned from disk here.
+                Room.RemoveFromCache(currentRoom);
                 roomList = loadRooms();
                 sendToUser("Room \"" + currentRoom.shortName + "\" deleted. Moving you to main", true, false, false);
                 movePlayer(AppSettings.Default.DefaultLoginRoom, false);

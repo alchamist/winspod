@@ -165,6 +165,7 @@
 "rank","cmdRank",1,"spod"
 "recap","cmdRecap",1,"player"
 "reject","cmdReject",1,"system"
+"reload","cmdReload",4,"admin"
 "remote","cmdRemote",0,"comms"
 "remove","cmdRemove",4,"admin"
 "rename","cmdRename",4,"admin"

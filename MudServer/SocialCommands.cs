@@ -298,6 +298,10 @@ namespace MudServer
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
 
+                // See loadObjects()'s equivalent comment (ObjectCommands.cs) - same
+                // caching approach, same reasoning.
+                cachedSocialList = playerSocials;
+
                 XmlSerializer serial = new XmlSerializer(typeof(List<social>));
                 TextWriter textWriter = new StreamWriter(@fpath.ToLower());
                 serial.Serialize(textWriter, playerSocials);
@@ -309,28 +313,43 @@ namespace MudServer
             }
         }
 
+        // Loaded once per server run - see loadObjects()'s comment (ObjectCommands.cs) for
+        // why this is safe. This one mattered even more than objects: tryRunSocial calls
+        // loadSocials() on *every* unmatched command, not just social ones, since it's the
+        // dispatch fallback - every mistyped command used to re-read this file from disk.
+        private static List<social> cachedSocialList = null;
+
         public List<social> loadSocials()
         {
-            List<social> load = new List<social>();
-            string path = Path.Combine(Server.userFilePath, @"socials" + Path.DirectorySeparatorChar);
-            string fname = "socials.xml";
-            string fpath = path + fname;
-
-            if (Directory.Exists(path) && File.Exists(fpath))
+            if (cachedSocialList == null)
             {
-                try
+                List<social> load = new List<social>();
+                string path = Path.Combine(Server.userFilePath, @"socials" + Path.DirectorySeparatorChar);
+                string fname = "socials.xml";
+                string fpath = path + fname;
+
+                if (Directory.Exists(path) && File.Exists(fpath))
                 {
-                    XmlSerializer deserial = new XmlSerializer(typeof(List<social>));
-                    TextReader textReader = new StreamReader(@fpath);
-                    load = (List<social>)deserial.Deserialize(textReader);
-                    textReader.Close();
+                    try
+                    {
+                        XmlSerializer deserial = new XmlSerializer(typeof(List<social>));
+                        TextReader textReader = new StreamReader(@fpath);
+                        load = (List<social>)deserial.Deserialize(textReader);
+                        textReader.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.Print(e.ToString());
+                    }
                 }
-                catch (Exception e)
-                {
-                    Debug.Print(e.ToString());
-                }
+                cachedSocialList = load;
             }
-            return load;
+            return cachedSocialList;
+        }
+
+        public static void ClearSocialCache()
+        {
+            cachedSocialList = null;
         }
 
         #endregion

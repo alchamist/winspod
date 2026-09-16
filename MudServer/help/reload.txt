@@ -1,0 +1,11 @@
+4
+^YSyntax: ^Nreload
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Forces objects, socials, rooms, the ban lists, and the player name lookup cache to be re-read from disk. Normally never needed - every change made through the game already updates these in memory as it happens - this is only for the rare case something edited one of the underlying XML files directly while the server was running.
+
+^RRestrictions:^N
+
+Player must be a resident and have admin privs

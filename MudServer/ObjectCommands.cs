@@ -614,7 +614,12 @@ namespace MudServer
                 objects inv = getObject(i.name);
                 if (inv.Name != null && !inv.Deleted)
                 {
-                    totalWeight += (i.count & inv.Weight);
+                    // Was `i.count & inv.Weight` (bitwise AND) - total weight should be
+                    // quantity times per-item weight, not whatever AND-ing the two
+                    // happened to produce. Found while reading this for the caching pass;
+                    // unrelated to it, but a real long-standing bug (eg 3 of a 5-weight
+                    // item counted as 1, not 15).
+                    totalWeight += (i.count * inv.Weight);
                 }
             }
             return totalWeight;
@@ -1141,6 +1146,11 @@ namespace MudServer
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
 
+                // Keep the cache in sync with whatever's actually on disk now - normally
+                // playerObjects already *is* cachedObjectList (same reference, assigned via
+                // loadObjects() below), so this is a no-op safety net, not the primary path.
+                cachedObjectList = playerObjects;
+
                 XmlSerializer serial = new XmlSerializer(typeof(List<objects>));
                 TextWriter textWriter = new StreamWriter(@fpath.ToLower());
                 serial.Serialize(textWriter, playerObjects);
@@ -1152,28 +1162,47 @@ namespace MudServer
             }
         }
 
+        // Loaded once per server run, not once per call - every command that touches
+        // objects used to re-read and re-deserialize the whole file from disk, including
+        // getInventoryWeight() doing it once per distinct item in a player's inventory.
+        // Safe under the existing BigLock invariant (see CLAUDE.md's heartbeat-fix note):
+        // every command runs fully serialized, so there's no window for one connection to
+        // read a stale copy of what another just wrote - saveObjects() above updates this
+        // same cache in the same call that writes to disk. `reload` (see AdminCommands.cs)
+        // forces a re-read, for the rare case something edited objects.xml outside the game.
+        private static List<objects> cachedObjectList = null;
+
         public List<objects> loadObjects()
         {
-            List<objects> load = new List<objects>();
-            string path = Path.Combine(Server.userFilePath, @"objects" + Path.DirectorySeparatorChar);
-            string fname = "objects.xml";
-            string fpath = path + fname;
-
-            if (Directory.Exists(path) && File.Exists(fpath))
+            if (cachedObjectList == null)
             {
-                try
+                List<objects> load = new List<objects>();
+                string path = Path.Combine(Server.userFilePath, @"objects" + Path.DirectorySeparatorChar);
+                string fname = "objects.xml";
+                string fpath = path + fname;
+
+                if (Directory.Exists(path) && File.Exists(fpath))
                 {
-                    XmlSerializer deserial = new XmlSerializer(typeof(List<objects>));
-                    TextReader textReader = new StreamReader(@fpath);
-                    load = (List<objects>)deserial.Deserialize(textReader);
-                    textReader.Close();
+                    try
+                    {
+                        XmlSerializer deserial = new XmlSerializer(typeof(List<objects>));
+                        TextReader textReader = new StreamReader(@fpath);
+                        load = (List<objects>)deserial.Deserialize(textReader);
+                        textReader.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.Print(e.ToString());
+                    }
                 }
-                catch (Exception e)
-                {
-                    Debug.Print(e.ToString());
-                }
+                cachedObjectList = load;
             }
-            return load;
+            return cachedObjectList;
+        }
+
+        public static void ClearObjectCache()
+        {
+            cachedObjectList = null;
         }
 
         #endregion

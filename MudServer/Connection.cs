@@ -821,6 +821,7 @@ namespace MudServer
                                 myState = 10;
                                 sendToUser("\r\nWelcome, " + myPlayer.ColourUserName + ". You are now the admin of the system", true);
                                 myPlayer.SavePlayer();
+                                AddCachedPlayerName(myPlayer.UserName);
                                 doPrompt();
                             }
                             else
@@ -927,6 +928,7 @@ namespace MudServer
                         }
                     }
                     myPlayer.SavePlayer();
+                    AddCachedPlayerName(myPlayer.UserName);
                 }
             }
             else if (myState == 9)

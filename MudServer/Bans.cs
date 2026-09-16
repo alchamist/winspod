@@ -175,41 +175,52 @@ namespace MudServer
             return false;
         }
 
+        // See loadObjects()'s comment (ObjectCommands.cs) for the caching approach/why it's
+        // safe. IpIsBanned runs on every incoming connection, so this one is on the
+        // hottest possible path.
+        private static List<IPAddress> cachedIPBanList = null;
+
         public List<IPAddress> loadIPBans()
         {
-            List<string> load = new List<string>();
-            string path = Path.Combine(Server.userFilePath, @"banish" + Path.DirectorySeparatorChar);
-            string fname = "ipban.xml";
-            string fpath = path + fname;
+            if (cachedIPBanList == null)
+            {
+                List<string> load = new List<string>();
+                string path = Path.Combine(Server.userFilePath, @"banish" + Path.DirectorySeparatorChar);
+                string fname = "ipban.xml";
+                string fpath = path + fname;
 
-            if (Directory.Exists(path) && File.Exists(fpath))
-            {
-                try
+                if (Directory.Exists(path) && File.Exists(fpath))
                 {
-                    XmlSerializer deserial = new XmlSerializer(typeof(List<string>));
-                    TextReader textReader = new StreamReader(@fpath);
-                    load = (List<string>)deserial.Deserialize(textReader);
-                    textReader.Close();
+                    try
+                    {
+                        XmlSerializer deserial = new XmlSerializer(typeof(List<string>));
+                        TextReader textReader = new StreamReader(@fpath);
+                        load = (List<string>)deserial.Deserialize(textReader);
+                        textReader.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.Print(e.ToString());
+                    }
                 }
-                catch (Exception e)
+                List<IPAddress> ret = new List<IPAddress>();
+                foreach (string s in load)
                 {
-                    Debug.Print(e.ToString());
+                    IPAddress test = null;
+                    if (IPAddress.TryParse(s, out test))
+                        ret.Add(test);
                 }
+                cachedIPBanList = ret;
             }
-            List<IPAddress> ret = new List<IPAddress>();
-            foreach (string s in load)
-            {
-                IPAddress test = null;
-                if (IPAddress.TryParse(s, out test))
-                    ret.Add(test);
-            }
-            return ret;
+            return cachedIPBanList;
         }
 
         public void saveIPBans()
         {
             try
             {
+                cachedIPBanList = IPBanList;
+
                 List<string> output = new List<string>();
                 foreach (IPAddress i in IPBanList)
                 {
@@ -232,35 +243,43 @@ namespace MudServer
             }
         }
 
+        // See loadIPBans()'s comment just above for the caching approach.
+        private static List<string> cachedNameBanList = null;
+
         public List<string> loadNameBans()
         {
-            List<string> load = new List<string>();
-            string path = Path.Combine(Server.userFilePath, @"banish" + Path.DirectorySeparatorChar);
-            string fname = "nameban.xml";
-            string fpath = path + fname;
-
-            if (Directory.Exists(path) && File.Exists(fpath))
+            if (cachedNameBanList == null)
             {
-                try
-                {
-                    XmlSerializer deserial = new XmlSerializer(typeof(List<string>));
-                    TextReader textReader = new StreamReader(@fpath);
-                    load = (List<string>)deserial.Deserialize(textReader);
-                    textReader.Close();
-                }
-                catch (Exception e)
-                {
-                    Debug.Print(e.ToString());
-                }
-            }
+                List<string> load = new List<string>();
+                string path = Path.Combine(Server.userFilePath, @"banish" + Path.DirectorySeparatorChar);
+                string fname = "nameban.xml";
+                string fpath = path + fname;
 
-            return load;
+                if (Directory.Exists(path) && File.Exists(fpath))
+                {
+                    try
+                    {
+                        XmlSerializer deserial = new XmlSerializer(typeof(List<string>));
+                        TextReader textReader = new StreamReader(@fpath);
+                        load = (List<string>)deserial.Deserialize(textReader);
+                        textReader.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.Print(e.ToString());
+                    }
+                }
+                cachedNameBanList = load;
+            }
+            return cachedNameBanList;
         }
 
         public void saveNameBans()
         {
             try
             {
+                cachedNameBanList = NameBanList;
+
                 string path = Path.Combine(Server.userFilePath, @"banish" + Path.DirectorySeparatorChar);
                 string fname = "nameban.xml";
                 string fpath = path + fname;
@@ -276,6 +295,12 @@ namespace MudServer
             {
                 Connection.logError(ex.ToString(), "filesystem");
             }
+        }
+
+        public static void ClearBanCache()
+        {
+            cachedIPBanList = null;
+            cachedNameBanList = null;
         }
     }
 }

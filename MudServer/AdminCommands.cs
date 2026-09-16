@@ -15,6 +15,22 @@ namespace MudServer
     public partial class Connection
     {
 
+        // Clears every in-memory cache added for the performance pass (see loadObjects()'s
+        // comment in ObjectCommands.cs for why the caching itself is safe under BigLock).
+        // The one thing that isn't safe automatically: a file edited on disk *outside* the
+        // game (server stopped, or hand-editing an XML file) while a cache is already
+        // built won't be picked up until something forces a reload - this is that.
+        public void cmdReload(string message)
+        {
+            ClearObjectCache();
+            ClearSocialCache();
+            Room.ClearRoomCache();
+            ClearBanCache();
+            ClearPlayerNameCache();
+            sendToUser("Reloaded objects, socials, rooms, ban lists, and the player name cache from disk.", true, false, false);
+            logToFile(myPlayer.UserName + " reloaded all caches", "admin");
+        }
+
         public void cmdGrant(string message)
         {
             string syntax = "Syntax: Grant <player> <admin/staff/guide/noidle/tester/builder/spod/minister>";
@@ -532,6 +548,7 @@ namespace MudServer
 
                     // Now need to kill the user file
                     Player.RemovePlayerFile(target[0]);
+                    RemoveCachedPlayerName(target[0]);
                     logToFile("[Nuke] Player \"" + target[0] + "\" has just been killed by " + myPlayer.UserName, "admin");
                 }
             }

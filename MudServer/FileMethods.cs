@@ -119,11 +119,20 @@ namespace MudServer
             }
         }
 
+        // Only actually scans the directory and deserializes every room file the first
+        // time this runs (normally on the very first connection the whole server gets,
+        // since Connection's constructor calls this) - after that it's handed the same
+        // shared Room.cachedRoomList every other connection uses. See Room.LoadRoom's
+        // comment for why individual-room lookups share this same cache rather than
+        // needing their own.
         private List<Room> loadRooms()
         {
+            if (Room.cachedRoomList != null)
+                return Room.cachedRoomList;
+
             List<Room> list = new List<Room>();
             string path = Path.Combine(Server.userFilePath, (@"rooms" + Path.DirectorySeparatorChar));
-            
+
             if (Directory.Exists(path))
             {
                 DirectoryInfo di = new DirectoryInfo(path);
@@ -162,6 +171,8 @@ namespace MudServer
                 jail.SaveRoom();
                 list.Add(jail);
             }
+
+            Room.cachedRoomList = list;
             return list;
         }
 

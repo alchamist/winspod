@@ -97,8 +97,32 @@ namespace MudServer
             roomOwner = sysRoom ? "System" : owner;
         }
 
+        // Shared across every Connection (not one list per connection, the way
+        // Connection.roomList still works - that field just gets pointed at this same
+        // list whenever loadRooms() runs). Searched by each Room's own current
+        // systemName rather than keyed by a dictionary, deliberately: a rename
+        // (StaffCommands.cs's username-rename cascade mutates systemName on an
+        // already-cached Room in place) then just works without any cache-key
+        // bookkeeping, since the next lookup naturally finds it under its new name and
+        // fails to find it under the old one. Deletion (cmdRoomDel) is the one case that
+        // genuinely needs an explicit RemoveFromCache call - nothing about "this room
+        // shouldn't exist any more" falls out of a property search on its own.
+        // Safe under the same BigLock invariant as the other caches added alongside this
+        // one - see loadObjects()'s comment in ObjectCommands.cs.
+        public static List<Room> cachedRoomList = null;
+
         public static Room LoadRoom(string roomName)
         {
+            string key = roomName.ToLower();
+            if (cachedRoomList != null)
+            {
+                foreach (Room cached in cachedRoomList)
+                {
+                    if (cached.systemName != null && cached.systemName.ToLower() == key)
+                        return cached;
+                }
+            }
+
             Room load;
             string path = Path.Combine(Server.userFilePath,("rooms" + Path.DirectorySeparatorChar + roomName.ToLower() + ".xml"));
 
@@ -138,6 +162,14 @@ namespace MudServer
                 load.SaveRoom();
             }
 
+            // Don't cache the "room not found" stub - callers (cmdHome, cmdGo) rely on
+            // getting a fresh, harmless placeholder back (detected via fullName == null)
+            // every time they probe a name that has no file yet. Caching it here would
+            // permanently wedge a Room with every field null into cachedRoomList, which
+            // is exactly what broke roomlist the first time this was tried.
+            if (cachedRoomList != null && load != null && load.systemName != null)
+                cachedRoomList.Add(load);
+
             return load;
         }
 
@@ -155,7 +187,21 @@ namespace MudServer
                 TextWriter textWriter = new StreamWriter(@fpath.ToLower());
                 serial.Serialize(textWriter, this);
                 textWriter.Close();
+
+                if (cachedRoomList != null && !cachedRoomList.Contains(this))
+                    cachedRoomList.Add(this);
             }
+        }
+
+        public static void RemoveFromCache(Room room)
+        {
+            if (cachedRoomList != null)
+                cachedRoomList.Remove(room);
+        }
+
+        public static void ClearRoomCache()
+        {
+            cachedRoomList = null;
         }
 
         public void remRoomMessage()

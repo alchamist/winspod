@@ -149,33 +149,63 @@ namespace MudServer
             }
         }
 
+        // The full, properly-cased list of every ever-registered username, built once
+        // from disk rather than re-scanning the players directory and re-loading every
+        // matching file on every single matchPartial call (give/pay/site/every two-player
+        // game challenge, etc. all call this). Registration/residency completion
+        // (Connection.cs) add to this as they happen; account deletion
+        // (AdminCommands.cs/StaffCommands.cs) removes. Same BigLock-safety reasoning as
+        // the other caches added alongside this one - see loadObjects()'s comment
+        // (ObjectCommands.cs).
+        private static List<string> cachedPlayerNames = null;
+
+        public static void AddCachedPlayerName(string name)
+        {
+            if (cachedPlayerNames != null)
+                cachedPlayerNames.Add(name);
+        }
+
+        public static void RemoveCachedPlayerName(string name)
+        {
+            if (cachedPlayerNames == null)
+                return;
+            for (int i = cachedPlayerNames.Count - 1; i >= 0; i--)
+            {
+                if (cachedPlayerNames[i].ToLower() == name.ToLower())
+                    cachedPlayerNames.RemoveAt(i);
+            }
+        }
+
+        public static void ClearPlayerNameCache()
+        {
+            cachedPlayerNames = null;
+        }
+
         private string[] matchPartial(string name)
         {
-            //string source = @"players/";
-            string source = Path.Combine(Server.userFilePath, "players");
             List<string> pNames = new List<string>();
 
-            if (pNames.Count == 0)
+            if (cachedPlayerNames == null)
             {
+                cachedPlayerNames = new List<string>();
+                string source = Path.Combine(Server.userFilePath, "players");
                 if (Directory.Exists(source))
                 {
-                    string[] dirs = Directory.GetDirectories(source);
-
-                    //foreach (string subdir in dirs)
-                    //{
-                        string[] fNames = Directory.GetFiles(@source);
-                        foreach (string n in fNames)
-                        {
-                            string fn = Path.GetFileNameWithoutExtension(n);
-                            if (fn.StartsWith(name, StringComparison.CurrentCultureIgnoreCase))
-                            {
-                                Player p = Player.LoadPlayer(fn, 0);
-                                if (p != null)
-                                    pNames.Add(p.UserName);
-                            }
-                        }
-                    //}
+                    string[] fNames = Directory.GetFiles(@source);
+                    foreach (string n in fNames)
+                    {
+                        string fn = Path.GetFileNameWithoutExtension(n);
+                        Player p = Player.LoadPlayer(fn, 0);
+                        if (p != null)
+                            cachedPlayerNames.Add(p.UserName);
+                    }
                 }
+            }
+
+            foreach (string n in cachedPlayerNames)
+            {
+                if (n.StartsWith(name, StringComparison.CurrentCultureIgnoreCase))
+                    pNames.Add(n);
             }
 
             foreach (Connection c in connections)
