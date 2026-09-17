@@ -1171,7 +1171,14 @@ namespace MudServer
                         found = doAlias(cmd);
 
                     if (!found)
-                        sendToUser("Huh?", true, true, false);
+                    {
+                        if (myPlayer.Converse)
+                            sendToRoom(myPlayer.ColourUserName + " " + sayWord(cmd, false) + " \"" + wibbleText(cmd, false) + "{reset}\"",
+                                       "You " + sayWord(cmd, true) + " \"" + wibbleText(cmd, false) + "{reset}\"",
+                                       myPlayer.UserRoom, myPlayer.UserName, true, true, true);
+                        else
+                            sendToUser("Huh?", true, true, false);
+                    }
 
                     //if (!noAlias && found)
                     //    doPrompt();

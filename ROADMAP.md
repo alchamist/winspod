@@ -95,9 +95,24 @@ name or a subcommand of the generic `set` (which only covers social-profile
 fields: jabber/icq/msn/yahoo/skype/email/URLs/jetlag/favourites). Confirmed
 gaps, not diff artifacts:
 
-1. **`converse` mode** — type freely without prefixing every line with
-   `'`/`;`. Standout gap for a chat-first talker; no equivalent found in
-   Winspod's command list.
+1. ~~`converse` mode~~ — **done.** `Player.Converse` toggle (`converse`,
+   `CommsCommands.cs`), rank 0 so newbies don't need a promotion to use the
+   one command most likely to help them. `ProcessLine`'s final dispatch
+   fallback (`Connection.cs`) - previously just "Huh?" for anything that
+   matched no command/social/alias - now checks `Converse` first and, if
+   set, says the raw line aloud via the same `sendToRoom`/`sayWord`/
+   `wibbleText` shape `say` uses. Everything above that fallback (real
+   commands, `'`/`;`-prefixed chat, socials, aliases) still takes priority
+   unchanged, so this is additive rather than a new escape convention.
+   Also added `forceconverse <player>` (rank 2/guide, `StaffCommands.cs`,
+   modelled on `silence`) so a guide can toggle it on or off for someone
+   struggling, with the target told who did it and how to undo it
+   themselves - noticed along the way that `silence` (the command this was
+   modelled on) has a latent bug where its target-facing messages use the
+   wrong `sendToUser` overload and silently go to the calling staff member
+   instead of the target; not fixed here since it's a separate pre-existing
+   issue, but `forceconverse` uses the correct overload rather than
+   inheriting it.
 2. **`linewrap`/`wordwrap`/`set_term_width`** — **foundation done, decorative
    elements still open.** Real Telnet NAWS (RFC 1073) negotiation
    (`Connection.cs`'s `SkipTelnetCommandAsync` + `OnConnect`'s `IAC DO NAWS`)

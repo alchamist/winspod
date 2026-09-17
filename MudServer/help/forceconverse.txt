@@ -1,0 +1,11 @@
+2
+^YSyntax: ^Nforceconverse <player>
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Toggles converse mode on or off for another player - for guides helping someone who's struggling with the '/; chat prefixes. The target is told who did it and how to turn it off themselves (converse). Can't be used on yourself (use converse) or on someone outranking you.
+
+^RRestrictions:^N
+
+Player must be on-line

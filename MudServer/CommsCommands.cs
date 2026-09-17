@@ -25,6 +25,16 @@ namespace MudServer
                 sendToRoom(myPlayer.ColourUserName + " " + sayWord(message, false) + " \"" + wibbleText(message, false) + "{reset}\"", "You " + sayWord(message, true) + " \"" + wibbleText(message, false) + "{reset}\"", myPlayer.UserRoom, myPlayer.UserName, true, false, true);
         }
 
+        public void cmdConverse(string message)
+        {
+            myPlayer.Converse = !myPlayer.Converse;
+            if (myPlayer.Converse)
+                sendToUser("You enter converse mode - anything you type that isn't a recognised command will be said aloud instead. Type converse again to leave.", true, false, false);
+            else
+                sendToUser("You leave converse mode - use ' or ; (or a full command) to talk again.", true, false, false);
+            myPlayer.SavePlayer();
+        }
+
         public void cmdThink(string message)
         {
             if (message == "")

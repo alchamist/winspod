@@ -957,6 +957,55 @@ namespace MudServer
             }
         }
 
+        public void cmdForceConverse(string message)
+        {
+            if (message == "")
+                sendToUser("Syntax: forceconverse <player>", true, false, false);
+            else
+            {
+                string[] target = matchPartial(message);
+                if (target.Length == 0)
+                    sendToUser("No such user \"" + message + "\"", true, false, false);
+                else if (target.Length > 1)
+                    sendToUser("Multiple matches found: " + target.ToString() + " - Please use more letters", true, false, false);
+                else if (target[0].ToLower() == myPlayer.UserName.ToLower())
+                    sendToUser("Use converse on yourself instead.", true, false, false);
+                else
+                {
+                    bool found = false;
+                    foreach (Connection c in connections)
+                    {
+                        if (c.socket.Connected && c.myPlayer != null && c.myPlayer.UserName.ToLower() == target[0].ToLower())
+                        {
+                            found = true;
+                            if (c.myPlayer.PlayerRank > myPlayer.PlayerRank)
+                            {
+                                sendToUser("Trying to force converse mode on the admin, eh?", true, false, false);
+                                sendToUser(myPlayer.UserName + " just tried to force your converse mode!", c.myPlayer.UserName);
+                            }
+                            else
+                            {
+                                c.myPlayer.Converse = !c.myPlayer.Converse;
+                                if (c.myPlayer.Converse)
+                                {
+                                    sendToUser("You put " + c.myPlayer.UserName + " into converse mode", true, false, false);
+                                    sendToUser(myPlayer.ColourUserName + " has put you into converse mode - anything you type that isn't a recognised command will now be said aloud. Type converse to leave it yourself.", c.myPlayer.UserName);
+                                }
+                                else
+                                {
+                                    sendToUser("You take " + c.myPlayer.UserName + " out of converse mode", true, false, false);
+                                    sendToUser(myPlayer.ColourUserName + " has taken you out of converse mode - you'll need ' or ; to talk again.", c.myPlayer.UserName);
+                                }
+                                c.myPlayer.SavePlayer();
+                            }
+                        }
+                    }
+                    if (!found)
+                        sendToUser(target[0] + " is not online at the moment.", true, false, false);
+                }
+            }
+        }
+
         public void cmdMuteList(string message)
         {
             string output = "{bold}{cyan}---[{green}Channel Mute List{cyan}]".PadRight(105, '-') + "{reset}\r\n";

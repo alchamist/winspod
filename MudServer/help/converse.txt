@@ -1,0 +1,11 @@
+0
+^YSyntax: ^Nconverse
+^YAliases: ^NNone
+
+^PEffect:^N
+
+Toggles converse mode. While on, anything you type that isn't a recognised command, social, alias, or punctuation-prefixed chat (' or ;) is said aloud to the room instead of getting a "Huh?" - useful if you keep forgetting to prefix your speech. Type converse again to leave it.
+
+^RRestrictions:^N
+
+None
